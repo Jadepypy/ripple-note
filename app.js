@@ -30,12 +30,12 @@ io.on("connection", (socket) => {
       }
       revisionID++
       doc = applyOperation(doc, info.operation)
-      console.log('pending...')
+      //console.log('pending...')
       socket.emit('ack', revisionID)
       socket.broadcast.emit('syncOperation', {id: revisionID, syncOp: info.operation});
       console.log('SEND SYNC:', info.operation)
       LogOp[revisionID] = info.operation
-    }, 6000)
+    }, 4000)
   })
 });
 
@@ -47,10 +47,9 @@ function iterateOT (opArr1, opArr2) {
     for (let i =0; i < opArr2.length; i++){
       let op2
       [op1, op2] = transformation(op1, opArr2[i])
-      console.log(op1)
       if (Array.isArray(op2)){
         opArr2[i++] = op2[0]
-        opArr2[i] = op2[1] 
+        opArr2.splice(i, 0, op2[1])
       } else{
         opArr2[i] = op2    
       }
@@ -166,8 +165,8 @@ function Tdd(op1, op2){
   } else {
     op2.pos = op2.pos + op1.count
   }
-  console.log('delete delete----')
-  console.log(op1, op2)
+  //console.log('delete delete----')
+  //console.log(op1, op2)
   return [op1, op2]
 }
 

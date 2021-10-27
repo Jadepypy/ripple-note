@@ -16,6 +16,15 @@ const OP_TYPE = {
 }
 let state = STATE.CLEAR
 
+function dblClickEvt(obj) {
+  let pos = obj.selectionStart;
+  let text = obj.value;
+  let lineStart = text.lastIndexOf("\n", pos);
+  if (lineStart > 0){
+    obj.selectionStart = lineStart
+  }
+}
+
 textarea.addEventListener('keydown', function (event) {
   let key = event.key == 'Enter'? '\n' : event.key
   const indexStart = textarea.selectionStart
@@ -34,7 +43,7 @@ textarea.addEventListener('keydown', function (event) {
   }
   if (state === STATE.CLEAR){
     outstandingOp.push(...opInfo)
-    console.log('OUTSTANDING:', outstandingOp)
+    //console.log('OUTSTANDING:', outstandingOp)
     socket.emit('operation', {revisionID, operation: outstandingOp}) 
     state = STATE.WAITING
   } else {
@@ -65,7 +74,10 @@ socket.on('ack', (id) => {
 
 socket.on('syncOperation', (syncInfo) => {
   revisionID = syncInfo.id
-  console.log('sync:', syncInfo)
+  console.log('GET SYNC:')
+  for (const op of syncInfo.syncOp){
+    console.log(op)
+  }
   if (outstandingOp.length > 0){
     //change syncOp inplace
     //console.log(outstandingOp)
@@ -73,9 +85,10 @@ socket.on('syncOperation', (syncInfo) => {
   }
   if (bufferOp.length > 0){
     //change syncOp inplace
-    console.log('buffer not empty')
+    //console.log('buffer not empty')
     bufferOp = iterateOT(bufferOp, syncInfo.syncOp)
   }
+  console.log('APPLY OP:', syncInfo)
   textarea.value = applyOperation(textarea.value, syncInfo.syncOp)
 })
 
@@ -94,6 +107,10 @@ function applyOperation(doc, operation) {
 }
 //Time Complexity: O(N*M), seems inevitable
 function iterateOT (opArr1, opArr2) {
+  console.log("BEFORE:")
+  for (const op of opArr2){
+    console.log(op)
+  }
   let opArr1Prime = []
   //let opArr2Prime = [...opArr2]
   for (let op1 of opArr1){
@@ -102,7 +119,7 @@ function iterateOT (opArr1, opArr2) {
       [op1, op2] = transformation(op1, opArr2[i])
       if (Array.isArray(op2)){
         opArr2[i++] = op2[0]
-        opArr2[i] = op2[1] 
+        opArr2.splice(i, 0, op2[1])
       } else{
         opArr2[i] = op2    
       }
@@ -114,6 +131,7 @@ function iterateOT (opArr1, opArr2) {
       opArr1Prime.push(op1)
     }
   }
+  console.log("TRANSFORM OP:", opArr2)
   return opArr1Prime
 }
 
@@ -146,6 +164,7 @@ function Tii(op1, op2){
 //insert delete transformation
 function Tid(op1, op2){
   const op1Temp = {...op1}
+  console.log('Tid:', op1, op2)
   if (op1.pos > op2.pos + op2.count){
     op1.pos = Math.max(op2.pos + op2.count, op1Temp.pos + op2.count)
     if (op1Temp.pos < op2.pos) {
