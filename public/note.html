@@ -1,0 +1,188 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta http-equiv="X-UA-Compatible" content="IE=edge">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Ripple Note</title>
+  <style>
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+    body {
+      background-color: #eeeeee;
+    }
+    .container {
+      display: grid;
+      height: 100vh;
+      grid-template-columns: 30px auto;
+      grid-template-areas: "side main";
+      margin: 0;
+    }
+    .sidebar {
+      grid-area: side; 
+      background-color: #7e7b7b;
+      /* border-right: 1px solid #e1e1e1; */
+      text-align: center;
+      padding-top: 50px;
+      padding-bottom: 30px;
+      display: flex;
+      flex-direction: column;
+      justify-content: space-between;
+    }
+    .note-container {
+      grid-area: main; 
+    }
+    #user-circle, #left-arrow{
+      color: #dddcdc;
+      font-size: 25px;
+      -webkit-text-stroke: 1.7px #7e7b7b;
+    }
+    #folder-icon, #search-icon
+    ,#file-icon {
+      color: #a8a4a4;
+      font-size: 25px;
+      -webkit-text-stroke: 1.7px #eeeeee;
+    }
+    #preview-icon,
+    #trash-icon, #dot-icon{
+      color: #a8a4a4;
+      font-size: 22px;
+      -webkit-text-stroke: 1.7px #f6f8f4;
+    }
+    #preview-icon, #trash-icon, #dot-icon{
+      margin-right: 10px;
+    }
+    #folder-icon:hover, #user-circle:hover,
+    #search-icon:hover, #left-arrow:hover,
+     #file-icon:hover, #preview-icon:hover,
+    #trash-icon:hover, #dot-icon:hover{
+      color: rgb(106, 201, 218);
+      cursor: pointer;
+    }
+
+    #folder-icon {
+      margin-right: 10px;
+    }
+    .editor-container {
+      display: grid;
+      height: 100vh;
+      grid-template-columns: 30% auto;
+      grid-template-areas: "side main";
+      margin: 0;
+    }
+    .panel{
+      grid-area: side; 
+      border-right: 1px solid #e1e1e1;
+      display: grid;
+      grid-template-rows: 50px 50px auto;
+      grid-template-columns: 100%;
+      grid-template-areas: "tools" "options" "notelist";
+    }
+    .tools {
+      grid-area: tools; 
+      border-bottom: 1px solid #e1e1e1;
+      padding: 10px;
+    }
+    .options {
+      grid-area: options; 
+      border-bottom: 1px solid #e1e1e1;
+      padding: 10px;
+      text-align: center;
+    }
+    .editor {
+      grid-area: main;
+      display: grid;
+      height: 100vh;
+      grid-template-rows: 50px auto;
+      grid-template-columns: auto 100px;
+      grid-template-areas: "title note-tools" "note note";
+    }
+    .note-tools {
+      background-color: #f6f8f4;
+      border-bottom: 1px solid #e1e1e1;
+      text-align: center;
+      margin: 0;
+      padding: 0;
+      line-height: 50px;
+    }
+    textarea{
+      border: none;
+      overflow: auto;
+      outline: none;
+      background-color: #f6f8f4;
+      color: #7e7b7b;
+      -webkit-box-shadow: none;
+      -moz-box-shadow: none;
+      box-shadow: none;
+      resize: none;
+      outline: none;
+      /* font-size: 20px;
+      padding: 50px; */
+    }
+    #note-title {
+      grid-area: title; 
+      border-bottom: 1px solid #e1e1e1;
+      padding: 10px;
+      padding-inline-start: 50px;
+      font-size: 24px;
+    }
+    #note {
+      grid-area: note; 
+      padding: 50px;
+      padding-top: 20px;
+      font-size: 16px;
+    }
+    ::placeholder{
+      color: #e1e1e1;
+    }
+    @media only screen and (min-width: 768px) {
+      .editor-container {
+        grid-template-columns: 300px auto;
+      }
+    }
+  </style>
+  <script src="https://kit.fontawesome.com/6c244c09d5.js" crossorigin="anonymous"></script>
+</head>
+<body>
+  <div class="container">
+    <div class="sidebar">
+      <span>
+        <i class="fas fa-angle-double-left" id="left-arrow"></i>
+      </span>
+      <span>
+       <i class="fas fa-user-circle" id="user-circle"></i>
+      </span>
+    </div>
+    <div class="editor-container">
+      <div class="panel">
+        <div class="tools">
+          <i class="far fa-window-restore" id="folder-icon"></i>
+          <i class="fas fa-search" id="search-icon"></i>
+        </div>
+        <div class="options">
+          <i class="far fa-window-maximize" id="folder-icon"></i>
+          <i class="far fa-file" id="file-icon"></i>
+        </div>
+        <ul class="notelist">
+          <!-- <li class="note">
+
+          </li> -->
+        </ul>
+      </div>
+      <div class="editor">
+          <textarea id="note-title" rows="1" placeholder="Untitled" maxlength="60"></textarea>
+          <span class="note-tools">
+            <i class="fas fa-align-right" id="preview-icon"></i>
+            <i class="fas fa-trash" id="trash-icon"></i>
+            <i class="fas fa-ellipsis-v" id="dot-icon"></i>
+          </span>
+        <textarea id="note">
+        </textarea>
+      </div>
+    </div>
+  </div>
+</body>
+</html>
