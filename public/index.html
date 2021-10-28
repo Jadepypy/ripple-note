@@ -40,7 +40,7 @@
       font-size: 25px;
       -webkit-text-stroke: 1.7px #7e7b7b;
     }
-    #folder-icon, #search-icon
+    .folder-icon, .search-icon
     ,#file-icon {
       color: #a8a4a4;
       font-size: 25px;
@@ -55,8 +55,8 @@
     #preview-icon, #trash-icon, #dot-icon{
       margin-right: 10px;
     }
-    #folder-icon:hover, #user-circle:hover,
-    #search-icon:hover, #left-arrow:hover,
+    .folder-icon:hover, #user-circle:hover,
+    .search-icon:hover, #left-arrow:hover,
      #file-icon:hover, #preview-icon:hover,
     #trash-icon:hover, #dot-icon:hover{
       color: rgb(106, 201, 218);
@@ -159,11 +159,11 @@
     <div class="editor-container">
       <div class="panel">
         <div class="tools">
-          <i class="far fa-window-restore" id="folder-icon"></i>
-          <i class="fas fa-search" id="search-icon"></i>
+          <i class="far fa-window-restore folder-icon" id="navigation-panel"></i>
+          <i class="fas fa-search search-icon" id="search-panel"></i>
         </div>
         <div class="options">
-          <i class="far fa-window-maximize" id="folder-icon"></i>
+          <i class="far fa-window-maximize folder-icon"></i>
           <i class="far fa-file" id="file-icon"></i>
         </div>
         <ul class="notelist">
@@ -184,5 +184,6 @@
       </div>
     </div>
   </div>
+  <script type="module" src='./src/index.js'></script>
 </body>
 </html>
