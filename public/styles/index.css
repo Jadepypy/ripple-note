@@ -1,0 +1,23 @@
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+}
+/* body {
+  background-color: #eeeeee;
+} */
+.container {
+  display: grid;
+  height: 100vh;
+  grid-template-columns: 30px auto;
+  grid-template-areas: "side main";
+  margin: 0;
+}
+.note-container {
+  grid-area: main; 
+}
+@media only screen and (min-width: 768px) {
+  .editor-container {
+    grid-template-columns: 300px auto;
+  }
+}

@@ -5,7 +5,13 @@
   <meta http-equiv="X-UA-Compatible" content="IE=edge">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Ripple Note</title>
-  <style>
+  <link href="./styles/editor.css" rel="stylesheet" />
+  <link href="./styles/index.css" rel="stylesheet" />
+  <link href="./styles/panel.css" rel="stylesheet" />
+  <link href="./styles/sidebar.css" rel="stylesheet" />
+
+
+  <!-- <style>
     * {
       margin: 0;
       padding: 0;
@@ -41,9 +47,10 @@
       -webkit-text-stroke: 1.7px #7e7b7b;
     }
     .folder-icon, .search-icon
-    ,#file-icon {
+    ,.file-icon {
       color: #a8a4a4;
       font-size: 25px;
+      margin-right: 8px;
       -webkit-text-stroke: 1.7px #eeeeee;
     }
     #preview-icon,
@@ -57,10 +64,13 @@
     }
     .folder-icon:hover, #user-circle:hover,
     .search-icon:hover, #left-arrow:hover,
-     #file-icon:hover, #preview-icon:hover,
+    .file-icon:hover, #preview-icon:hover,
     #trash-icon:hover, #dot-icon:hover{
       color: rgb(106, 201, 218);
       cursor: pointer;
+    }
+    .clicked {
+      color: rgb(106, 201, 218); 
     }
 
     #folder-icon {
@@ -79,7 +89,7 @@
       display: grid;
       grid-template-rows: 50px 50px auto;
       grid-template-columns: 100%;
-      grid-template-areas: "tools" "options" "notelist";
+      grid-template-areas: "tools" "options" "note-list";
     }
     .tools {
       grid-area: tools; 
@@ -91,6 +101,11 @@
       border-bottom: 1px solid #e1e1e1;
       padding: 10px;
       text-align: center;
+    }
+    .note-list {
+      grid-area: note-list;
+      max-height: calc(100vh - 100px);
+      overflow-y: auto;
     }
     .editor {
       grid-area: main;
@@ -112,6 +127,7 @@
       border: none;
       overflow: auto;
       outline: none;
+      font-family: monospace;
       background-color: #f6f8f4;
       color: #7e7b7b;
       -webkit-box-shadow: none;
@@ -122,12 +138,54 @@
       /* font-size: 20px;
       padding: 50px; */
     }
+    .sort-down-icon {
+      margin-right: 5px;
+      margin-bottom: 100px;
+      color: #7e7b7b;
+    }
     #note-title {
       grid-area: title; 
-      border-bottom: 1px solid #e1e1e1;
       padding: 10px;
       padding-inline-start: 50px;
       font-size: 24px;
+      outline: none;
+      border: none;
+      height: 100%;
+      font-size: 24px;
+      font-family: monospace;
+      color: #7e7b7b;
+      background: #f6f8f4;
+      border-bottom: 1px solid #e1e1e1;
+    }
+    .folder, .file {
+      list-style-type: none;
+      height: 50px;
+      padding-left: 15px;
+      border-bottom: 1px solid #e1e1e1;
+    }
+    .file {
+      max-width: 100%;
+      overflow-x: auto;
+    }
+    .folder:hover, .file:hover{
+      background-color: #f6f8f4b9;
+    }
+    .file {
+      padding-left: 50px;
+    }
+    .selected {
+      color: red;
+    }
+
+    .folder-title, .file-title{
+      outline: none;
+      border: none;
+      height: 100%;
+      font-size: 24px;
+      font-family: monospace;
+      width: 80%;
+      color: #7e7b7b;
+      background: transparent;
     }
     #note {
       grid-area: note; 
@@ -143,14 +201,14 @@
         grid-template-columns: 300px auto;
       }
     }
-  </style>
+  </style> -->
   <script src="https://kit.fontawesome.com/6c244c09d5.js" crossorigin="anonymous"></script>
 </head>
 <body>
   <div class="container">
     <div class="sidebar">
       <span>
-        <i class="fas fa-angle-double-left" id="left-arrow"></i>
+        <i class="fas fa-angle-double-left" data-state="0" id="arrow"></i>
       </span>
       <span>
        <i class="fas fa-user-circle" id="user-circle"></i>
@@ -159,21 +217,34 @@
     <div class="editor-container">
       <div class="panel">
         <div class="tools">
-          <i class="far fa-window-restore folder-icon" id="navigation-panel"></i>
-          <i class="fas fa-search search-icon" id="search-panel"></i>
+          <i class="far fa-window-restore folder-icon clicked" id="navigation-tool" data-mode="0"></i>
+          <i class="fas fa-search search-icon" id="search-tool" data-mode="1"></i>
         </div>
         <div class="options">
-          <i class="far fa-window-maximize folder-icon"></i>
-          <i class="far fa-file" id="file-icon"></i>
+          <input placeholder="Search..." id="search-box" class="hidden">
+          <i class="far fa-window-maximize folder-icon" id="folder-option"></i>
+          <i class="far fa-file file-icon" id="file-option"></i>
         </div>
-        <ul class="notelist">
-          <!-- <li class="note">
+        <ul class="note-list">
 
+          <!-- <li class="folder">
+            <i class="fas fa-sort-down sort-down-icon"></i>
+            <input class="folder-title" value="Untitled" readonly="true" ondblclick="this.readOnly='';">
+          </li>
+          <li class="file">
+            <input class="file-title" value="Untitled" readonly="true" ondblclick="this.readOnly='';">
           </li> -->
+          <li class="file" data-type="1">
+            <p class="file-title" contenteditable="false">Untitled</p>
+          </li>
+          <li class="folder closed" data-type="0">
+            <i class="fas fa-sort-down sort-down-icon"></i>
+            <p class="folder-title" contenteditable="false">Untitled</p>
+          </li>
         </ul>
       </div>
       <div class="editor">
-          <textarea id="note-title" rows="1" placeholder="Untitled" maxlength="60"></textarea>
+          <input id="note-title" placeholder="Untitled" maxlength="60"></textarea>
           <span class="note-tools">
             <i class="fas fa-align-right" id="preview-icon"></i>
             <i class="fas fa-trash" id="trash-icon"></i>
@@ -185,5 +256,7 @@
     </div>
   </div>
   <script type="module" src='./src/index.js'></script>
+  <script src='./src/temp.js'></script>
 </body>
 </html>
+

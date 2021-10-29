@@ -1,0 +1,23 @@
+.sidebar {
+  grid-area: side; 
+  background-color: #7e7b7b;
+  /* border-right: 1px solid #e1e1e1; */
+  text-align: center;
+  padding-top: 50px;
+  padding-bottom: 30px;
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+}
+#user-circle, #arrow{
+  color: #dddcdc;
+  font-size: 25px;
+  -webkit-text-stroke: 1.7px #7e7b7b;
+}
+#user-circle:hover,#arrow:hover{
+  color: rgb(106, 201, 218);
+  cursor: pointer;
+}
+.clicked {
+  color: rgb(106, 201, 218); 
+}

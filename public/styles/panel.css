@@ -1,0 +1,116 @@
+.folder-icon, .search-icon
+,.file-icon {
+  color: #a8a4a4;
+  font-size: 25px;
+  margin-right: 8px;
+  -webkit-text-stroke: 1.7px #eeeeee;
+}
+.folder-icon:hover, 
+.search-icon:hover, 
+.file-icon:hover{
+  color: rgb(106, 201, 218);
+  cursor: pointer;
+}
+.clicked {
+  color: rgb(106, 201, 218); 
+}
+#folder-icon {
+  margin-right: 10px;
+}
+.panel{
+  grid-area: side; 
+  background-color: #eeeeee;
+  border-right: 1px solid #e1e1e1;
+  display: grid;
+  grid-template-rows: 50px 50px auto;
+  grid-template-columns: 100%;
+  grid-template-areas: "tools" "options" "note-list";
+}
+.tools {
+  grid-area: tools; 
+  border-bottom: 1px solid #e1e1e1;
+  padding: 10px;
+}
+.options {
+  grid-area: options; 
+  border-bottom: 1px solid #e1e1e1;
+  padding: 10px;
+  text-align: center;
+}
+#search-box {
+  outline: none;
+  background: transparent;
+  border: none;
+  height: 80%;
+  font-size: 24px;
+  font-family: monospace;
+  color: #7e7b7b;
+  padding: 15px;
+  max-width: 100%;
+  white-space: nowrap;
+  overflow-x: scroll;
+}
+.hidden {
+  display: none;
+}
+.note-list {
+  grid-area: note-list;
+  max-height: calc(100vh - 100px);
+  overflow-y: auto;
+}
+.note-tools {
+  background-color: #f6f8f4;
+  border-bottom: 1px solid #e1e1e1;
+  text-align: center;
+  margin: 0;
+  padding: 0;
+  line-height: 50px;
+}
+.sort-down-icon {
+  margin-right: 10px;
+  color: #7e7b7b;
+  pointer-events: none;
+}
+.folder, .file {
+  list-style-type: none;
+  height: 50px;
+  padding-left: 15px;
+  border-bottom: 1px solid #e1e1e1;
+}
+
+.folder:hover, .file:hover{
+  background-color: #f6f8f4a6;
+}
+.folder{
+  display: flex;
+  align-items: center;
+}
+.file {
+  padding-left: 50px;
+}
+.folder-title, .file-title{
+  pointer-events: none;
+  outline: none;
+  border: none;
+  height: 100%;
+  font-size: 24px;
+  font-family: monospace;
+  color: #7e7b7b;
+  background: transparent;
+  line-height: 50px;
+  max-width: 100%;
+  white-space: nowrap;
+  overflow-x: scroll;
+}
+.folder-title {
+  flex-grow: 1;
+}
+
+
+
+.selected {
+  background-color: #f6f8f4;
+}
+.selected:hover{
+  background-color: #f6f8f4;
+}
