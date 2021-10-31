@@ -1,3 +1,16 @@
+class Node {
+  constructor(id, firstChild, next, type) {
+    this.id = id
+    this.type = type
+    this.parent = null 
+    this.prev = null
+    this.next = next
+    this.firstChild = firstChild
+    this.lastChild = null
+    this.depth = 0
+  }
+}
+
 class FileTree {
   //may change to tree constructed by backend first
   constructor(rootNode, nodeMap) {
@@ -125,17 +138,4 @@ class FileTree {
   }
 }
 
-class Node {
-  constructor(id, firstChild, next, type) {
-    this.id = id
-    this.type = type
-    this.parent = null 
-    this.prev = null
-    this.next = next
-    this.firstChild = firstChild
-    this.lastChild = null
-    this.depth = 0
-  }
-}
-
-export default FileTree
+export {FileTree, Node}

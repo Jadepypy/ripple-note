@@ -65,3 +65,14 @@ textarea{
 ::placeholder{
   color: #e1e1e1;
 }
+.reminder {
+  grid-area: main;
+  font-size: 30px;
+  font-family: monospace;
+  color: #b8b8b8;
+  line-height: 100vh;
+  text-align: center;
+  width: 100%;
+}
+
+

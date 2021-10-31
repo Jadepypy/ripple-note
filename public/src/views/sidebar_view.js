@@ -6,6 +6,7 @@ class SideBarView extends BaseView {
     this.arrow = this.getElement('#arrow')
     this.panel =  this.getElement('.panel')
     this.editorContainer = this.getElement('.editor-container')
+    this.reminder = this.getElement('.reminder')
   }
 
   bindClickArrow(handler) {

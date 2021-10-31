@@ -3,9 +3,9 @@
   padding: 0;
   box-sizing: border-box;
 }
-/* body {
-  background-color: #eeeeee;
-} */
+body {
+  background: #f6f8f4;
+}
 .container {
   display: grid;
   height: 100vh;

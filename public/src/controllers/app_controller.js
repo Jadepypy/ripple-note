@@ -1,15 +1,16 @@
+import {Node, FileTree} from '../utils/file_tree.js'
 class AppController {
-  constructor (noteModel, fileSystemModel, sidebarView, panelView, editorView){
+  constructor (noteModel, fileSystemModel, sidebarView, panelView, editorView, socketIO){
     this.noteModel = noteModel
     this.fileSystemModel = fileSystemModel
     this.sidebarView = sidebarView
     this.panelView = panelView
     this.editorView = editorView
+    this.socketIO = socketIO
 
     this.sidebarView.bindClickArrow(this.changePanelState.bind(this))
     this.panelView.bindClickPanelTools(this.changePanelTool.bind(this))
     this.panelView.bindClickNoteList(this.showHiddenFiles.bind(this), this.changeTitle.bind(this), this.changeSelectedFile.bind(this))
-    
     
     this.panelView.bindClickFolderOptions(this.createFolder.bind(this))
     this.panelView.bindClickFileOptions(this.createFile.bind(this))
@@ -17,7 +18,21 @@ class AppController {
 
   }
   init() {
+    this.socketIO.init(1, 'abc')
+    const callbacks = {
+      fileSystem: this.constructFileSystem.bind(this),
+      
+    }
+
+    this.socketIO.registerCallbacks(callbacks)
     console.log('start')
+  }
+  constructFileSystem(rootID, dataArr) {
+    const nodeMap = {}
+    for (const data of dataArr){
+      nodeMap[data[0]] = new Node(...data)
+    }
+    this.FileTree = new FileTree(nodeMap[rootID], nodeMap)
   }
   changePanelState (state) {
     this.fileSystemModel.panelState = this.fileSystemModel.PANEL_STATE[state]

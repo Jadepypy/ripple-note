@@ -14,3 +14,11 @@
 
 
 // console.log('ok')
+
+const trash = document.querySelector('#trash-icon')
+trash.addEventListener('click', (event) => {
+  const editor = document.querySelector('.editor')
+  const reminder = document.querySelector('.reminder')
+  editor.classList.toggle('hidden', true)
+  reminder.classList.toggle('hidden', false)
+})

@@ -34,14 +34,16 @@
 .options {
   grid-area: options; 
   border-bottom: 1px solid #e1e1e1;
-  padding: 10px;
   text-align: center;
 }
+#folder-option, #file-option {
+  margin-top: 10px;
+}
 #search-box {
-  outline: none;
   background: transparent;
+  outline: none;
   border: none;
-  height: 80%;
+  height: 100%;
   font-size: 24px;
   font-family: monospace;
   color: #7e7b7b;
@@ -49,6 +51,9 @@
   max-width: 100%;
   white-space: nowrap;
   overflow-x: scroll;
+}
+#search-box:focus{
+  border: 1px solid rgb(106, 201, 218); 
 }
 .hidden {
   display: none;
@@ -101,12 +106,17 @@
   max-width: 100%;
   white-space: nowrap;
   overflow-x: scroll;
+scrollbar-width: none; /* Firefox */
+-ms-overflow-style: none;  /* Internet Explorer 10+ */
 }
+.folder-title::-webkit-scrollbar, .file-title::-webkit-scrollbar{ /* WebKit */
+    width: 0;
+    height: 0;
+}
+
 .folder-title {
   flex-grow: 1;
 }
-
-
 
 .selected {
   background-color: #f6f8f4;
