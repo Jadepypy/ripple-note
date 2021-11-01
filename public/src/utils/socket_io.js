@@ -1,11 +1,13 @@
 
 class SocketIO {
   init(vaultID, token) {
+    console.log(token)
     this.socket = io(`/${vaultID}`, {auth: {token}})
-    this.socket.on('fileSystem', (rootID, dataArr) => {   
-                  this.trigger('fileSystem', rootID, dataArr)           
-                })
+    this.socket.on('fileSystem', (rootID, dataArr) => { 
+      this.trigger('fileSystem', rootID, dataArr) 
+    })
   }
+
   registerCallbacks(cb) {
     this.callbacks = cb
   }

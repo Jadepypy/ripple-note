@@ -39,6 +39,10 @@
 #folder-option, #file-option {
   margin-top: 10px;
 }
+#folder-option.disabled, #file-option.disabled{
+  color: #d6d6d6;
+  pointer-events: none;
+}
 #search-box {
   background: transparent;
   outline: none;
@@ -93,6 +97,10 @@
 .file {
   padding-left: 50px;
 }
+p:empty:not(:focus)::before {
+  content: attr(data-placeholder);
+  color: #e1e1e1;
+}
 .folder-title, .file-title{
   pointer-events: none;
   outline: none;
@@ -106,8 +114,8 @@
   max-width: 100%;
   white-space: nowrap;
   overflow-x: scroll;
-scrollbar-width: none; /* Firefox */
--ms-overflow-style: none;  /* Internet Explorer 10+ */
+  scrollbar-width: none; /* Firefox */
+  -ms-overflow-style: none;  /* Internet Explorer 10+ */
 }
 .folder-title::-webkit-scrollbar, .file-title::-webkit-scrollbar{ /* WebKit */
     width: 0;

@@ -21,7 +21,8 @@ io.of(/^\/[0-9]+$/)
   })
   .on('connection', (socket) => {
     console.log('userID', socket.userID)
-    const dataArr = [[0, 1, null, -1], [1, 2, null, -1], [2, 3, null, -1], [3, 4, null, -1], [4, 5, null, -1], [5, 6, null, -1], [6, 7, null, -1], [7, 8, null, -1], [8, 9, null, -1], [9, 10, null, -1], [10, 11, null, -1], [11, null, null, -1]]
+    const dataArr = [[0, 1, null, -1, 'vault'], [1, 4, 2, 0, 'Untitled'], [2, 5, 3, 0, 'Untitled'], [3, 10, null, 0, 'Untitled'], [4, null, 8, 1, 'Untitled'], [8, null, 9, 1, 'Untitled'], [9, null, null, 1, 'Untitled'], [5, null, 6, 1, 'Untitled'], [6, null, null, 1, 'Untitled'], [10, 11, null, 0, 'Untitled'], [11, null, null, 0, 'Untitled']]
+
     socket.emit('fileSystem', 0, dataArr)
 
   })
