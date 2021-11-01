@@ -9,4 +9,5 @@ const OP_TYPE = {
 }
 const SPECIAL_KEYS = ['Alt', 'Shift', 'Meta', 'Control', 'CapsLock', 'Tab', 'ArrowDown', 'ArrowUp', 'ArrowLeft', 'ArrowRight']
 
+
 export {STATE, OP_TYPE, SPECIAL_KEYS}

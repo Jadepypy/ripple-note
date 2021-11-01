@@ -1,4 +1,5 @@
 import BaseView from "./base_view.js"
+import {backlink, config} from "../utils/utils.js"
 import {STATE, OP_TYPE, SPECIAL_KEYS} from '../utils/enum.js'
 
 class EditorView extends BaseView{
@@ -9,6 +10,10 @@ class EditorView extends BaseView{
     this.trash = document.querySelector('#trash-icon')
     this.editor = this.getElement('.editor')
     this.reminder = this.getElement('.reminder')
+    this.preview = this.getElement('#preview-icon')
+    this.mdModeIsOn = true
+    this.previewWindow = document.querySelector('#preview-window')
+    this.initPreviewIconListener()
   }
   renderEditor(content, name) {
     if (name){
@@ -24,9 +29,9 @@ class EditorView extends BaseView{
   }
   showEditor(fileIsOpen) {
     if(fileIsOpen){
+      this.toggleEditorDisplay(false)
       this.editor.classList.toggle('hidden', false)
       this.reminder.classList.toggle('hidden', true)
-
     } else{
       this.editor.classList.toggle('hidden', true)
       this.reminder.classList.toggle('hidden', false)
@@ -52,6 +57,37 @@ class EditorView extends BaseView{
       }
         handler(opInfo)
     })
+  }
+  convertHtmlToMD() {
+    marked.use({ extensions: [backlink]})
+    const html = DOMPurify.sanitize(marked(this.textarea.value), config)
+    previewWindow.innerHTML = html
+
+  }
+  initPreviewIconListener(){
+    this.preview.addEventListener('click', () => {
+      if (this.mdModeIsOn){
+        this.toggleEditorDisplay(true)
+        this.convertHtmlToMD()
+        this.mdModeIsOn = false
+      } else{
+        this.toggleEditorDisplay(false)
+        this.mdModeIsOn = true
+      }
+    })
+  }
+  toggleEditorDisplay(isOn){
+    if(isOn){
+      this.preview.classList.remove('fa-align-right')
+      this.preview.classList.add('fa-edit')
+      this.textarea.classList.toggle('hidden', true)
+      this.previewWindow.classList.toggle('hidden', false)
+    } else{
+      this.preview.classList.add('fa-align-right')
+      this.preview.classList.remove('fa-edit')
+      this.textarea.classList.toggle('hidden', false)
+      this.previewWindow.classList.toggle('hidden', true)
+    }
   }
 }
 

@@ -13,11 +13,11 @@ class SocketIO {
       this.trigger('init', revisionID, doc)
     })
     this.socket.on('ack', (revisionID) => {
-      console.log('ack??')
+      // console.log('ack??')
       this.trigger('ack', revisionID)
     })
     this.socket.on('syncOp', (revisionID, syncOp) => {
-            console.log('sync??')
+            // console.log('sync??')
       this.trigger('syncOp', revisionID, syncOp)
     })
   }
@@ -33,7 +33,7 @@ class SocketIO {
     this.socket.emit('leaveRoom', this.roomID)
   }
   sendOperation(revisionID, opInfo) {
-    console.log('op')
+    // console.log('op')
     this.socket.emit('operation', revisionID, opInfo) 
   }
 

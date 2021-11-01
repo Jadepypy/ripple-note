@@ -28,6 +28,7 @@
   grid-template-areas: "title note-tools" "note note";
 }
 textarea{
+  line-height: 2;
   border: none;
   overflow: auto;
   outline: none;
@@ -41,6 +42,17 @@ textarea{
   outline: none;
   /* font-size: 20px;
   padding: 50px; */
+}
+#preview-window {
+  font-size: 20px;
+  border: none;
+  overflow: auto;
+  font-family: monospace;
+  background-color: #f6f8f4;
+  color: #7e7b7b;
+  padding: 50px;
+  padding-top: 20px;
+  line-height: 2;
 }
 #note-title {
   grid-area: title; 
@@ -74,8 +86,9 @@ textarea{
   text-align: center;
   width: 100%;
 }
-textarea{
-  line-height: 2;
+backlink {
+  color: rgb(106, 201, 218);
+  text-decoration: underline;
 }
 
 

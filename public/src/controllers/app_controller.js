@@ -69,7 +69,7 @@ class AppController {
   }
 
   checkIsDuplicate(name, parentID, type, isNew, id) {
-    console.log('Node', id)
+    // console.log('Node', id)
     let parent
     if (isNew){
       parent = this.fileSystemModel.nodeMap[parentID]
@@ -104,7 +104,7 @@ class AppController {
     //use view function to insert files into notelist (render display files)
   }
   async addTitleToNewElement(element, name, type, parentID, prevID) {
-    console.log('name', name)
+    // console.log('name', name)
     const id = await this.api.getElementID(this.fileSystemModel.head.id, parentID, name, type)
     const node = new Node(id, null, null, type, name)
     this.fileSystemModel.nodeMap[id] = node
@@ -163,7 +163,7 @@ class AppController {
     } else {
       bufferOp.push(...opInfo)
     }
-    console.log(outstandingOp)
+    // console.log(outstandingOp)
   }
 
   handleAcknowledgement(revisionID) {
@@ -188,7 +188,7 @@ class AppController {
     this.operationModel.revisionID = revisionID
     let outstandingOp = this.operationModel.outstandingOp
     let bufferOp = this.operationModel.bufferOp
-    console.log('GET SYNC:')
+    // console.log('GET SYNC:')
     
     // for (const op of syncOp){
     //   console.log(op)
