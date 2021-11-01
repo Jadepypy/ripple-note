@@ -3,7 +3,6 @@ class BaseView {
     this.navigationTool = this.getElement('#navigation-tool')
     this.searchTool = this.getElement('#search-tool')
     this.pElemList = this.getAllElements('p')
-    this.preventLineBreaks()
   }
   getElement(selector, parent) {
     let elem
@@ -25,14 +24,6 @@ class BaseView {
   }
   toggleTag (elem, tag, force) {
     elem.classList.toggle(tag, force)
-  }
-  preventLineBreaks(){
-    // for (const p of this.pElemList){
-    //   p.addEventListener('keypress', (event) => {
-    //       if (event.keyCode === 13)
-    //         event.preventDefault()
-    //   })
-    // }
   }
 
 }

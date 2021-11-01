@@ -89,14 +89,12 @@ class PanelView extends BaseView {
               if (p.innerText.length === 0 || (/^\s+$/).test(p.innerText)){
                   p.innerText = this.selectedElementName
               } else {
-                if (p.innerText != this.selectedElementName){
-                  if (checkIsDuplicate(p.innerText, null, p.parentNode.dataset.type, false, p.parentNode.dataset.id)) {
-                    alert('There\'s already a file with the same name')
-                    p.innerText = this.selectedElementName
-                  } else{
-                    titleChangeHandler(target.dataset.id, p.innerText)
-                  }
-                }
+                if (checkIsDuplicate(p.innerText, null, p.parentNode.dataset.type, false, p.parentNode.dataset.id)) {
+                  alert('There\'s already a file with the same name')
+                  p.innerText = this.selectedElementName
+                } else{
+                  titleChangeHandler(target.dataset.id, p.innerText)
+                }  
               }
             })
         }
@@ -128,7 +126,7 @@ class PanelView extends BaseView {
     const p = this.createElement('p', ['folder-title'])
     // p.dataset.placeholder = 'Untitled'
     p.dataset.parent = parentID
-    p.dataset.prev = prevDom.dataset.id
+    p.dataset.prev = prevDom !== null? prevDom.dataset.id: null
     folder.appendChild(p)
     if (prevDom !== null){
       this.noteList.insertBefore(folder, prevDom.nextSibling)
@@ -145,7 +143,7 @@ class PanelView extends BaseView {
     const file = this.createElement('li', ['file', 'selected'])
     const p = this.createElement('p', ['file-title'])
     p.dataset.parent = parentID
-    p.dataset.prev = prevDom.dataset.id
+    p.dataset.prev = prevDom !== null? prevDom.dataset.id: null
     file.appendChild(p)
     if (prevDom !== null){
       this.noteList.insertBefore(file, prevDom.nextSibling)

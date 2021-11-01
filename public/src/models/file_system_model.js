@@ -5,9 +5,9 @@ class FileSystemModel {
     this.nodeMap = null
     this.head = null
     this.DATA_TYPE = {
-      VAULT: -1,
-      FOLDER: 0,
-      FILE: 1
+      VAULT: '-1',
+      FOLDER: '0',
+      FILE: '1'
     }
   }
   buildTree(rootNode, nodeMap, createNodeHandler) {
@@ -165,6 +165,8 @@ class FileSystemModel {
     }
   }
   getDuplicateElementID(name, node, type, id) {
+    console.log('?')
+    console.log(name, node, type, id)
     if(node === null){
       return null
     } else if (node.name == name && node.type == type){

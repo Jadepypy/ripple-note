@@ -41,6 +41,7 @@ textarea.addEventListener('keydown', function (event) {
     }
     opInfo.push({opType: OP_TYPE.INSERT, pos: indexStart, key: key})
   }
+  //////////////
   if (state === STATE.CLEAR){
     outstandingOp.push(...opInfo)
     //console.log('OUTSTANDING:', outstandingOp)

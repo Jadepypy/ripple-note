@@ -1,7 +1,7 @@
 class Node {
   constructor(id, firstChild, next, type, name) {
     this.id = id
-    this.type = type
+    this.type = String(type)
     this.name = name
     this.parent = null 
     this.prev = null
