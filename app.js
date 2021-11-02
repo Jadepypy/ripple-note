@@ -27,7 +27,7 @@ io.of(/^\/[0-9]+$/)
   })
   .on('connection', (socket) => {
     console.log('userID', socket.userID)
-    const dataArr = [[0, 1, null, -1, 'vault'], [1, 4, 2, 0, 'Folder1'], [2, 5, 3, 0, 'Folder2'], [3, 10, null, 0, 'Folder3'], [4, null, 8, 1, 'File4'], [8, null, 9, 1, 'File8'], [9, null, null, 1, 'File9'], [5, null, 6, 1, 'Folder5'], [6, null, null, 1, 'Folder6'], [10, 11, null, 0, 'Folder10'], [11, null, null, 1, 'File11']]
+    const dataArr = [[0, 1, null, -1, 'vault'], [1, 4, 2, 0, 'Folder1'], [2, 5, 3, 0, 'Folder2'], [3, 10, null, 0, 'Folder3'], [4, null, 8, 1, 'File4'],  [8, null, 9, 1, 'File8'], [9, null, null, 1, 'File9'], [5, null, 6, 1, 'File5'], [6, null, null, 1, 'File6'], [10, 11, null, 0, 'Folder10'], [11, null, null, 1, 'File11']]
 
     socket.emit('fileSystem', 0, dataArr)
     socket.on('joinRoom', (id) => {
@@ -66,7 +66,7 @@ io.of(/^\/[0-9]+$/)
         socket.to(socket.roomID).emit('syncOp', revisionID, operation);
         // console.log('SEND SYNC:', operation)
         LogOp[revisionID] = operation
-      }, 2000)
+      }, 0)
     })
 
     

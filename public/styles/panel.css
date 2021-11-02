@@ -86,16 +86,21 @@
   padding-left: 15px;
   border-bottom: 1px solid #e1e1e1;
 }
-
+/* .file {
+  padding-left: 28px;
+} */
+.folder.entered, .file.entered{
+ background-color: rgba(216, 231, 233, 0.753);
+}
 .folder:hover, .file:hover{
   background-color: #f6f8f4a6;
+}
+.folder .hidden, .file .hidden {
+  display: none;
 }
 .folder{
   display: flex;
   align-items: center;
-}
-.file {
-  padding-left: 50px;
 }
 p:empty:not(:focus)::before {
   content: attr(data-placeholder);

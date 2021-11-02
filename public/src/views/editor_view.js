@@ -61,8 +61,7 @@ class EditorView extends BaseView{
   convertHtmlToMD() {
     marked.use({ extensions: [backlink]})
     const html = DOMPurify.sanitize(marked(this.textarea.value), config)
-    previewWindow.innerHTML = html
-
+    this.previewWindow.innerHTML = html
   }
   initPreviewIconListener(){
     this.preview.addEventListener('click', () => {

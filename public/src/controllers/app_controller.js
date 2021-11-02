@@ -14,7 +14,7 @@ class AppController {
 
     this.sidebarView.bindClickArrow(this.changePanelState.bind(this))
     this.panelView.bindClickPanelTools(this.changePanelTool.bind(this))
-    this.panelView.bindClickNoteList(this.showHiddenFiles.bind(this), this.changeTitle.bind(this), this.addTitleToNewElement.bind(this), this.checkIsDuplicate.bind(this), this.changeSelectedFile.bind(this))
+    this.panelView.bindClickNoteList(this.showHiddenFiles.bind(this), this.changeTitle.bind(this), this.addTitleToNewElement.bind(this), this.checkIsDuplicate.bind(this), this.changeSelectedFile.bind(this), this.moveFile.bind(this))
     this.panelView.bindClickFolderOptions(this.createNewElement(this.fileSystemModel.DATA_TYPE.FOLDER))
     this.panelView.bindClickFileOptions(this.createNewElement(this.fileSystemModel.DATA_TYPE.FILE))
 
@@ -29,7 +29,7 @@ class AppController {
       ack: this.handleAcknowledgement.bind(this),
       syncOp: this.handleSyncOperation.bind(this) 
     }
-
+    console.log('start')
     this.socketIO.registerCallbacks(callbacks)
   }
   constructFileSystem(rootID, dataArr) {
@@ -38,9 +38,12 @@ class AppController {
       nodeMap[data[0]] = new Node(...data)
     }
     this.fileSystemModel.buildTree(nodeMap[rootID], nodeMap, this.buildFileOrFolder.bind(this))
+    // this.fileSystemModel.printTree()
+
   }
   createNewElement(type) {
     return async () => {
+      console.log(this.fileSystemModel.file)
       const vaultID = this.fileSystemModel.head.id
       const [prevDom, prevNode, parent] = this.fileSystemModel.getDataBeforeInsertion()
       // console.log('prevDom', prevDom, prevNode)
@@ -56,13 +59,18 @@ class AppController {
       }
     }
   }
-  buildFileOrFolder(id, name, type) {
+  buildFileOrFolder(id, name, type, depth) {
     if (type == this.fileSystemModel.DATA_TYPE.FOLDER){
       const folder =  this.panelView.buildFolder(id, name)
       folder.dataset.type = this.fileSystemModel.DATA_TYPE.FOLDER
+      const node = this.fileSystemModel.nodeMap
+      const paddingLeft = depth*15
+      folder.style.paddingLeft= `${paddingLeft}px`
       return folder
     } else {
       const file = this.panelView.buildFile(id, name)
+      const paddingLeft = depth*15 + 5
+      file.style.paddingLeft= `${paddingLeft}px`
       file.dataset.type = this.fileSystemModel.DATA_TYPE.FILE
       return file
     }
@@ -98,10 +106,32 @@ class AppController {
     //get notelist from model
     //render notelist
   }
-  showHiddenFiles(folder) {
-    //given folder get sub files from model
-    //add files into displayfiles (may be an array)
-    //use view function to insert files into notelist (render display files)
+  showHiddenFiles(id, isHiding, isFirst) {
+    console.log('id', id)
+    const element = this.fileSystemModel.domMap[id]
+    console.log(element)
+    const node = this.fileSystemModel.nodeMap[id]
+    if(!isFirst){
+      if(isHiding){
+        element.classList.toggle('opened', false)
+        element.classList.toggle('closed', true)
+        // element.classList.toggle('hidden', isHiding)
+        element.classList.toggle('opened', true)
+        element.classList.toggle('closed', closed)
+        element.style.display = 'none'
+        
+      } else{
+        // element.classList.toggle('hidden', !isHiding)
+        element.style.display = ''
+      }
+    }
+    if (node.firstChild !== null){
+      this.showHiddenFiles(node.firstChild.id, isHiding)
+    }
+    if (node.next !== null && !isFirst){
+      this.showHiddenFiles(node.next.id, isHiding)
+    }
+    //this.fileSystemModel.printTree()
   }
   async addTitleToNewElement(element, name, type, parentID, prevID) {
     // console.log('name', name)
@@ -222,6 +252,63 @@ class AppController {
       this.editorView.renderEditor(doc)
     }
   }
+  moveFile(id, targetID, isFirst) {
+    let node = this.fileSystemModel.nodeMap[id]
+    let targetNode = this.fileSystemModel.nodeMap[targetID]
+    console.log('id', id, 'targetid', targetID)
+    if (targetID === null){
+      targetID = this.fileSystemModel.head.id
+      targetNode = this.fileSystemModel.nodeMap[targetID]
+      console.log('target', targetNode)
+    } else{
+      if(targetNode.parent.id == node.id){
+        return null
+      }
+    }
+    const element = this.fileSystemModel.domMap[id].cloneNode(true)
+    this.fileSystemModel.domMap[id].remove()
+    this.fileSystemModel.domMap[id] = element
+    if (isFirst){
+      const type = targetNode.type
+      if(type == this.fileSystemModel.DATA_TYPE.FOLDER){
+        this.fileSystemModel.moveUnderAsFirstChild(node, targetNode)
+      } else if (type == this.fileSystemModel.DATA_TYPE.VAULT){
+        console.log('target!!!', targetID)
+        console.log(targetNode)
+        this.fileSystemModel.moveUnder(node, targetNode)
+      } else {
+        this.fileSystemModel.moveAfter(node, targetNode)
+      }
+    }
+    let paddingLeft = node.depth*15
+    if(node.type == this.fileSystemModel.DATA_TYPE.FILE){
+      paddingLeft += 5
+    }
+    element.style.paddingLeft= `${paddingLeft}px`
+    if (targetNode.id == this.fileSystemModel.head.id && isFirst){
+      this.panelView.noteList.append(element)
+    } else{
+      const prevElem = this.fileSystemModel.domMap[targetID]
+      this.insertAfter(element, prevElem)
+    }
+    this.fileSystemModel.printTree()
+    if (node.firstChild !== null){
+      this.moveFile(node.firstChild.id, node.id, false)
+    } else if (node.next !== null && !isFirst){
+      this.moveFile(node.next.id, node.id, false)
+    }
+    return element
+    //this.fileSystemModel.printTree()
+  }
+
+  insertAfter(e, prev) { 
+    if(prev.nextElementSibling !== null){
+      this.panelView.noteList.insertBefore(e, prev.nextElementSibling)
+    } else {
+      this.panelView.noteList.append(e)
+    }
+  }
+
 }
 
 export default AppController

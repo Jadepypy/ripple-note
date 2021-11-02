@@ -28,11 +28,72 @@ class PanelView extends BaseView {
     })
   }
 
-  bindClickNoteList(showHiddenFiles, titleChangeHandler, titleChangeOnNewElem, checkIsDuplicate, changeSelectedFile) {
-    this.handleNoteListFocus(titleChangeOnNewElem, checkIsDuplicate)
+  bindClickNoteList(showHiddenFiles, titleChangeHandler, titleChangeOnNewElem, checkIsDuplicate, changeSelectedFile, moveFileHandler) {
+    this.handleNoteListFocus(titleChangeOnNewElem, checkIsDuplicate, changeSelectedFile)
     this.handleNoteListClick(showHiddenFiles, titleChangeHandler, checkIsDuplicate, changeSelectedFile)
+    this.handleNoteListDragEvent(moveFileHandler, showHiddenFiles)
   }
-  handleNoteListFocus(titleChangeOnNewElem, checkIsDuplicate) {
+  handleNoteListDragEvent(moveFileHandler, showHiddenFiles) {
+    this.noteList.addEventListener('dragstart', (e) => {
+      e.target.classList.add("dragging");      
+    })
+    this.noteList.addEventListener('dragenter', (e) => {
+      if(e.target.matches('.dragging')){
+        return
+      } else if (e.target.matches('.folder') || e.target.matches('.file')){
+        e.target.classList.add('entered')
+        this.target = e.target
+      }
+      //  else if (e.target.matches('.file')){
+      //   e.target.classList.add('entered')
+      //   this.target = e.target
+      // }
+    })
+    document.addEventListener('dragleave', (e) => {
+      if(e.target.matches('.dragging')){
+        return
+      } else if (e.target.matches('.folder') || e.target.matches('.file')){
+        e.target.classList.remove('entered')
+      } else if (e.target.matches('.note-list')){
+        this.target = this.noteList
+      } else {
+        this.target = null
+      }
+      // else{
+      //   e.classList.remove('hover')
+      // }
+    })
+    this.noteList.addEventListener('dragend', (e) => {
+      e.target.classList.remove('dragging')
+      if (this.target !== null){
+        if (this.target.matches('.note-list')){
+          moveFileHandler(e.target.dataset.id, null, true)
+          return
+        }
+
+        const element = moveFileHandler(e.target.dataset.id, this.target.dataset.id, true)
+        if(element === null){
+          return
+        }
+        if(this.target.matches('.folder.opened')&& e.target.matches('.folder.closed')){
+          e.target.style.display = ''
+          showHiddenFiles(e.target.dataset.id, false, true)
+        } else if(this.target.matches('.folder.closed')&& e.target.matches('.folder.opened')) {
+          element.style.display = 'none'
+          element.classList.remove('opened')
+          element.classList.add('closed')
+          // console.log('current', e.target)
+          showHiddenFiles(e.target.dataset.id, true, true)
+        }
+      }
+      this.target = null
+    })
+  }
+  changeFolderIcon(isOpen){
+
+
+  }
+  handleNoteListFocus(titleChangeOnNewElem, checkIsDuplicate, changeSelectedFile) {
     this.noteList.addEventListener('focusin', (e) => {
       if(e.target.matches('#new')){
         const p = e.target
@@ -43,6 +104,7 @@ class PanelView extends BaseView {
           if (p.innerText.length === 0 || (/^\s+$/).test(p.innerText)){
             p.parentNode.remove()
             this.toggleOptionFunctionality(true)
+            changeSelectedFile(null)
             return
           } else {
             if(checkIsDuplicate(p.innerText, p.dataset.parent, p.parentNode.dataset.type, true)){
@@ -68,10 +130,11 @@ class PanelView extends BaseView {
             if (target.matches('.folder.opened')){
               target.classList.toggle('opened', false)
               target.classList.toggle('closed', true)
+              showHiddenFiles(target.dataset.id, true, true)
             } else if (target.matches('.folder.closed')) {
               target.classList.toggle('closed', false)
               target.classList.toggle('opened', true)
-              showHiddenFiles(target)
+              showHiddenFiles(target.dataset.id, false, true)
             } else if (target.matches('.file')) {
               target.classList.toggle('selected', true)
               changeSelectedFile(target)
@@ -101,7 +164,7 @@ class PanelView extends BaseView {
       this.noteList.addEventListener('keypress', (event) => {
         if (event.target.matches('p')){
           if (event.keyCode === 13)
-            event.preventDefault()
+            event.target.blur()
         }
       }) 
     })
@@ -121,13 +184,14 @@ class PanelView extends BaseView {
 
   }
   createNewFolder(prevDom, parentID) {
-    const folder = this.createElement('li', ['folder', 'closed'])
+    const folder = this.createElement('li', ['folder', 'opened', 'draggable'])
     folder.innerHTML = `<i class="fas fa-sort-down sort-down-icon"></i>`
     const p = this.createElement('p', ['folder-title'])
     // p.dataset.placeholder = 'Untitled'
     p.dataset.parent = parentID
     p.dataset.prev = prevDom !== null? prevDom.dataset.id: null
     folder.appendChild(p)
+    folder.setAttribute('draggable', true)
     if (prevDom !== null){
       this.noteList.insertBefore(folder, prevDom.nextSibling)
     } else{
@@ -140,11 +204,12 @@ class PanelView extends BaseView {
     return folder
   }
   createNewFile(prevDom, parentID) {
-    const file = this.createElement('li', ['file', 'selected'])
+    const file = this.createElement('li', ['file', 'selected', 'draggable'])
     const p = this.createElement('p', ['file-title'])
     p.dataset.parent = parentID
     p.dataset.prev = prevDom !== null? prevDom.dataset.id: null
     file.appendChild(p)
+    file.setAttribute('draggable', true)
     if (prevDom !== null){
       this.noteList.insertBefore(file, prevDom.nextSibling)
     } else{
@@ -158,8 +223,9 @@ class PanelView extends BaseView {
   }
 
   buildFolder(id, name) {
-    const folder = this.createElement('li', ['folder', 'closed'])
+    const folder = this.createElement('li', ['folder', 'opened', 'draggable'])
     folder.dataset.id = id
+    folder.setAttribute('draggable', true)
     folder.innerHTML = `<i class="fas fa-sort-down sort-down-icon"></i>
                           <p class="folder-title" contenteditable="false" dataset-placehoder="Untitled">${name}</p>`
     this.noteList.appendChild(folder)
@@ -167,8 +233,9 @@ class PanelView extends BaseView {
   }
 
   buildFile(id, name) {
-    const file = this.createElement('li', ['file'])
+    const file = this.createElement('li', ['file', 'draggable'])
     file.dataset.id = id
+    file.setAttribute('draggable', true)
     file.innerHTML = `<p class="file-title" dataset-placehoder="Untitled" contenteditable="false">${name}</p>`
     this.noteList.appendChild(file) 
     return file 

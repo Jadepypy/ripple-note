@@ -52,7 +52,7 @@ textarea{
   color: #7e7b7b;
   padding: 50px;
   padding-top: 20px;
-  line-height: 2;
+  line-height: 1.5;
 }
 #note-title {
   grid-area: title; 
