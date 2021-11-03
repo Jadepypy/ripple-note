@@ -1,4 +1,4 @@
-import {STATE, OP_TYPE} from '../utils/enum.js'
+//import {STATE, OP_TYPE} from '../utils/enum.js'
 class OperationModel {
   constructor () {
     this.outstandingOp = []

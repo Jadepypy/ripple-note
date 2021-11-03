@@ -44,10 +44,6 @@ class PanelView extends BaseView {
         e.target.classList.add('entered')
         this.target = e.target
       }
-      //  else if (e.target.matches('.file')){
-      //   e.target.classList.add('entered')
-      //   this.target = e.target
-      // }
     })
     document.addEventListener('dragleave', (e) => {
       if(e.target.matches('.dragging')){
@@ -59,9 +55,6 @@ class PanelView extends BaseView {
       } else {
         this.target = null
       }
-      // else{
-      //   e.classList.remove('hover')
-      // }
     })
     this.noteList.addEventListener('dragend', (e) => {
       e.target.classList.remove('dragging')

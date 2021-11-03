@@ -1,6 +1,6 @@
 import BaseView from "./base_view.js"
 import {backlink, config} from "../utils/utils.js"
-import {STATE, OP_TYPE, SPECIAL_KEYS} from '../utils/enum.js'
+//import {STATE, OP_TYPE, SPECIAL_KEYS} from '../utils/enum.js'
 
 class EditorView extends BaseView{
   constructor (){

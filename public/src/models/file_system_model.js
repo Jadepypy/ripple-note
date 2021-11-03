@@ -1,14 +1,8 @@
 class FileSystemModel {
   constructor () {
     this.file = null
-    this.domMap = {}
     this.nodeMap = null
     this.head = null
-    this.DATA_TYPE = {
-      VAULT: '-1',
-      FOLDER: '0',
-      FILE: '1'
-    }
   }
   buildTree(rootNode, nodeMap, createNodeHandler) {
     this.head = rootNode //can not be null
@@ -19,8 +13,8 @@ class FileSystemModel {
       node.next = node.next === null? null: this.nodeMap[node.next]
       node.firstChild = node.firstChild === null? null: this.nodeMap[node.firstChild]
       node.parent = parents[depth - 1]
-      if (this.domMap[node.id] === undefined && node.id !== this.head.id){
-        this.domMap[node.id] = createNodeHandler(node.id, node.name, node.type, depth)
+      if (domMap[node.id] === undefined && node.id !== this.head.id){
+        domMap[node.id] = createNodeHandler(node.id, node.name, node.type, depth)
       }
       if (node.firstChild !== null){
         parents[depth] = node
@@ -41,7 +35,7 @@ class FileSystemModel {
       if (prevNode.next !== null || prevNode.firstChild !== null){
         return [this.file, prevNode, prevNode.parent]
       } else if (prevNode.parent.next !== null){
-        return [this.domMap[prevNode.id], prevNode, prevNode.parent]
+        return [domMap[prevNode.id], prevNode, prevNode.parent]
       }  
       else{
         return [null, prevNode, prevNode.parent]
@@ -52,9 +46,9 @@ class FileSystemModel {
         const lastDescendant = this.getLastDescendant(lastChild)
             console.log(lastDescendant.id)
 
-        return [this.domMap[lastDescendant.id], lastChild, this.head]
+        return [domMap[lastDescendant.id], lastChild, this.head]
       } else if (lastChild.next !== null) {
-        return [this.domMap[lastChild.id], lastChild, this.head]
+        return [domMap[lastChild.id], lastChild, this.head]
       } else {
         return [null, lastChild, this.head]
       }

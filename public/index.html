@@ -74,6 +74,24 @@
     <script src="node_modules/socket.io-client/dist/socket.io.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
     <script type="text/javascript" src="node_modules/dompurify/dist/purify.min.js"></script>
+    <script>
+      const DATA_TYPE = {
+        VAULT: '-1',
+        FOLDER: '0',
+        FILE: '1'
+      }
+      const STATE = {
+        CLEAR: 0,
+        WAITING: -1  
+      }
+      const OP_TYPE = {
+        INSERT: 0,
+        DELETE: 1,
+        NOOP: -1
+      }
+      const domMap = {}
+const SPECIAL_KEYS = ['Alt', 'Shift', 'Meta', 'Control', 'CapsLock', 'Tab', 'ArrowDown', 'ArrowUp', 'ArrowLeft', 'ArrowRight']
+    </script>
 
   <script type="module" src='./src/index.js'></script>
   <script src='./src/temp.js'></script>
