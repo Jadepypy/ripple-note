@@ -1,10 +1,38 @@
+require('dotenv').config();
 const express = require('express')
-const { createServer } = require("http");
-const { Server } = require("socket.io");
 const app = express()
-const httpServer = createServer(app);
-const io = new Server(httpServer, {cors: ['localhost:3000']});
 
+app.use('/node_modules', express.static('node_modules'))
+app.use(express.static('public'))
+app.use(express.json())
+app.use(express.urlencoded({extended:true}))
+
+// app.use('/', mainRoutes)
+// app.use('/product', productRoutes)
+// app.use('/campaign', campaignRoutes)
+
+app.use('api', 
+        [
+          require('./server/routes/user_route'),
+          require('./server/routes/file_route')
+        ]
+)
+
+app.use(function(err, req, res, next) {
+    console.log(err);
+    res.status(500).send('Internal Server Error');
+})
+
+const { pool } = require('./server/models/mysql')
+
+
+
+/////////////////////////
+const Operation = require('./server/models/operation')
+const FileSystem = require('./server/models/file_system')
+
+
+////
 let revisionID = 0
 const LogOp = []
 const OP_TYPE = {
@@ -13,10 +41,12 @@ const OP_TYPE = {
   NOOP: -1
 }
 
-app.use('/node_modules', express.static('node_modules'));
-app.use(express.static('public'))
-
-const docs = {}
+const { createServer } = require("http");
+const { Server } = require("socket.io");
+const httpServer = createServer(app);
+const io = new Server(httpServer, {cors: ['localhost:3000']});
+//sokcet
+const files = {}
 io.of(/^\/[0-9]+$/)
   .use((socket, next) => {
     console.log(socket.handshake.auth)
@@ -26,28 +56,52 @@ io.of(/^\/[0-9]+$/)
     }
   })
   .on('connection', (socket) => {
-    console.log('userID', socket.userID)
+    // console.log('userID', socket.userID)
     const dataArr = [[0, 1, null, -1, 'vault'], [1, 4, 2, 0, 'Folder1'], [2, 5, 3, 0, 'Folder2'], [3, 10, null, 0, 'Folder3'], [4, null, 8, 1, 'File4'],  [8, null, 9, 1, 'File8'], [9, null, null, 1, 'File9'], [5, null, 6, 1, 'File5'], [6, null, null, 1, 'File6'], [10, 11, null, 0, 'Folder10'], [11, null, null, 1, 'File11']]
 
     socket.emit('fileSystem', 0, dataArr)
-    socket.on('joinRoom', (id) => {
+    socket.on('joinRoom', async (id) => {
       socket.join(id)
-      socket.roomID = id
-      if(docs[id] === undefined){
-        docs[id] = ''
-      }
-      socket.emit('init', revisionID, docs[id])    
+      socket.fileID = id
+      if(files[id] === undefined){
+        const result = FileSystem.getFile(id)
+        if(result.length > 0){
+          console.log('result', result)
+          files[id] = {revisionID: result[0], doc: result[1]}
+        } else{
+          files[id] = {revisionID: 0, doc: ''}
+
+        }
+      } 
+      // const [fileSystem] = FileSystem.getFileSystem(vaultID)
+      socket.emit('init', files[id].revisionID, files[id].doc) 
+         
       console.log(`user ${socket.userID} joined room ${id}`)
     })
     socket.on('leaveRoom', (id) => {
       socket.leave(id)
       console.log(`user ${socket.userID} left room ${id}`)
     })
+    socket.on('createFile', () => {
+
+    })
+    socket.on('createFolder', () => {
+      
+    })
     socket.on('operation', (clientRevisionID, operation) => {
-      const roomID = socket.roomID
-      console.log(clientRevisionID, operation)
-      setTimeout(() => {
-        console.log("ID", clientRevisionID, "SERVER INFO:", operation)
+      const userID = socket.userID
+      //const vaultID = socket.nsp.name.replace('/', '')
+      const fileID = socket.fileID
+      const time = new Date().toISOString().slice(0, 19).replace('T', ' ')
+      let revisionID = files[fileID].revisionID
+      let doc = files[fileID].doc
+      console.log(files, files[fileID], files[fileID].doc)
+      console.log('doc', doc)
+
+
+      // console.log(clientRevisionID, operation)
+      setTimeout(async () => {
+        // console.log("ID", clientRevisionID, "SERVER INFO:", operation)
         if (revisionID > clientRevisionID) {
           for (let i = clientRevisionID + 1; i < LogOp.length; i++){
             if (LogOp[i]){
@@ -57,15 +111,29 @@ io.of(/^\/[0-9]+$/)
           }
         }
         revisionID++
-        docs[roomID] = applyOperation(docs[roomID], operation)
-        docs[socket.roomID] = docs[roomID]
+        doc = applyOperation(doc, operation)
         //console.log('pending...')
         socket.emit('ack', revisionID)
         // socket.broadcast.emit('syncOperation', revisionID, info.operation);
-        // console.log(socket.roomID)
-        socket.to(socket.roomID).emit('syncOp', revisionID, operation);
+        // console.log(socket.fileID)
+        socket.to(socket.fileID).emit('syncOp', revisionID, operation);
         // console.log('SEND SYNC:', operation)
         LogOp[revisionID] = operation
+        console.log(operation)
+        const backUpOp = operation.map((op) => {
+          return [  revisionID,  
+                    userID,
+                    fileID,
+                    op.type,
+                    op.position,
+                    op.count != undefined? op.count: 0,
+                    op.key != undefined? op.key: '',
+                    time
+                  ]
+        })
+        await Operation.createOperation(fileID, revisionID, doc, backUpOp)
+        files[fileID].doc = doc
+        files[fileID].revisionID = revisionID
       }, 0)
     })
 
@@ -134,12 +202,12 @@ function iterateOT (opArr1, opArr2) {
 
 function applyOperation(doc, operation) {
   for (const op of operation){
-    switch (op.opType) {
+    switch (op.type) {
       case OP_TYPE.INSERT :
-        doc = doc.substring(0, op.pos) + op.key + doc.substring(op.pos, doc.length)
+        doc = doc.substring(0, op.position) + op.key + doc.substring(op.position, doc.length)
         break;
       case OP_TYPE.DELETE :
-        doc = doc.substring(0, op.pos + op.count) + doc.substring(op.pos, doc.length)
+        doc = doc.substring(0, op.position + op.count) + doc.substring(op.position, doc.length)
         break;
     }
   }
@@ -150,14 +218,14 @@ function applyOperation(doc, operation) {
 
 //heart of OT
 function transformation(op1, op2){
-  if (op1.opType == OP_TYPE.INSERT && op2.opType == OP_TYPE.INSERT){
+  if (op1.type == OP_TYPE.INSERT && op2.type == OP_TYPE.INSERT){
     return Tii(op1, op2)
-  } else if (op1.opType == OP_TYPE.INSERT && op2.opType == OP_TYPE.DELETE){
+  } else if (op1.type == OP_TYPE.INSERT && op2.type == OP_TYPE.DELETE){
     return Tid(op1, op2)
-  } else if (op1.opType == OP_TYPE.DELETE && op2.opType == OP_TYPE.INSERT){
+  } else if (op1.type == OP_TYPE.DELETE && op2.type == OP_TYPE.INSERT){
     const result = Tid(op2, op1)
     return [result[1], result[0]]
-  } else if (op1.opType == OP_TYPE.DELETE && op2.opType == OP_TYPE.DELETE){
+  } else if (op1.type == OP_TYPE.DELETE && op2.type == OP_TYPE.DELETE){
     return Tdd(op1, op2)
   }
   return [op1, op2]
@@ -165,73 +233,73 @@ function transformation(op1, op2){
 
 //insert  insert transformation
 function Tii(op1, op2){
-  if (op1.pos >= op2.pos) {
-    op1.pos += 1
+  if (op1.position >= op2.position) {
+    op1.position += 1
   } else {
-    op2.pos += 1
+    op2.position += 1
   }
   return [op1, op2]
 }
 //insert delete transformation
 function Tid(op1, op2){
   const op1Temp = {...op1}
-  if (op1.pos > op2.pos + op2.count){
-    op1.pos = Math.max(op2.pos + op2.count, op1Temp.pos + op2.count)
-    if (op1Temp.pos < op2.pos) {
+  if (op1.position > op2.position + op2.count){
+    op1.position = Math.max(op2.position + op2.count, op1Temp.position + op2.count)
+    if (op1Temp.position < op2.position) {
       const op2First = {...op2}
-      op2First.pos += 1
-      op2First.count = (op1Temp.pos + 1) - op2First.pos
-      const op2Second = {opType: OP_TYPE.DELETE, pos: op1Temp.pos, count: op2.count - op2First.count} 
+      op2First.position += 1
+      op2First.count = (op1Temp.position + 1) - op2First.position
+      const op2Second = {type: OP_TYPE.DELETE, pos: op1Temp.position, count: op2.count - op2First.count} 
       op2 = [op2First, op2Second]
     }
   } else {
-    op2.pos += 1
+    op2.position += 1
   }
   return [op1, op2]
 }
 //delete delete transformation
 function Tdd(op1, op2){
-  if (op1.pos == op2.pos){
+  if (op1.position == op2.position){
     if (op1.count == op2.count){
-      op1.opType = OP_TYPE.NOOP
-      op2.opType = OP_TYPE.NOOP
+      op1.type = OP_TYPE.NOOP
+      op2.type = OP_TYPE.NOOP
     } else if (Math.abs(op1.count) > Math.abs(op2.count)){
-      op1.pos = op2.pos + op2.count
+      op1.position = op2.position + op2.count
       op1.count = op1.count - op2.count
-      op2.opType = OP_TYPE.NOOP     
+      op2.type = OP_TYPE.NOOP     
     } else {
-      op2.pos = op1.pos + op1.count
+      op2.position = op1.position + op1.count
       op2.count = op2.count - op1.count
-      op1.opType = OP_TYPE.NOOP
+      op1.type = OP_TYPE.NOOP
     }
-  } else if (op1.pos + op1.count < op2.pos && op1.pos > op2.pos) {
+  } else if (op1.position + op1.count < op2.position && op1.position > op2.position) {
     const op2Temp = {...op2}
-    if (op2.pos + op2.count >= op1.pos + op1.count){
-      op2.opType = OP_TYPE.NOOP
-      op1.pos = op1.pos + op2Temp.count
+    if (op2.position + op2.count >= op1.position + op1.count){
+      op2.type = OP_TYPE.NOOP
+      op1.position = op1.position + op2Temp.count
       op1.count = op1.count - op2Temp.count 
     } else {
-      op2.pos = op1.pos + op1.count
-      op2.count = (op2Temp.pos + op2Temp.count) - (op1.pos + op1.count)
-      op1.count = op2Temp.pos - op1.pos
-      op1.pos = op1.pos + op2Temp.count
+      op2.position = op1.position + op1.count
+      op2.count = (op2Temp.position + op2Temp.count) - (op1.position + op1.count)
+      op1.count = op2Temp.position - op1.position
+      op1.position = op1.position + op2Temp.count
     }
-  } else if (op2.pos + op2.count < op1.pos && op2.pos > op1.pos) {
+  } else if (op2.position + op2.count < op1.position && op2.position > op1.position) {
     const op1Temp = {...op1}
-    if (op1.pos + op1.count >= op2.pos + op2.count){
-      op1.opType = OP_TYPE.NOOP
-      op2.pos = op2.pos + op1Temp.count
+    if (op1.position + op1.count >= op2.position + op2.count){
+      op1.type = OP_TYPE.NOOP
+      op2.position = op2.position + op1Temp.count
       op2.count = op2.count - op1Temp.count 
     } else {
-      op1.pos = op2.pos + op2.count
-      op1.count = (op1Temp.pos + op1Temp.count) - (op2.pos + op2.count)
-      op2.count = op1Temp.pos - op2.pos
-      op2.pos = op2.pos + op1Temp.count
+      op1.position = op2.position + op2.count
+      op1.count = (op1Temp.position + op1Temp.count) - (op2.position + op2.count)
+      op2.count = op1Temp.position - op2.position
+      op2.position = op2.position + op1Temp.count
     }
-  } else if (op1.pos > op2.pos) {
-    op1.pos = op1.pos + op2.count
+  } else if (op1.position > op2.position) {
+    op1.position = op1.position + op2.count
   } else {
-    op2.pos = op2.pos + op1.count
+    op2.position = op2.position + op1.count
   }
   //console.log('delete delete----')
   //console.log(op1, op2)

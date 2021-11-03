@@ -47,13 +47,13 @@ class EditorView extends BaseView{
       if (SPECIAL_KEYS.includes(key)) return
       let opInfo = []
       if (key == 'Backspace'){
-        opInfo.push({opType: OP_TYPE.DELETE, pos: indexEnd, count: Math.min(indexStart - indexEnd, -1)})
+        opInfo.push({type: OP_TYPE.DELETE, position: indexEnd, count: Math.min(indexStart - indexEnd, -1)})
         console.log('opinfo:', opInfo)
       } else {
         if (indexEnd - indexStart > 0){
-          opInfo.push({opType: OP_TYPE.DELETE, pos: indexEnd, count: indexStart - indexEnd})
+          opInfo.push({type: OP_TYPE.DELETE, position: indexEnd, count: indexStart - indexEnd})
         }
-        opInfo.push({opType: OP_TYPE.INSERT, pos: indexStart, key: key})
+        opInfo.push({type: OP_TYPE.INSERT, position: indexStart, key: key})
       }
         handler(opInfo)
     })

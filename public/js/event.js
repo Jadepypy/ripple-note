@@ -32,14 +32,14 @@ textarea.addEventListener('keydown', function (event) {
   if (specialKeys.includes(key)) return
   let opInfo = []
   if (key == 'Backspace'){
-    opInfo.push({opType: OP_TYPE.DELETE, pos: indexEnd, count: Math.min(indexStart - indexEnd, -1)})
+    opInfo.push({type: OP_TYPE.DELETE, pos: indexEnd, count: Math.min(indexStart - indexEnd, -1)})
     console.log('opinfo:', opInfo)
   } else {
     //console.log("INSERT:", OP_TYPE.INSERT, indexStart, key)
     if (indexEnd - indexStart > 0){
-      opInfo.push({opType: OP_TYPE.DELETE, pos: indexEnd, count: indexStart - indexEnd})
+      opInfo.push({type: OP_TYPE.DELETE, pos: indexEnd, count: indexStart - indexEnd})
     }
-    opInfo.push({opType: OP_TYPE.INSERT, pos: indexStart, key: key})
+    opInfo.push({type: OP_TYPE.INSERT, pos: indexStart, key: key})
   }
   //////////////
   if (state === STATE.CLEAR){
@@ -95,12 +95,12 @@ socket.on('syncOperation', (syncInfo) => {
 
 function applyOperation(doc, operation) {
   for (const op of operation){
-    switch (op.opType) {
+    switch (op.type) {
     case OP_TYPE.INSERT :
-      doc = doc.substring(0, op.pos) + op.key + doc.substring(op.pos, doc.length)
+      doc = doc.substring(0, op.position) + op.key + doc.substring(op.position, doc.length)
       break;
     case OP_TYPE.DELETE :
-      doc = doc.substring(0, op.pos + op.count) + doc.substring(op.pos, doc.length)
+      doc = doc.substring(0, op.position + op.count) + doc.substring(op.position, doc.length)
       break;
     }
   }
@@ -140,14 +140,14 @@ function iterateOT (opArr1, opArr2) {
 
 //heart of OT
 function transformation(op1, op2){
-  if (op1.opType == OP_TYPE.INSERT && op2.opType == OP_TYPE.INSERT){
+  if (op1.type == OP_TYPE.INSERT && op2.type == OP_TYPE.INSERT){
     return Tii(op1, op2)
-  } else if (op1.opType == OP_TYPE.INSERT && op2.opType == OP_TYPE.DELETE){
+  } else if (op1.type == OP_TYPE.INSERT && op2.type == OP_TYPE.DELETE){
     return Tid(op1, op2)
-  } else if (op1.opType == OP_TYPE.DELETE && op2.opType == OP_TYPE.INSERT){
+  } else if (op1.type == OP_TYPE.DELETE && op2.type == OP_TYPE.INSERT){
     const result = Tid(op2, op1)
     return [result[1], result[0]]
-  } else if (op1.opType == OP_TYPE.DELETE && op2.opType == OP_TYPE.DELETE){
+  } else if (op1.type == OP_TYPE.DELETE && op2.type == OP_TYPE.DELETE){
     return Tdd(op1, op2)
   }
   return [op1, op2]
@@ -155,10 +155,10 @@ function transformation(op1, op2){
 
 //insert  insert transformation
 function Tii(op1, op2){
-  if (op1.pos > op2.pos) {
-    op1.pos += 1
+  if (op1.position > op2.position) {
+    op1.position += 1
   } else {
-    op2.pos += 1
+    op2.position += 1
   }
   return [op1, op2]
 }
@@ -166,63 +166,63 @@ function Tii(op1, op2){
 function Tid(op1, op2){
   const op1Temp = {...op1}
   console.log('Tid:', op1, op2)
-  if (op1.pos > op2.pos + op2.count){
-    op1.pos = Math.max(op2.pos + op2.count, op1Temp.pos + op2.count)
-    if (op1Temp.pos < op2.pos) {
+  if (op1.position > op2.position + op2.count){
+    op1.position = Math.max(op2.position + op2.count, op1Temp.position + op2.count)
+    if (op1Temp.position < op2.position) {
       const op2First = {...op2}
-      op2First.pos += 1
-      op2First.count = (op1Temp.pos + 1) - op2First.pos
-      const op2Second = {opType: OP_TYPE.DELETE, pos: op1Temp.pos, count: op2.count - op2First.count} 
+      op2First.position += 1
+      op2First.count = (op1Temp.position + 1) - op2First.position
+      const op2Second = {type: OP_TYPE.DELETE, pos: op1Temp.position, count: op2.count - op2First.count} 
       op2 = [op2First, op2Second]
     }
   } else {
-    op2.pos += 1
+    op2.position += 1
   }
   return [op1, op2]
 }
 //delete delete transformation
 function Tdd(op1, op2){
-  if (op1.pos == op2.pos){
+  if (op1.position == op2.position){
     if (op1.count == op2.count){
-      op1.opType = OP_TYPE.NOOP
-      op2.opType = OP_TYPE.NOOP
+      op1.type = OP_TYPE.NOOP
+      op2.type = OP_TYPE.NOOP
     } else if (Math.abs(op1.count) > Math.abs(op2.count)){
-      op1.pos = op2.pos + op2.count
+      op1.position = op2.position + op2.count
       op1.count = op1.count - op2.count
-      op2.opType = OP_TYPE.NOOP     
+      op2.type = OP_TYPE.NOOP     
     } else {
-      op2.pos = op1.pos + op1.count
+      op2.position = op1.position + op1.count
       op2.count = op2.count - op1.count
-      op1.opType = OP_TYPE.NOOP
+      op1.type = OP_TYPE.NOOP
     }
-  } else if (op1.pos + op1.count < op2.pos && op1.pos > op2.pos) {
+  } else if (op1.position + op1.count < op2.position && op1.position > op2.position) {
     const op2Temp = {...op2}
-    if (op2.pos + op2.count >= op1.pos + op1.count){
-      op2.opType = OP_TYPE.NOOP
-      op1.pos = op1.pos + op2Temp.count
+    if (op2.position + op2.count >= op1.position + op1.count){
+      op2.type = OP_TYPE.NOOP
+      op1.position = op1.position + op2Temp.count
       op1.count = op1.count - op2Temp.count 
     } else {
-      op2.pos = op1.pos + op1.count
-      op2.count = (op2Temp.pos + op2Temp.count) - (op1.pos + op1.count)
-      op1.count = op2Temp.pos - op1.pos
-      op1.pos = op1.pos + op2Temp.count
+      op2.position = op1.position + op1.count
+      op2.count = (op2Temp.position + op2Temp.count) - (op1.position + op1.count)
+      op1.count = op2Temp.position - op1.position
+      op1.position = op1.position + op2Temp.count
     }
-  } else if (op2.pos + op2.count < op1.pos && op2.pos > op1.pos) {
+  } else if (op2.position + op2.count < op1.position && op2.position > op1.position) {
     const op1Temp = {...op1}
-    if (op1.pos + op1.count >= op2.pos + op2.count){
-      op1.opType = OP_TYPE.NOOP
-      op2.pos = op2.pos + op1Temp.count
+    if (op1.position + op1.count >= op2.position + op2.count){
+      op1.type = OP_TYPE.NOOP
+      op2.position = op2.position + op1Temp.count
       op2.count = op2.count - op1Temp.count 
     } else {
-      op1.pos = op2.pos + op2.count
-      op1.count = (op1Temp.pos + op1Temp.count) - (op2.pos + op2.count)
-      op2.count = op1Temp.pos - op2.pos
-      op2.pos = op2.pos + op1Temp.count
+      op1.position = op2.position + op2.count
+      op1.count = (op1Temp.position + op1Temp.count) - (op2.position + op2.count)
+      op2.count = op1Temp.position - op2.position
+      op2.position = op2.position + op1Temp.count
     }
-  } else if (op1.pos > op2.pos) {
-    op1.pos = op1.pos + op2.count
+  } else if (op1.position > op2.position) {
+    op1.position = op1.position + op2.count
   } else {
-    op2.pos = op2.pos + op1.count
+    op2.position = op2.position + op1.count
   }
   //console.log('delete delete----')
   //console.log(op1, op2)

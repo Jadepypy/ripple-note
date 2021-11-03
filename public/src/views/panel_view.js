@@ -201,6 +201,7 @@ class PanelView extends BaseView {
     p.setAttribute("contenteditable", true)
     p.setAttribute("id", "new")
     p.focus()
+    console.log('?')
     return folder
   }
   createNewFile(prevDom, parentID) {

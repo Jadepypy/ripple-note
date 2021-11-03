@@ -241,12 +241,12 @@ class AppController {
     console.log('APPLY OP:', operation)
     let doc = this.editorView.textarea.value
     for (const op of operation){
-      switch (op.opType) {
+      switch (op.type) {
         case OP_TYPE.INSERT :
-          doc = doc.substring(0, op.pos) + op.key + doc.substring(op.pos, doc.length)
+          doc = doc.substring(0, op.position) + op.key + doc.substring(op.position, doc.length)
           break;
         case OP_TYPE.DELETE :
-          doc = doc.substring(0, op.pos + op.count) + doc.substring(op.pos, doc.length)
+          doc = doc.substring(0, op.position + op.count) + doc.substring(op.position, doc.length)
           break;
       }
       this.editorView.renderEditor(doc)
