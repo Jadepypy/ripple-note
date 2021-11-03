@@ -15,21 +15,21 @@ const createFile = async(req, res) => {
 }
 
 const getFileSystem = async (vaultID) => {
-  console.log(vaultID)
-  const [result] = await FileSystem.getFileSystem(vaultID)
-  let firstChild = result[0]
+  const result = await FileSystem.getFileSystem(vaultID)
+  console.log(result[0])
+  let firstChild = result[0][0].first_child_id
   const files = []
   firstChild = firstChild != undefined? firstChild: null
-  if (result.length > 1){
-    result[1].forEach((file) => {
-      files.push({  id: file.id, 
-                    name: file.name, 
-                    firstChild: file.first_child_id != undefined? file.first_child_id: null,
-                    next: file.next_id != undefined? file.next_id: null,
-                    type: FileSystem.DATA_TYPE.VAULT
-                  })
-    })
-  }
+  result[1].forEach((file) => {
+    files.push({  id: file.id, 
+                  name: file.name, 
+                  firstChild: file.first_child_id != undefined? file.first_child_id: null,
+                  next: file.next_id != undefined? file.next_id: null,
+                  type: file.type
+                })
+  })
+  console.log(files)
+  
   return [firstChild, files]
 }
 

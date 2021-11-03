@@ -31,10 +31,9 @@ app.use(function(err, req, res, next) {
 
 
 /////////////////////////
-// const Operation = require('./server/models/operation')
-// const FileSystem = require('./server/models/file_system')
-
-// const FileSystemController = require('./server/controllers/file_sytem_controller')
+const Operation = require('./server/models/operation')
+const FileSystem = require('./server/models/file_system')
+const FileSystemController = require('./server/controllers/file_sytem_controller')
 
 ////
 let revisionID = 0
@@ -63,9 +62,9 @@ io.of(/^\/[0-9]+$/)
     // console.log('userID', socket.userID)
     // const dataArr = [[0, 1, null, -1, 'vault'], [1, 4, 2, 0, 'Folder1'], [2, 5, 3, 0, 'Folder2'], [3, 10, null, 0, 'Folder3'], [4, null, 8, 1, 'File4'],  [8, null, 9, 1, 'File8'], [9, null, null, 1, 'File9'], [5, null, 6, 1, 'File5'], [6, null, null, 1, 'File6'], [10, 11, null, 0, 'Folder10'], [11, null, null, 1, 'File11']]
     const vaultID = socket.nsp.name.replace('/', '')
-   const result = []
-  //  = await FileSystemController.getFileSystem(vaultID)
-  //   console.log(result)
+    
+   const result = await FileSystemController.getFileSystem(vaultID)
+    console.log(result)
     socket.emit('fileSystem', result[0], result[1])
     socket.on('joinRoom', async (id) => {
       socket.join(id)

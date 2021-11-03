@@ -4,8 +4,8 @@ class FileSystemModel {
     this.nodeMap = null
     this.head = null
   }
-  buildTree(firstChild, nodeMap, createNodeHandler) {
-    this.head = rootNode //can not be null
+  buildTree(nodeMap, createNodeHandler) {
+    this.head = nodeMap[0] //can not be null
     this.nodeMap = nodeMap
     this.buildNode = (node, depth, prev, parents) => {
       console.log(node, depth, prev, parents)
@@ -28,6 +28,8 @@ class FileSystemModel {
       }
     }
     this.buildNode(this.head, 0, null, {'-1': null})
+    this.printTree()
+    console.log('map', this.nodeMap)
   }
   //find the previous node_id of the new folder/file, a bit tricky since js doesn't support insertAftr
   // getDataBeforeInsertion() {

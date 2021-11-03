@@ -1,6 +1,5 @@
 import BaseController from "./base_controller.js"
 import {Node} from '../utils/utils.js'
-import { DATA_TYPE } from "../../../server/models/file_system.js"
 
 class FileSystemController extends BaseController{
   constructor (operation, fileSystem, socketIO, api){
@@ -8,7 +7,7 @@ class FileSystemController extends BaseController{
 
   }
   init() {
-    this.socketIO.init(1, 'abc')
+    this.socketIO.init(2, 'abc')
     const callbacks = {
       fileSystem: this.constructFileSystem.bind(this)
     }
@@ -25,10 +24,11 @@ class FileSystemController extends BaseController{
     nodeMap[0] = root
     for (const data of fileArr){
       const node = new Node(data.id, data.firstChild, data.next, data.type, data.name)
+      //console.log(data.id, data.firstChild, data.next, data.type, data.name)
       nodeMap[node.id] = node
     }
     console.log(nodeMap)
-    this.fileSystem.buildTree(root, nodeMap, this.buildFileOrFolder.bind(this))
+    this.fileSystem.buildTree(nodeMap, this.buildFileOrFolder.bind(this))
     // this.fileSystem.printTree()
   }
   buildFileOrFolder(id, name, type, depth) {
