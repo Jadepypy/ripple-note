@@ -11,26 +11,30 @@ app.use(express.urlencoded({extended:true}))
 // app.use('/product', productRoutes)
 // app.use('/campaign', campaignRoutes)
 
-app.use('api', 
+app.use('/api', 
         [
           require('./server/routes/user_route'),
           require('./server/routes/file_route')
         ]
 )
 
+app.get('/hello', (req, res) => {
+  res.send('<h1>Hello</h1>')
+})
+
 app.use(function(err, req, res, next) {
     console.log(err);
     res.status(500).send('Internal Server Error');
 })
 
-const { pool } = require('./server/models/mysql')
 
 
 
 /////////////////////////
-const Operation = require('./server/models/operation')
-const FileSystem = require('./server/models/file_system')
+// const Operation = require('./server/models/operation')
+// const FileSystem = require('./server/models/file_system')
 
+// const FileSystemController = require('./server/controllers/file_sytem_controller')
 
 ////
 let revisionID = 0
@@ -55,11 +59,14 @@ io.of(/^\/[0-9]+$/)
       return next()
     }
   })
-  .on('connection', (socket) => {
+  .on('connection', async (socket) => {
     // console.log('userID', socket.userID)
-    const dataArr = [[0, 1, null, -1, 'vault'], [1, 4, 2, 0, 'Folder1'], [2, 5, 3, 0, 'Folder2'], [3, 10, null, 0, 'Folder3'], [4, null, 8, 1, 'File4'],  [8, null, 9, 1, 'File8'], [9, null, null, 1, 'File9'], [5, null, 6, 1, 'File5'], [6, null, null, 1, 'File6'], [10, 11, null, 0, 'Folder10'], [11, null, null, 1, 'File11']]
-
-    socket.emit('fileSystem', 0, dataArr)
+    // const dataArr = [[0, 1, null, -1, 'vault'], [1, 4, 2, 0, 'Folder1'], [2, 5, 3, 0, 'Folder2'], [3, 10, null, 0, 'Folder3'], [4, null, 8, 1, 'File4'],  [8, null, 9, 1, 'File8'], [9, null, null, 1, 'File9'], [5, null, 6, 1, 'File5'], [6, null, null, 1, 'File6'], [10, 11, null, 0, 'Folder10'], [11, null, null, 1, 'File11']]
+    const vaultID = socket.nsp.name.replace('/', '')
+   const result = []
+  //  = await FileSystemController.getFileSystem(vaultID)
+  //   console.log(result)
+    socket.emit('fileSystem', result[0], result[1])
     socket.on('joinRoom', async (id) => {
       socket.join(id)
       socket.fileID = id

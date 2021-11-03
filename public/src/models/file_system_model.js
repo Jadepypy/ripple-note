@@ -4,10 +4,11 @@ class FileSystemModel {
     this.nodeMap = null
     this.head = null
   }
-  buildTree(rootNode, nodeMap, createNodeHandler) {
+  buildTree(firstChild, nodeMap, createNodeHandler) {
     this.head = rootNode //can not be null
     this.nodeMap = nodeMap
     this.buildNode = (node, depth, prev, parents) => {
+      console.log(node, depth, prev, parents)
       node.depth = depth
       node.prev = prev
       node.next = node.next === null? null: this.nodeMap[node.next]
@@ -29,32 +30,32 @@ class FileSystemModel {
     this.buildNode(this.head, 0, null, {'-1': null})
   }
   //find the previous node_id of the new folder/file, a bit tricky since js doesn't support insertAftr
-  getDataBeforeInsertion() {
-    if (this.file !== null){
-      const prevNode = this.nodeMap[this.file.dataset.id]
-      if (prevNode.next !== null || prevNode.firstChild !== null){
-        return [this.file, prevNode, prevNode.parent]
-      } else if (prevNode.parent.next !== null){
-        return [domMap[prevNode.id], prevNode, prevNode.parent]
-      }  
-      else{
-        return [null, prevNode, prevNode.parent]
-      }
-    } else if (this.head.lastChild !== null){
-      const lastChild = this.head.lastChild
-      if (lastChild.lastChild !== null){
-        const lastDescendant = this.getLastDescendant(lastChild)
-            console.log(lastDescendant.id)
+  // getDataBeforeInsertion() {
+  //   if (this.file !== null){
+  //     const prevNode = this.nodeMap[this.file.dataset.id]
+  //     if (prevNode.next !== null || prevNode.firstChild !== null){
+  //       return [this.file, prevNode, prevNode.parent]
+  //     } else if (prevNode.parent.next !== null){
+  //       return [domMap[prevNode.id], prevNode, prevNode.parent]
+  //     }  
+  //     else{
+  //       return [null, prevNode, prevNode.parent]
+  //     }
+  //   } else if (this.head.lastChild !== null){
+  //     const lastChild = this.head.lastChild
+  //     if (lastChild.lastChild !== null){
+  //       const lastDescendant = this.getLastDescendant(lastChild)
+  //           console.log(lastDescendant.id)
 
-        return [domMap[lastDescendant.id], lastChild, this.head]
-      } else if (lastChild.next !== null) {
-        return [domMap[lastChild.id], lastChild, this.head]
-      } else {
-        return [null, lastChild, this.head]
-      }
-    }
-    return [null, null, this.head.id]
-  }
+  //       return [domMap[lastDescendant.id], lastChild, this.head]
+  //     } else if (lastChild.next !== null) {
+  //       return [domMap[lastChild.id], lastChild, this.head]
+  //     } else {
+  //       return [null, lastChild, this.head]
+  //     }
+  //   }
+  //   return [null, null, this.head.id]
+  // }
   // insertAfterNode(node) {
   //   if(node.next !== null){
   //       const nextID = node.next.id

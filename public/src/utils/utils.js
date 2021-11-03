@@ -36,4 +36,4 @@ const config = {
   ADD_TAGS: ['backlink']
 }
 
-export {Node, backlink, config}
+export {Node, backlink,}

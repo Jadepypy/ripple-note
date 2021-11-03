@@ -3,8 +3,10 @@
 class SocketIO {
   constructor() {
     this.roomID = null
+    this.vaultID = null
   }
   init(vaultID, token) {
+    this.vaultID = vaultID
     this.socket = io(`/${vaultID}`, {auth: {token}})
     this.socket.on('fileSystem', (rootID, dataArr) => {
       this.trigger('fileSystem',  rootID, dataArr)
@@ -17,12 +19,10 @@ class SocketIO {
       this.trigger('ack', revisionID)
     })
     this.socket.on('syncOp', (revisionID, syncOp) => {
-            // console.log('sync??')
       this.trigger('syncOp', revisionID, syncOp)
     })
   }
-
-  joinNote(roomID) {
+  joinFile(roomID) {
     if(this.roomID !== null){
       this.leaveRoom()
     }
@@ -36,6 +36,9 @@ class SocketIO {
     // console.log('op')
     console.log(opInfo)
     this.socket.emit('operation', revisionID, opInfo) 
+  }
+  changeName(id, name) {
+    this.socket.emit('changeTitle', id, name)
   }
 
   registerCallbacks(cb) {
