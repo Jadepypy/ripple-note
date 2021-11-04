@@ -66,23 +66,18 @@ io.of(/^\/[0-9]+$/)
    const result = await FileSystemController.getFileSystem(vaultID)
     console.log(result)
     socket.emit('fileSystem', result[0], result[1])
-    socket.on('joinRoom', async (id) => {
+    socket.on('joinFile', async (id) => {
       socket.join(id)
       socket.fileID = id
-      if(files[id] === undefined){
-        const result = FileSystem.getFile(id)
-        if(result.length > 0){
-          console.log('result', result)
-          files[id] = {revisionID: result[0], doc: result[1]}
-        } else{
-          files[id] = {revisionID: 0, doc: ''}
-
-        }
-      } 
-      // const [fileSystem] = FileSystem.getFileSystem(vaultID)
-      socket.emit('init', files[id].revisionID, files[id].doc) 
+      const result = await FileSystem.getFile(id)
+      files[id] = {
+        revisionID: result.revision_id,
+        doc: result.text
+      }
+      socket.emit('init', result.revision_id, result.text) 
          
       console.log(`user ${socket.userID} joined room ${id}`)
+      console.log(`send revisionID  ${files[id].revisionID} text ${files[id].doc}`)
     })
     socket.on('changeName', async (id, name, type) => {
       if(type == FileSystem.DATA_TYPE.VAULT){
@@ -95,6 +90,10 @@ io.of(/^\/[0-9]+$/)
     socket.on('leaveRoom', (id) => {
       socket.leave(id)
       console.log(`user ${socket.userID} left room ${id}`)
+    })
+    socket.on('moveFile', (dataArr) => {
+      FileSystemController.moveFile(dataArr, vaultID)
+
     })
     socket.on('operation', (clientRevisionID, operation) => {
       const userID = socket.userID

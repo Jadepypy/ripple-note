@@ -12,15 +12,16 @@ class OperationController extends BaseController{
       ack: this.handleAcknowledgement.bind(this),
       syncOp: this.handleSyncOperation.bind(this) 
     }
-    console.log('start')
     this.socketIO.registerCallbacks(callbacks)
     //addEventListers: an unorthodox approach (for simplification)
     this.addTrashIconListener()
     this.addTextAreaListener()
   }
   initializeNote(revisionID, doc) {
+    console.log('init??')
     this.operation.revisionID = revisionID
     this.operation.doc = doc
+    console.log('???')
     renderEditor(doc, this.operation.name)
   }
 

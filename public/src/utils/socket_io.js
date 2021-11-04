@@ -2,8 +2,9 @@
 
 class SocketIO {
   constructor() {
-    this.roomID = null
+    this.fileID = null
     this.vaultID = null
+    this.callbacks = {}
   }
   init(vaultID, token) {
     this.vaultID = vaultID
@@ -12,6 +13,8 @@ class SocketIO {
       this.trigger('fileSystem',  rootID, dataArr)
     })
     this.socket.on('init', (revisionID, doc) => {
+      console.log('get data!')
+      console.log(revisionID, doc)
       this.trigger('init', revisionID, doc)
     })
     this.socket.on('ack', (revisionID) => {
@@ -22,12 +25,12 @@ class SocketIO {
       this.trigger('syncOp', revisionID, syncOp)
     })
   }
-  joinFile(roomID) {
-    if(this.roomID !== null){
+  joinFile(fileID) {
+    if(this.fileID !== null){
       this.leaveRoom()
     }
-    this.socket.emit('joinRoom', roomID)
-    this.roomID = roomID
+    this.socket.emit('joinFile', fileID)
+    this.fileID = fileID
   }
   leaveRoom() {
     this.socket.emit('leaveRoom', this.roomID)
@@ -40,11 +43,14 @@ class SocketIO {
   changeName(id, name, type) {
     this.socket.emit('changeName', id, name, type)
   }
-
+  moveFile(dataArr) {
+    this.socket.emit('moveFile', dataArr)
+  }
   registerCallbacks(cb) {
-    this.callbacks = cb
+    this.callbacks = {...this.callbacks, ...cb}
   }
   trigger(event, ...args) {
+
     if (this.callbacks[event] !== undefined){
       return this.callbacks[event](...args)
     } else {

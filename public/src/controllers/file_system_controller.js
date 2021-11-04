@@ -219,15 +219,29 @@ class FileSystemController extends BaseController{
     if (targetNode.id != this.fileSystem.head.id){
       if (targetNode.parent.id == node.id)
         return null
+      if (targetNode.next !== null && targetNode.type == DATA_TYPE.FILE){
+        if(targetNode.next.id == node.id){
+          console.log('ineffective')
+          return
+        }
+      } else if(targetNode.firstChild !== null && targetNode.type == DATA_TYPE.FOLDER) {
+        if(targetNode.firstChild.id == node.id){
+          console.log('ineffective')
+          return
+        }
+      }
+    } else if (this.fileSystem.head.lastChild.id == node.id){
+      return
     }
     const element = domMap[id].cloneNode(true)
     domMap[id].remove()
     domMap[id] = element
     if (isFirst){
+      this.sendMoveMessage(node, targetNode)
       const type = targetNode.type
       const prevElem = domMap[targetID]
       if(type == DATA_TYPE.FOLDER){
-      console.log(node, targetNode)
+        console.log(node, targetNode)
         this.fileSystem.moveUnderAsFirstChild(node, targetNode)
         insertAfter(element, prevElem)
       } else if (type == DATA_TYPE.VAULT){
@@ -250,6 +264,35 @@ class FileSystemController extends BaseController{
     element.style.paddingLeft= `${paddingLeft}px`
     return element
     //this.fileSystem.printTree()
+  }
+  sendMoveMessage(node, targetNode){
+    let before, after
+    const nodeData = {id: node.id, prop: 'next_id', change_to: null}
+    let nextID = null
+    if(node.next !== null){
+      nextID = node.next.id
+    }
+    if(node.prev !== null){
+      before = {id: node.prev.id, prop: 'next_id', change_to: nextID}
+    } else{
+      if(node.parent.id == this.fileSystem.head.id){
+        before = {vault_id: node.parent.id, prop: 'first_child_id', change_to: nextID}
+      } else{
+        before = {id: node.parent.id, prop: 'first_child_id', change_to: nextID}        
+      }
+    }
+    if(targetNode.type == DATA_TYPE.FILE){
+      after = {id: targetNode.id, prop: 'next_id', change_to: node.id}
+      nodeData.change_to = targetNode.next === null? null: targetNode.next.id
+    } else if (targetNode.id == this.fileSystem.head.id){
+      const id = this.fileSystem.head.lastChild.id
+      after = {id, prop: 'next_id', change_to: node.id}
+      nodeData.change_to = null
+    } else{
+      after = {id: targetNode.id, prop: 'first_child_id', change_to: node.id}
+      nodeData.change_to = targetNode.firstChild === null? null: targetNode.firstChild.id
+    }
+    this.socketIO.moveFile([nodeData, before, after])
   }
 }
 

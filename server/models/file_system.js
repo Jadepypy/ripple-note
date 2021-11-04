@@ -23,19 +23,21 @@ const getFileSystem = async (vaultID) => {
 const getFile = async (fileID) => {
   try{
     const [file] = await pool.query('SELECT text, revision_id FROM files WHERE id = ?', [fileID])
-    return file
+    console.log('file', file)
+    return file[0]
   } catch(e) {
     console.log(e)
   }
 }
 
-const insertFileAfter = async (newFile, prevID) => {
+const insertFileAfter = async (newFile, prevID, type) => {
   const conn = await pool.getConnection()
-  console.log(newFile, prevID)
   try{
     conn.query('START TRANSACTION')
-    const [result] = await conn.query('INSERT INTO folder_file SET?', newFile)
-    console.log(result)
+    const [result] = await conn.query('INSERT INTO folder_file SET ?', newFile)
+    if(type == DATA_TYPE.FILE){
+      await conn.query('INSERT INTO files (id, revision_id, text) VALUES (?, ?, ?)', [result.insertId, 0, ""])
+    }
     await conn.query('UPDATE folder_file SET next_id = ? WHERE id = ?', [result.insertId, prevID])
     await conn.query('COMMIT')
     return result.insertId
@@ -47,11 +49,14 @@ const insertFileAfter = async (newFile, prevID) => {
   }
 }
 
-const insertFileUnderRoot = async (newFile, vaultID) => {
+const insertFileUnderRoot = async (newFile, vaultID, type) => {
   const conn = await pool.getConnection()
   try{
     conn.query('START TRANSACTION')
-    const [result] = await conn.query('INSERT INTO folder_file SET?', newFile)
+    const [result] = await conn.query('INSERT INTO folder_file SET ?', newFile)
+    if(type == DATA_TYPE.FILE){
+      await conn.query('INSERT INTO files (id, revision_id, text) VALUES (?, ?, ?)', [result.insertId, 0, ""])
+    }
     await conn.query('UPDATE vaults SET first_child_id = ? WHERE id = ?', [result.insertId, vaultID])
     await conn.query('COMMIT')
     return result.insertId
@@ -65,11 +70,36 @@ const insertFileUnderRoot = async (newFile, vaultID) => {
 
 const changeFileName = async (fileID, name) => {
   try{
-    console.log(fileID, name)
     await pool.query('UPDATE folder_file SET name = ? WHERE id = ?', [name, fileID])
   } catch(e) {
     console.log(e)
   } 
+}
+const moveFile = async(dataArr, vaultID) => {
+  const conn = await pool.getConnection()
+  try{
+    await conn.query('START TRANSACTION')
+    let sql, bind
+    for( const data of dataArr){
+      if (data.id){
+        console.log('data', data)
+        sql = `UPDATE folder_file SET ${data.prop} = ? WHERE id = ?`
+        bind = [data.change_to, data.id]
+      } else{
+        console.log('vault', data)
+        sql = `UPDATE vaults SET ${data.prop} = ? WHERE id = ?`
+        bind = [data.change_to, vaultID]
+      }
+      await conn.query(sql, bind)
+    }
+    await conn.query('COMMIT')
+  } catch(e) {
+    console.log(e)
+    conn.query('ROLLBACK')
+  } finally{
+    await conn.release()
+  }
+
 }
 
 const removeFile = async () => {
@@ -83,6 +113,7 @@ const removeFolder = async () => {
 module.exports = {  DATA_TYPE,
                     getFileSystem,
                     getFile,
+                    moveFile,
                     changeFileName,
                     insertFileAfter,
                     insertFileUnderRoot
