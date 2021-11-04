@@ -51,8 +51,9 @@ const insertFileUnderRoot = async (newFile, vaultID) => {
   const conn = await pool.getConnection()
   try{
     conn.query('START TRANSACTION')
-    const [result] = await conn.query('INSERT INTO file_folder SET?', newFile)
-    await conn.query('UPDATE vault SET first_child = ? WHERE id = ?', [result.insertId, vaultID])
+    const [result] = await conn.query('INSERT INTO folder_file SET?', newFile)
+    await conn.query('UPDATE vaults SET first_child_id = ? WHERE id = ?', [result.insertId, vaultID])
+    await conn.query('COMMIT')
     return result.insertId
   } catch(e) {
     console.log(e)
@@ -62,8 +63,13 @@ const insertFileUnderRoot = async (newFile, vaultID) => {
   }
 }
 
-const createFolder = async () => {
-
+const changeFileName = async (fileID, name) => {
+  try{
+    console.log(fileID, name)
+    await pool.query('UPDATE folder_file SET name = ? WHERE id = ?', [name, fileID])
+  } catch(e) {
+    console.log(e)
+  } 
 }
 
 const removeFile = async () => {
@@ -77,6 +83,7 @@ const removeFolder = async () => {
 module.exports = {  DATA_TYPE,
                     getFileSystem,
                     getFile,
+                    changeFileName,
                     insertFileAfter,
                     insertFileUnderRoot
 }

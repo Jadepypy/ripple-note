@@ -152,16 +152,12 @@ class FileSystemModel {
     }
   }
   insertUnderAsFirstChild(node, parent) {
-    if (parent.firstCild !== null){
+    console.log('insertUnderAsFirstChild', node, parent)
+    if (parent.firstChild !== null){
       this.insertBefore(node, parent.firstChild)
     } else {
-      if (parent.firstChild !== null){
-        node.next = parent.firstChild
-        parent.firstChild.prev = node
-      } else{
-        node.next = null
-        parent.lastChild = node
-      }
+      node.next = null
+      parent.lastChild = node
       parent.firstChild =node
       node.parent = parent
       node.prev = null

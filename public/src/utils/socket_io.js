@@ -37,8 +37,8 @@ class SocketIO {
     console.log(opInfo)
     this.socket.emit('operation', revisionID, opInfo) 
   }
-  changeName(id, name) {
-    this.socket.emit('changeTitle', id, name)
+  changeName(id, name, type) {
+    this.socket.emit('changeName', id, name, type)
   }
 
   registerCallbacks(cb) {

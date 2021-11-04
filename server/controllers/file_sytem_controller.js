@@ -13,6 +13,9 @@ const createFile = async(req, res) => {
   console.log(id)
   res.send({id})
 }
+const changeFileName = async (id, name) => {
+  await FileSystem.changeFileName(id, name)
+}
 
 const getFileSystem = async (vaultID) => {
   const result = await FileSystem.getFileSystem(vaultID)
@@ -36,5 +39,6 @@ const getFileSystem = async (vaultID) => {
 
 module.exports =  { 
                     createFile,
-                    getFileSystem
+                    getFileSystem,
+                    changeFileName
 }

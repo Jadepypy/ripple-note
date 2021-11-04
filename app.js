@@ -84,15 +84,17 @@ io.of(/^\/[0-9]+$/)
          
       console.log(`user ${socket.userID} joined room ${id}`)
     })
+    socket.on('changeName', async (id, name, type) => {
+      if(type == FileSystem.DATA_TYPE.VAULT){
+
+      } else{
+        await FileSystemController.changeFileName(id, name)
+        socket.to(socket.fileID).emit('changeName', id, name)
+      }
+    })
     socket.on('leaveRoom', (id) => {
       socket.leave(id)
       console.log(`user ${socket.userID} left room ${id}`)
-    })
-    socket.on('createFile', () => {
-
-    })
-    socket.on('createFolder', () => {
-      
     })
     socket.on('operation', (clientRevisionID, operation) => {
       const userID = socket.userID

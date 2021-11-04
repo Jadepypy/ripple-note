@@ -7,7 +7,7 @@ class FileSystemController extends BaseController{
 
   }
   init() {
-    this.socketIO.init(2, 'abc')
+    this.socketIO.init(1, 'abc')
     const callbacks = {
       fileSystem: this.constructFileSystem.bind(this)
     }
@@ -16,6 +16,7 @@ class FileSystemController extends BaseController{
     //addEventListers: an unorthodox approach (for simplification)
     this.addNoteListClickListener()
     this.addOptionsListener()
+    this.addNoteListDragListener()
   }
   constructFileSystem(firstChild, fileArr) {
     const nodeMap = {}
@@ -24,7 +25,6 @@ class FileSystemController extends BaseController{
     nodeMap[0] = root
     for (const data of fileArr){
       const node = new Node(data.id, data.firstChild, data.next, data.type, data.name)
-      //console.log(data.id, data.firstChild, data.next, data.type, data.name)
       nodeMap[node.id] = node
     }
     console.log(nodeMap)
@@ -82,11 +82,6 @@ class FileSystemController extends BaseController{
     }
     //this.fileSystem.printTree()
   }
-  changeName (id, name) {
-    const node = this.fileSystem.nodeMap[id]
-    node.name = name
-    // this.fileSystem.printTree()
-  }
   //create folder or file
   addOptionsListener(){
     options.addEventListener('click', async (e) => {
@@ -122,7 +117,7 @@ class FileSystemController extends BaseController{
       const prevNode = this.fileSystem.nodeMap[prevID]
       data['prev'] = prevNode.id
       if (prevNode.next !== null){
-        data.new['next'] = prevNode.next.id
+        data.new['next_id'] = prevNode.next.id
       }
       id = await this.api.createElement(data)
       node = new Node(id, null, null, type, 'Untitled')
@@ -169,20 +164,95 @@ class FileSystemController extends BaseController{
           const p = getElement('p', target)
           this.selectedName = p.innerText
           p.style['pointer-events'] = 'auto'
-          p.setAttribute("contenteditable", true);
-          p.addEventListener('blur', (e) => {
-            p.innerText = p.innerText.trim()
-            p.style['pointer-events'] = 'none'
-            p.setAttribute("contenteditable", false)
-            if (p.innerText.length === 0 || (/^\s+$/).test(p.innerText)){
-                p.innerText = this.selectedName
-            } else {
-              this.changeName(target.dataset.id, p.innerText)
-            }
-          })
+          p.setAttribute("contenteditable", true)
+          this.addBlurListener(p)
       }
     })
   }
+
+  addBlurListener(p) {
+    p.addEventListener('blur', (e) => {
+      const fileID = p.parentNode.dataset.id
+      const node = this.fileSystem.nodeMap[fileID]
+      let name = p.innerText.trim()
+      console.log(name, node.name)
+      p.style['pointer-events'] = 'none'
+      p.setAttribute("contenteditable", false)
+      if ((/^\s*$/).test(name) || name == node.name){
+        p.innerText = node.name
+        return
+      } 
+      node.name = name
+      this.socketIO.changeName(node.id, name, node.type)
+    })
+  }
+  addNoteListDragListener() {
+    noteList.addEventListener('dragend', (e) => {
+      console.log(dragTarget)
+        e.target.classList.remove('dragging')
+        if (dragTarget !== null){
+          if (dragTarget.matches('.note-list')){
+            this.moveFile(e.target.dataset.id, this.fileSystem.head.id, true)
+            return
+          }
+          const element = this.moveFile(e.target.dataset.id, dragTarget.dataset.id, true)
+          if(element === null){
+            return
+          }
+          // if(target.matches('.folder.opened')&& e.target.matches('.folder.closed')){
+          //   e.target.style.display = ''
+          //   this.showHiddenFiles(e.target.dataset.id, false, true)
+          // } else if(target.matches('.folder.closed')&& e.target.matches('.folder.opened')) {
+          //   element.style.display = 'none'
+          //   element.classList.remove('opened')
+          //   element.classList.add('closed')
+          //   // console.log('current', e.target)
+          //   this.showHiddenFiles(e.target.dataset.id, true, true)
+          // }
+        }
+        dragTarget = null
+      })
+  }
+  moveFile(id, targetID, isFirst) {
+    let node = this.fileSystem.nodeMap[id]
+    let targetNode = this.fileSystem.nodeMap[targetID]
+    if (targetNode.id != this.fileSystem.head.id){
+      if (targetNode.parent.id == node.id)
+        return null
+    }
+    const element = domMap[id].cloneNode(true)
+    domMap[id].remove()
+    domMap[id] = element
+    if (isFirst){
+      const type = targetNode.type
+      const prevElem = domMap[targetID]
+      if(type == DATA_TYPE.FOLDER){
+      console.log(node, targetNode)
+        this.fileSystem.moveUnderAsFirstChild(node, targetNode)
+        insertAfter(element, prevElem)
+      } else if (type == DATA_TYPE.VAULT){
+        this.fileSystem.moveUnder(node, targetNode)
+        noteList.append(element)
+      } else {
+        this.fileSystem.moveAfter(node, targetNode)
+        insertAfter(element, prevElem)
+      }
+    } else if (node.next !== null){
+      this.moveFile(node.next.id, node.id, false)
+    }
+    if (node.firstChild !== null){
+      this.moveFile(node.firstChild.id, node.id, false)
+    }
+    let paddingLeft = node.depth*15
+    if(node.type == DATA_TYPE.FILE){
+      paddingLeft += 5
+    }
+    element.style.paddingLeft= `${paddingLeft}px`
+    return element
+    //this.fileSystem.printTree()
+  }
 }
+
+
 
 export default FileSystemController

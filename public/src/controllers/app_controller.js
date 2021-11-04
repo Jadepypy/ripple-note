@@ -14,25 +14,25 @@ class AppController {
 
     // this.sidebar.bindClickArrow(this.changePanelState.bind(this))
     // this.panel.bindClickPanelTools(this.changePanelTool.bind(this))
-    this.panel.bindClickNoteList(this.showHiddenFiles.bind(this), this.changeTitle.bind(this), this.addTitleToNewElement.bind(this), this.checkIsDuplicate.bind(this), this.changeSelectedFile.bind(this), this.moveFile.bind(this))
-    this.panel.bindClickFolderOptions(this.createNewElement(DATA_TYPE.FOLDER))
-    this.panel.bindClickFileOptions(this.createNewElement(DATA_TYPE.FILE))
+    // this.panel.bindClickNoteList(this.showHiddenFiles.bind(this), this.changeTitle.bind(this), this.addTitleToNewElement.bind(this), this.checkIsDuplicate.bind(this), this.changeSelectedFile.bind(this), this.moveFile.bind(this))
+    // this.panel.bindClickFolderOptions(this.createNewElement(DATA_TYPE.FOLDER))
+    // this.panel.bindClickFileOptions(this.createNewElement(DATA_TYPE.FILE))
 
 
     //this.editor.bindTrashIcon(this.changeSelectedFile.bind(this))
     // this.editor.bindTextAreaEdit(this.handleTextAreaOperation.bind(this))
   }
-  init() {
-    this.socketIO.init(1, 'abc')
-    const callbacks = {
-      fileSystem: this.constructFileSystem.bind(this),
-      init: this.initializeNote.bind(this),
-      ack: this.handleAcknowledgement.bind(this),
-      syncOp: this.handleSyncOperation.bind(this) 
-    }
-    console.log('start')
-    this.socketIO.registerCallbacks(callbacks)
-  }
+  // init() {
+  //   this.socketIO.init(1, 'abc')
+  //   const callbacks = {
+  //     fileSystem: this.constructFileSystem.bind(this),
+  //     init: this.initializeNote.bind(this),
+  //     ack: this.handleAcknowledgement.bind(this),
+  //     syncOp: this.handleSyncOperation.bind(this) 
+  //   }
+  //   console.log('start')
+  //   this.socketIO.registerCallbacks(callbacks)
+  // }
   // constructFileSystem(rootID, dataArr) {
   //   const nodeMap = {}
   //   for (const data of dataArr){
@@ -42,24 +42,24 @@ class AppController {
   //   // this.fileSystem.printTree()
 
   // }
-  createNewElement(type) {
-    return async () => {
-      console.log(this.fileSystem.file)
-      const vaultID = this.fileSystem.head.id
-      const [prevDom, prevNode, parent] = this.fileSystem.getDataBeforeInsertion()
-      // console.log('prevDom', prevDom, prevNode)
-      let element, name, isRemoved
-      if(type === DATA_TYPE.FOLDER){
-        element = this.panel.createNewFolder(prevDom, parent.id)
-        element.dataset.type = DATA_TYPE.FOLDER
-      }
-      else if (type === DATA_TYPE.FILE){
-        element = this.panel.createNewFile(prevDom, parent.id)
-        element.dataset.type = DATA_TYPE.FILE
-        this.changeSelectedFile(element)
-      }
-    }
-  }
+  // createNewElement(type) {
+  //   return async () => {
+  //     console.log(this.fileSystem.file)
+  //     const vaultID = this.fileSystem.head.id
+  //     const [prevDom, prevNode, parent] = this.fileSystem.getDataBeforeInsertion()
+  //     // console.log('prevDom', prevDom, prevNode)
+  //     let element, name, isRemoved
+  //     if(type === DATA_TYPE.FOLDER){
+  //       element = this.panel.createNewFolder(prevDom, parent.id)
+  //       element.dataset.type = DATA_TYPE.FOLDER
+  //     }
+  //     else if (type === DATA_TYPE.FILE){
+  //       element = this.panel.createNewFile(prevDom, parent.id)
+  //       element.dataset.type = DATA_TYPE.FILE
+  //       this.changeSelectedFile(element)
+  //     }
+  //   }
+  // }
   // buildFileOrFolder(id, name, type, depth) {
   //   if (type == DATA_TYPE.FOLDER){
   //     const folder =  this.panel.buildFolder(id, name)
@@ -99,9 +99,9 @@ class AppController {
   //   return false
   // }
 
-  changePanelState (state) {
-    this.panelModel.panelState = this.panelModel.PANEL_STATE[state]
-  }
+  // changePanelState (state) {
+  //   this.panelModel.panelState = this.panelModel.PANEL_STATE[state]
+  // }
 
   // changePanelTool(panelMode) {
   //   //get notelist from model
@@ -256,48 +256,36 @@ class AppController {
   moveFile(id, targetID, isFirst) {
     let node = this.fileSystem.nodeMap[id]
     let targetNode = this.fileSystem.nodeMap[targetID]
-    console.log('id', id, 'targetid', targetID)
-    if (targetID === null){
-      targetID = this.fileSystem.head.id
-      targetNode = this.fileSystem.nodeMap[targetID]
-      console.log('target', targetNode)
-    } else{
-      if(targetNode.parent.id == node.id){
-        return null
-      }
+    if (targetNode.parent.id == node.id){
+      return null
     }
     const element = domMap[id].cloneNode(true)
     domMap[id].remove()
     domMap[id] = element
     if (isFirst){
       const type = targetNode.type
+      const prevElem = domMap[targetID]
       if(type == DATA_TYPE.FOLDER){
         this.fileSystem.moveUnderAsFirstChild(node, targetNode)
+        insertAfter(element, prevElem)
       } else if (type == DATA_TYPE.VAULT){
-        console.log('target!!!', targetID)
-        console.log(targetNode)
         this.fileSystem.moveUnder(node, targetNode)
+        noteList.append(element)
       } else {
         this.fileSystem.moveAfter(node, targetNode)
+        insertAfter(element, prevElem)
       }
+    } else if (node.next !== null){
+      this.moveFile(node.next.id, node.id, false)
+    }
+    if (node.firstChild !== null){
+      this.moveFile(node.firstChild.id, node.id, false)
     }
     let paddingLeft = node.depth*15
     if(node.type == DATA_TYPE.FILE){
       paddingLeft += 5
     }
     element.style.paddingLeft= `${paddingLeft}px`
-    if (targetNode.id == this.fileSystem.head.id && isFirst){
-      this.panel.noteList.append(element)
-    } else{
-      const prevElem = domMap[targetID]
-      this.insertAfter(element, prevElem)
-    }
-    this.fileSystem.printTree()
-    if (node.firstChild !== null){
-      this.moveFile(node.firstChild.id, node.id, false)
-    } else if (node.next !== null && !isFirst){
-      this.moveFile(node.next.id, node.id, false)
-    }
     return element
     //this.fileSystem.printTree()
   }

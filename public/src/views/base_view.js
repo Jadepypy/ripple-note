@@ -22,3 +22,10 @@ function createElement(tagName, classList) {
 function toggleTag (elem, tag, force) {
   elem.classList.toggle(tag, force)
 }
+function insertAfter(e, prev) { 
+  if(prev.nextElementSibling !== null){
+    noteList.insertBefore(e, prev.nextElementSibling)
+  } else {
+    noteList.append(e)
+  }
+}
