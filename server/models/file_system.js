@@ -9,16 +9,15 @@ const DATA_TYPE = {
 const getFileSystem = async (vaultID) => {
   const conn = await pool.getConnection()
   try{
-    const [vault] = await conn.query('SELECT first_child_id from vaults where id = ?', [vaultID])
+    const [firstChild] = await conn.query('SELECT first_child_id from vaults where id = ?', [vaultID])
     const [files] = await conn.query('SELECT id, name, type, first_child_id, next_id from folder_file where vault_id = ?', [vaultID])
-    return [vault, files]
+    return [firstChild, files]
   } catch(e) {
     console.log(e)
   } finally{
     await conn.release()
   }
 }
-
 
 const getFile = async (fileID) => {
   try{

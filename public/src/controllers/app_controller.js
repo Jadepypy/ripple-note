@@ -253,42 +253,42 @@ class AppController {
   //     this.editor.renderEditor(doc)
   //   }
   // }
-  moveFile(id, targetID, isFirst) {
-    let node = this.fileSystem.nodeMap[id]
-    let targetNode = this.fileSystem.nodeMap[targetID]
-    if (targetNode.parent.id == node.id){
-      return null
-    }
-    const element = domMap[id].cloneNode(true)
-    domMap[id].remove()
-    domMap[id] = element
-    if (isFirst){
-      const type = targetNode.type
-      const prevElem = domMap[targetID]
-      if(type == DATA_TYPE.FOLDER){
-        this.fileSystem.moveUnderAsFirstChild(node, targetNode)
-        insertAfter(element, prevElem)
-      } else if (type == DATA_TYPE.VAULT){
-        this.fileSystem.moveUnder(node, targetNode)
-        noteList.append(element)
-      } else {
-        this.fileSystem.moveAfter(node, targetNode)
-        insertAfter(element, prevElem)
-      }
-    } else if (node.next !== null){
-      this.moveFile(node.next.id, node.id, false)
-    }
-    if (node.firstChild !== null){
-      this.moveFile(node.firstChild.id, node.id, false)
-    }
-    let paddingLeft = node.depth*15
-    if(node.type == DATA_TYPE.FILE){
-      paddingLeft += 5
-    }
-    element.style.paddingLeft= `${paddingLeft}px`
-    return element
-    //this.fileSystem.printTree()
-  }
+  // moveFile(id, targetID, isFirst) {
+  //   let node = this.fileSystem.nodeMap[id]
+  //   let targetNode = this.fileSystem.nodeMap[targetID]
+  //   if (targetNode.parent.id == node.id){
+  //     return null
+  //   }
+  //   const element = domMap[id].cloneNode(true)
+  //   domMap[id].remove()
+  //   domMap[id] = element
+  //   if (isFirst){
+  //     const type = targetNode.type
+  //     const prevElem = domMap[targetID]
+  //     if(type == DATA_TYPE.FOLDER){
+  //       this.fileSystem.moveUnderAsFirstChild(node, targetNode)
+  //       insertAfter(element, prevElem)
+  //     } else if (type == DATA_TYPE.VAULT){
+  //       this.fileSystem.moveUnder(node, targetNode)
+  //       noteList.append(element)
+  //     } else {
+  //       this.fileSystem.moveAfter(node, targetNode)
+  //       insertAfter(element, prevElem)
+  //     }
+  //   } else if (node.next !== null){
+  //     this.moveFile(node.next.id, node.id, false)
+  //   }
+  //   if (node.firstChild !== null){
+  //     this.moveFile(node.firstChild.id, node.id, false)
+  //   }
+  //   let paddingLeft = node.depth*15
+  //   if(node.type == DATA_TYPE.FILE){
+  //     paddingLeft += 5
+  //   }
+  //   element.style.paddingLeft= `${paddingLeft}px`
+  //   return element
+  //   //this.fileSystem.printTree()
+  // }
 
   insertAfter(e, prev) { 
     if(prev.nextElementSibling !== null){

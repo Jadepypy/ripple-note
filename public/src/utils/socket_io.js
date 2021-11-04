@@ -24,11 +24,26 @@ class SocketIO {
     this.socket.on('syncOp', (revisionID, syncOp) => {
       this.trigger('syncOp', revisionID, syncOp)
     })
+    this.socket.on('createFile', (id, prevID, type, socketID) => {
+      if (this.socket.id != socketID){
+        this.trigger('createFile', id, prevID, type)
+      }
+    })
+    this.socket.on('moveFile', (id, targetID, socketID) => {
+      if (this.socket.id != socketID){
+        this.trigger('moveFile', id, targetID)
+      }
+    })
+    this.socket.on('changeName', (id, name) => {
+      console.log('changeName', id, name)
+      this.trigger('changeName', id, name)
+    })
   }
   joinFile(fileID) {
     if(this.fileID !== null){
       this.leaveRoom()
     }
+    console.log('join')
     this.socket.emit('joinFile', fileID)
     this.fileID = fileID
   }
@@ -43,8 +58,11 @@ class SocketIO {
   changeName(id, name, type) {
     this.socket.emit('changeName', id, name, type)
   }
-  moveFile(dataArr) {
-    this.socket.emit('moveFile', dataArr)
+  moveFile(dataArr, id, targetID) {
+    this.socket.emit('moveFile', dataArr, id, targetID)
+  }
+  createFile(id, prevID, type){
+    this.socket.emit('createFile', id, prevID, type)
   }
   registerCallbacks(cb) {
     this.callbacks = {...this.callbacks, ...cb}

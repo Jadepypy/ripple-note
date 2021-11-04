@@ -1,7 +1,7 @@
 const FileSystem = require('../models/file_system')
 
 const createFile = async(req, res) => {
-  const data = req.body
+  const data = req.body.data
   const newFile = data.new
   newFile['created_at'] = new Date().toISOString().slice(0, 19).replace('T', ' ')
   let id
@@ -10,11 +10,11 @@ const createFile = async(req, res) => {
   } else{
     id = await FileSystem.insertFileUnderRoot(newFile, newFile.vault_id, data.new.type)
   }
-  console.log('create file', id)
+  console.log('new file', id)
   res.send({id})
 }
 const changeFileName = async (id, name) => {
-  await FileSystem.changeFileName(id, name)
+  return await FileSystem.changeFileName(id, name)
 }
 const moveFile = async (dataArr, vaultID) => {
   console.log(dataArr, vaultID)
@@ -22,7 +22,10 @@ const moveFile = async (dataArr, vaultID) => {
 }
 
 const getFileSystem = async (vaultID) => {
+  console.log(vaultID)
   const result = await FileSystem.getFileSystem(vaultID)
+  console.log(result)
+
   let firstChild = result[0][0].first_child_id
   const files = []
   firstChild = firstChild != undefined? firstChild: null
@@ -38,10 +41,21 @@ const getFileSystem = async (vaultID) => {
   return [firstChild, files]
 }
 
+const getFile = async (fileID) => {
+  const {text, revision_id} = await FileSystem.getFile(fileID)
+  console.log(text, revision_id)
+  return {revisionID: revision_id, doc: text}
+}
+
+// const getFileSystem = async (vaultID) => {
+//   return await FileSystem.getFileSystem(vaultID)
+// }
+
 
 module.exports =  { 
                     createFile,
                     getFileSystem,
+                    getFile,
                     moveFile,
                     changeFileName,
 }

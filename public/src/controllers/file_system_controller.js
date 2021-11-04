@@ -9,7 +9,10 @@ class FileSystemController extends BaseController{
   init() {
     this.socketIO.init(1, 'abc')
     const callbacks = {
-      fileSystem: this.constructFileSystem.bind(this)
+      fileSystem: this.constructFileSystem.bind(this),
+      changeName: this.changeName.bind(this),
+      createFile: this.receiveNewFile.bind(this),
+      moveFile: this.receiveMoveFile.bind(this),
     }
     console.log('start filesystem')
     this.socketIO.registerCallbacks(callbacks)
@@ -35,7 +38,7 @@ class FileSystemController extends BaseController{
     if (type == DATA_TYPE.FOLDER){
       const folder =  buildFolder(id, name)
       folder.dataset.type = DATA_TYPE.FOLDER
-      const node = this.fileSystem.nodeMap
+      //const node = this.fileSystem.nodeMap
       const paddingLeft = depth*15
       folder.style.paddingLeft= `${paddingLeft}px`
       return folder
@@ -63,6 +66,7 @@ class FileSystemController extends BaseController{
     }
   }
   showHiddenFiles(id, isHiding, isFirst) {
+    console.log(id)
     const element = domMap[id]
     const node = this.fileSystem.nodeMap[id]
     if(!isFirst){
@@ -77,7 +81,8 @@ class FileSystemController extends BaseController{
     }
     if (node.firstChild !== null && (isFirst ||isHiding)){
       this.showHiddenFiles(node.firstChild.id, isHiding)
-    } else if (node.next !== null && !isFirst){
+    }
+    if (node.next !== null && !isFirst){
       this.showHiddenFiles(node.next.id, isHiding)
     }
     //this.fileSystem.printTree()
@@ -119,7 +124,7 @@ class FileSystemController extends BaseController{
       if (prevNode.next !== null){
         data.new['next_id'] = prevNode.next.id
       }
-      id = await this.api.createElement(data)
+      id = await this.api.createElement({data})
       node = new Node(id, null, null, type, 'Untitled')
       this.fileSystem.insertAfter(node, prevNode)
     } else {
@@ -130,14 +135,33 @@ class FileSystemController extends BaseController{
         prevID = this.fileSystem.getLastDescendant(head).id
         data['prev'] = lastChildID
       } else{
+        prevID = null
         lastChildID = -1
       }
-      id = await this.api.createElement(data)
+      id = await this.api.createElement({ data })
       node = new Node(id, null, null, type, 'Untitled')
       this.fileSystem.insertUnder(node, head)
     }
+    this.socketIO.createFile(id, prevID, type)
     this.fileSystem.nodeMap[id] = node
     return [id, prevID, node.depth]
+  }
+  receiveNewFile(id, prevID, type) {
+    const node = new Node(id, null, null, type, 'Untitled')
+    console.log(id, prevID, type)
+    if (prevID != null){
+      const prevNode = this.fileSystem.nodeMap[prevID]
+      this.fileSystem.insertAfter(node, prevNode)
+    } else{
+      this.fileSystem.insertUnder(node, this.fileSystem.head)
+      if (this.fileSystem.head.lastChild === null){
+        prevID = this.fileSystem.getLastDescendant(head).id
+      }
+    }
+    const element = createFolderOrFile(type, id, prevID, node.depth)
+    this.changeSelectedFile(element)
+    domMap[id] = element
+    this.fileSystem.nodeMap[node.id] = node
   }
 
   addNoteListClickListener(){
@@ -181,10 +205,21 @@ class FileSystemController extends BaseController{
       if ((/^\s*$/).test(name) || name == node.name){
         p.innerText = node.name
         return
-      } 
-      node.name = name
+      }
+      if(node.type == DATA_TYPE.FILE){
+        noteTitle.value = name
+      }
       this.socketIO.changeName(node.id, name, node.type)
     })
+  }
+
+  changeName(fileID, name) {
+    console.log(fileID, name)
+    const node = this.fileSystem.nodeMap[fileID]
+    const dom = domMap[fileID]
+    const p = getElement('p', dom)
+    node.name = name
+    p.innerText = name
   }
   addNoteListDragListener() {
     noteList.addEventListener('dragend', (e) => {
@@ -192,10 +227,10 @@ class FileSystemController extends BaseController{
         e.target.classList.remove('dragging')
         if (dragTarget !== null){
           if (dragTarget.matches('.note-list')){
-            this.moveFile(e.target.dataset.id, this.fileSystem.head.id, true)
+            this.moveFile(e.target.dataset.id, this.fileSystem.head.id, true, true)
             return
           }
-          const element = this.moveFile(e.target.dataset.id, dragTarget.dataset.id, true)
+          const element = this.moveFile(e.target.dataset.id, dragTarget.dataset.id, true, true)
           if(element === null){
             return
           }
@@ -213,35 +248,49 @@ class FileSystemController extends BaseController{
         dragTarget = null
       })
   }
-  moveFile(id, targetID, isFirst) {
-    let node = this.fileSystem.nodeMap[id]
-    let targetNode = this.fileSystem.nodeMap[targetID]
+  receiveMoveFile(id, targetID){
+    this.moveFile(id, targetID, true, false)
+  }
+  checkValidity(node, targetNode){
     if (targetNode.id != this.fileSystem.head.id){
       if (targetNode.parent.id == node.id)
-        return null
+        return false
       if (targetNode.next !== null && targetNode.type == DATA_TYPE.FILE){
         if(targetNode.next.id == node.id){
           console.log('ineffective')
-          return
+          return false
         }
       } else if(targetNode.firstChild !== null && targetNode.type == DATA_TYPE.FOLDER) {
         if(targetNode.firstChild.id == node.id){
           console.log('ineffective')
-          return
+          return false
         }
       }
     } else if (this.fileSystem.head.lastChild.id == node.id){
-      return
+      return false
+    }
+    return true
+  }
+  moveFile(id, targetID, isFirst, isNotSent) {
+    console.log('moveFile', id, targetID, isFirst, isNotSent)
+    let node = this.fileSystem.nodeMap[id]
+    let targetNode = this.fileSystem.nodeMap[targetID]
+    if(isFirst){
+      if(!this.checkValidity(node, targetNode)){
+        return
+      }
     }
     const element = domMap[id].cloneNode(true)
     domMap[id].remove()
     domMap[id] = element
     if (isFirst){
-      this.sendMoveMessage(node, targetNode)
+      if(isNotSent){
+        console.log('sent')
+        this.sendMoveMessage(node, targetNode)
+      }
       const type = targetNode.type
       const prevElem = domMap[targetID]
       if(type == DATA_TYPE.FOLDER){
-        console.log(node, targetNode)
         this.fileSystem.moveUnderAsFirstChild(node, targetNode)
         insertAfter(element, prevElem)
       } else if (type == DATA_TYPE.VAULT){
@@ -251,11 +300,15 @@ class FileSystemController extends BaseController{
         this.fileSystem.moveAfter(node, targetNode)
         insertAfter(element, prevElem)
       }
-    } else if (node.next !== null){
-      this.moveFile(node.next.id, node.id, false)
+    } else{
+      const prevElem = domMap[targetID]
+      insertAfter(element, prevElem)
     }
     if (node.firstChild !== null){
       this.moveFile(node.firstChild.id, node.id, false)
+    }
+    if (node.next !== null && !isFirst){
+      this.moveFile(node.next.id, node.id, false)
     }
     let paddingLeft = node.depth*15
     if(node.type == DATA_TYPE.FILE){
@@ -292,7 +345,7 @@ class FileSystemController extends BaseController{
       after = {id: targetNode.id, prop: 'first_child_id', change_to: node.id}
       nodeData.change_to = targetNode.firstChild === null? null: targetNode.firstChild.id
     }
-    this.socketIO.moveFile([nodeData, before, after])
+    this.socketIO.moveFile([nodeData, before, after], node.id, targetNode.id)
   }
 }
 

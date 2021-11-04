@@ -27,7 +27,6 @@ function showEditor(fileIsOpen) {
 }
 
 function convertHtmlToMD() {
-  marked.use({ extensions: [backlink]})
   const html = DOMPurify.sanitize(marked(textarea.value), config)
   previewWindow.innerHTML = html
 }
@@ -48,7 +47,7 @@ function toggleEditorDisplay(isOn){
 
 //add event listeners without need of controller funcitons
 preview.addEventListener('click', () => {
-  if (preview.matches('fa-edit')){
+  if (preview.matches('.fa-align-right')){
     toggleEditorDisplay(true)
     convertHtmlToMD()
   } else{
