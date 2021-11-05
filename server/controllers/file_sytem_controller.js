@@ -10,7 +10,7 @@ const createFile = async(req, res) => {
   } else{
     id = await FileSystem.insertFileUnderRoot(newFile, newFile.vault_id, data.new.type)
   }
-  console.log('new file', id)
+  // console.log('new file', id)
   res.send({id})
 }
 const changeFileName = async (id, name) => {
@@ -22,9 +22,9 @@ const moveFile = async (dataArr, vaultID) => {
 }
 
 const getFileSystem = async (vaultID) => {
-  console.log(vaultID)
+  // console.log(vaultID)
   const result = await FileSystem.getFileSystem(vaultID)
-  console.log(result)
+  // console.log(result)
 
   let firstChild = result[0][0].first_child_id
   const files = []
@@ -43,7 +43,7 @@ const getFileSystem = async (vaultID) => {
 
 const getFile = async (fileID) => {
   const {text, revision_id} = await FileSystem.getFile(fileID)
-  console.log(text, revision_id)
+  // console.log(text, revision_id)
   return {revisionID: revision_id, doc: text}
 }
 

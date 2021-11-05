@@ -10,19 +10,147 @@ body {
 }
 .custom-container {
   display: grid;
-  height: 100vh;
   padding: 0;
   grid-template-columns: 30px auto;
   grid-template-areas: "side main";
   margin: 0;
-
 }
 .note-container {
   grid-area: main; 
 }
 .modal-header {
-    border-bottom: 0 none;
+  background-color: #f6f8f4;
+  color: #7e7b7b;
+  border-bottom: 0 none;
+  margin-bottom: 0;
+  padding-bottom: 0;
 }
+.modal-body{
+  color: #7e7b7b;
+  background-color: #f6f8f4;
+  padding-top: 0;
+  padding-left: 40px;
+  padding-right: 40px; 
+}
+.form-group{
+  margin-bottom: 15px;
+}
+label, option, .sign-up{
+  color: #7e7b7b;
+  font-family: monospace;
+}
+button{
+  font-family: monospace;
+}
+#vault-input, .input-group-text, 
+#vault-name, #add-user-input {
+  color: #7e7b7b;
+  font-family: monospace;
+}
+#vault-name{
+  font-size: 16px;
+}
+/* #add-input-label{
+  margin-top: 15px;
+} */
+#vault-input{
+  font-size: 18px;
+}
+#vault-input:focus, #add-user-input:focus,
+#vault-name {
+  box-shadow: none;
+  outline: 0 none;
+}
+#add-user-input, #basic-addon1{
+  height: 31px;
+}
+a{
+  text-decoration:none;
+  color: #7e7b7b;
+}
+.footer-container{
+  display: flex;
+  align-items: center;
+}
+#setting-body, #vault-body{
+  padding-left: 40px;
+  padding-right: 40px; 
+}
+#vault-body{
+  padding-top: 21px;
+}
+/* .modal{
+  background-color: #f6f8f4;
+} */
+.btn-close{
+  font-size: 10px;
+}
+#setting-dialog, #vault-dialog{
+  max-width: 600px;
+  min-height: 550px;
+}
+#sign-in-button, #sign-up-button, 
+#leave-button, #save-button {
+  color: #f6f8f4;
+  margin-top: 8px;
+  margin-bottom: 10px;
+  margin-right: 8px;
+  border: none;
+  padding: 5px;
+  padding-left: 15px;
+  padding-right: 15px;
+  background-color: #7e7b7b;
+}
+#save-button{
+  width: 78px;
+  margin-top: 30px
+}
+#leave-button{
+  background-color: rgba(255, 0, 0, 0.774);
+}
+#sign-up-trigger{
+  padding-left: 9px;
+  color:rgb(106, 201, 218);
+}
+#enter-btn{
+  color: #f6f8f4;
+  background-color:rgb(106, 201, 218);
+  border-radius: 0px 0px;
+}
+.vault-label{
+  font-size: 20px;
+}
+
+#user-email-list {
+  /* position: absolute;
+  top: 20px;
+  bottom: 20px;
+  left: 20px;
+  right: 20px; */
+  height: 93px;
+  overflow: scroll;
+  margin: 0;
+  padding: 0;
+  border: 2px solid #ccc; 
+  font-size: 16px;
+  font-family: Arial, sans-serif;
+  -webkit-overflow-scrolling: touch;
+}
+
+li.user-email {
+  height: 30px;
+  padding: 5px 20px;
+    color: #7e7b7b;
+  font-family: monospace;
+  border-bottom: 1px solid #ccc; 
+}
+li.user-email:last-child {
+  border-bottom: none;
+}
+li.user-email:nth-child(even) {
+  background: #eeeeee;
+}
+
 @media only screen and (min-width: 768px) {
   .editor-container {
     grid-template-columns: 300px auto;

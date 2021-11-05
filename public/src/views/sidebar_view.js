@@ -9,7 +9,6 @@ arrow.addEventListener('click', () => {
     arrow.classList.add('fa-angle-double-right')
     panel.style.display='none'
     editorContainer.style.gridTemplateAreas = '"main main"';
-    handler(arrow.dataset.state)
   } else {
     panel.style.display=''
     arrow.classList.remove('fa-angle-double-right')
