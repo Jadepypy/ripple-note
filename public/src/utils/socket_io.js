@@ -51,8 +51,6 @@ class SocketIO {
     this.socket.emit('leaveRoom', this.roomID)
   }
   sendOperation(revisionID, opInfo) {
-    // console.log('op')
-    console.log(opInfo)
     this.socket.emit('operation', revisionID, opInfo) 
   }
   changeName(id, name, type) {

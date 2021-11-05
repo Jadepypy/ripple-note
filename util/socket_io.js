@@ -9,7 +9,7 @@ const {
 } = require('../server/controllers/file_sytem_controller')
 const {
   createOperation
-} = require('../server/controllers/file_sytem_controller')
+} = require('../server/controllers/operation_controller')
 const {
   iterateOT,
   applyOperation,
@@ -69,55 +69,56 @@ io.of(/^\/[0-9]+$/)
       console.log(id, prevID, type)
       io.of(vaultID).emit('createFile', id, prevID, type, socket.id)
     })
-  })
-  .on('operation', (clientRevisionID, operation) => {
-    const userID = socket.userID
-    //const vaultID = socket.nsp.name.replace('/', '')
-    const fileID = socket.fileID
-    if(LogOp[fileID] == undefined){
-      LogOp[fileID] = []
-    }
-    const time = new Date().toISOString().slice(0, 19).replace('T', ' ')
-    let revisionID = fileArr[fileID].revisionID
-    let doc = fileArr[fileID].doc
-    console.log('files', fileArr[fileID], fileArr[fileID].doc)
-    console.log('doc', doc)
-
-
-    // console.log(clientRevisionID, operation)
-    setTimeout(async () => {
-      // console.log("ID", clientRevisionID, "SERVER INFO:", operation)
-      if (revisionID > clientRevisionID) {
-        for (let i = clientRevisionID + 1; i < LogOp[fileID].length; i++){
-          if (LogOp[fileID][i]){
-            //change info.operation inplace
-            iterateOT(LogOp[fileID][i], operation)
-          } 
-        }
+    .on('operation', (clientRevisionID, operation) => {
+      const userID = socket.userID
+      //const vaultID = socket.nsp.name.replace('/', '')
+      const fileID = socket.fileID
+      console.log('received')
+      if(LogOp[fileID] == undefined){
+        LogOp[fileID] = []
       }
-      revisionID++
-      doc = applyOperation(doc, operation)
-      //console.log('pending...')
-      socket.emit('ack', revisionID)
-      socket.to(socket.fileID).emit('syncOp', revisionID, operation);
-      LogOp[fileID][revisionID] = operation
-      console.log(operation)
-      const backUpOp = operation.map((op) => {
-        return [  revisionID,  
-                  userID,
-                  fileID,
-                  op.type,
-                  op.position,
-                  op.count != undefined? op.count: 0,
-                  op.key != undefined? op.key: '',
-                  time
-                ]
-      })
-      await createOperation(fileID, revisionID, doc, backUpOp)
-      fileArr[fileID].doc = doc
-      fileArr[fileID].revisionID = revisionID
-    }, 0)
+      const time = new Date().toISOString().slice(0, 19).replace('T', ' ')
+      let revisionID = fileArr[fileID].revisionID
+      let doc = fileArr[fileID].doc
+      console.log('files', fileArr[fileID], fileArr[fileID].doc)
+      console.log('doc', doc)
+      // console.log(clientRevisionID, operation)
+      setTimeout(async () => {
+        // console.log("ID", clientRevisionID, "SERVER INFO:", operation)
+        if (revisionID > clientRevisionID) {
+          for (let i = clientRevisionID + 1; i < LogOp[fileID].length; i++){
+            if (LogOp[fileID][i]){
+              //change info.operation inplace
+              iterateOT(LogOp[fileID][i], operation)
+            } 
+          }
+        }
+        revisionID++
+        doc = applyOperation(doc, operation)
+        //console.log('pending...')
+        socket.emit('ack', revisionID)
+        socket.to(socket.fileID).emit('syncOp', revisionID, operation);
+        LogOp[fileID][revisionID] = operation
+        console.log(operation)
+        const backUpOp = operation.map((op) => {
+          return [  revisionID,  
+                    userID,
+                    fileID,
+                    op.type,
+                    op.position,
+                    op.count != undefined? op.count: 0,
+                    op.key != undefined? op.key: '',
+                    time
+                  ]
+        })
+        console.log('create Operation', fileID, revisionID, doc, operation)
+        await createOperation(fileID, revisionID, doc, backUpOp)
+        fileArr[fileID].doc = doc
+        fileArr[fileID].revisionID = revisionID
+      }, 0)
+    })
   })
+
 }
 
 module.exports = {start}

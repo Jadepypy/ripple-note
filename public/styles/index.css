@@ -5,16 +5,23 @@
 }
 body {
   background: #f6f8f4;
+  margin: 0;
+  padding:0;
 }
-.container {
+.custom-container {
   display: grid;
   height: 100vh;
+  padding: 0;
   grid-template-columns: 30px auto;
   grid-template-areas: "side main";
   margin: 0;
+
 }
 .note-container {
   grid-area: main; 
+}
+.modal-header {
+    border-bottom: 0 none;
 }
 @media only screen and (min-width: 768px) {
   .editor-container {

@@ -69,13 +69,21 @@ class FileSystemModel {
   //     this.noteList.appendChild(element)
   //   }
   // }
-  getLastDescendant(node, lastDescendant) {
+  // getLastDescendant(node, lastDescendant) {
+  //   if (node.lastChild !== null){
+  //     lastDescendant = this.getLastDescendant(node.lastChild)
+  //   } else{
+  //     lastDescendant = node
+  //   }
+  //   return lastDescendant
+  // }
+
+  //rewrite to tail recursion, though chrome no longer supports
+  getLastDescendant(node) {
     if (node.lastChild !== null){
-      lastDescendant = this.getLastDescendant(node.lastChild)
-    } else{
-      lastDescendant = node
+      return this.getLastDescendant(node.lastChild)
     }
-    return lastDescendant
+    return node
   }
   insertAfter(node, prev) {
     console.log('node', node)
@@ -135,8 +143,8 @@ class FileSystemModel {
         node.parent.lastChild = null
       }
     }
-    console.log(';nnode', node)
-    console.log('pprev', node.prev)
+    // console.log(';nnode', node)
+    // console.log('pprev', node.prev)
   }
   //worse O(N), have to change each child's depth
   insertUnder(node, parent) {

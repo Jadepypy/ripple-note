@@ -66,6 +66,7 @@
   grid-area: note-list;
   max-height: calc(100vh - 100px);
   overflow-y: auto;
+  padding: 0;
 }
 .note-tools {
   background-color: #f6f8f4;
@@ -85,6 +86,7 @@
   height: 50px;
   padding-left: 15px;
   border-bottom: 1px solid #e1e1e1;
+  width: 100%;
 }
 /* .file {
   padding-left: 28px;
@@ -121,6 +123,9 @@ p:empty:not(:focus)::before {
   overflow-x: scroll;
   scrollbar-width: none; /* Firefox */
   -ms-overflow-style: none;  /* Internet Explorer 10+ */
+}
+.folder-title{
+  padding-top: 8px;
 }
 .folder-title::-webkit-scrollbar, .file-title::-webkit-scrollbar{ /* WebKit */
     width: 0;
