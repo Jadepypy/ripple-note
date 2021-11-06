@@ -13,8 +13,8 @@ class SocketIO {
       this.trigger('fileSystem',  rootID, dataArr)
     })
     this.socket.on('init', (revisionID, doc) => {
-      console.log('get data!')
-      console.log(revisionID, doc)
+      //console.log('get data!')
+      //console.log(revisionID, doc)
       this.trigger('init', revisionID, doc)
     })
     this.socket.on('ack', (revisionID) => {
@@ -43,12 +43,12 @@ class SocketIO {
     if(this.fileID !== null){
       this.leaveRoom()
     }
-    console.log('join')
+    //console.log('join')
     this.socket.emit('joinFile', fileID)
     this.fileID = fileID
   }
   leaveRoom() {
-    this.socket.emit('leaveRoom', this.roomID)
+    this.socket.emit('leaveRoom', this.fileID)
   }
   sendOperation(revisionID, opInfo) {
     this.socket.emit('operation', revisionID, opInfo) 

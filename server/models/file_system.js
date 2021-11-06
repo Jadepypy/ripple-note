@@ -22,8 +22,10 @@ const getFileSystem = async (vaultID) => {
 const getFile = async (fileID) => {
   try{
     const [file] = await pool.query('SELECT text, revision_id FROM files WHERE id = ?', [fileID])
-    console.log('file', file)
-    return file[0]
+    if(file.length < 1){
+      return {error: 'Database query error'}
+    }
+    return {file: file[0]}
   } catch(e) {
     console.log(e)
   }

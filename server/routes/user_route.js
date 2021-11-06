@@ -1,5 +1,5 @@
 const router = require('express').Router()
-const {wrapAsync} = require('../../util/util');
+const {wrapAsync, httpAuthenticate} = require('../../util/util');
 
 const {
   getVaults,
@@ -10,11 +10,11 @@ const {
 
 
 router.route('/user/vaults')
-    .get(wrapAsync(getVaults))
+    .get(httpAuthenticate, wrapAsync(getVaults))
 router.route('/user/signin')
-    .get(signIn)
+    .post(signIn)
 router.route('/user/signup')
-    .get(signUp)
+    .post(signUp)
 router.route('/user/signout')
     .get(signOut)
 

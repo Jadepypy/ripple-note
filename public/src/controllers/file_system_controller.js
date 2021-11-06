@@ -7,19 +7,29 @@ class FileSystemController extends BaseController{
 
   }
   init() {
-    this.socketIO.init(1, 'abc')
+    const storage = window.sessionStorage
+    const accessToken =  storage.getItem('access_token')
+    const vaultID =  storage.getItem('vault_id')
+    if(accessToken !== null && vaultID !== null){
+      this.socketIO.init(vaultID, accessToken)
+    } else{
+      this.socketIO.init(DEMO_VAULT_ID, '')
+    }
     const callbacks = {
       fileSystem: this.constructFileSystem.bind(this),
       changeName: this.changeName.bind(this),
       createFile: this.receiveNewFile.bind(this),
       moveFile: this.receiveMoveFile.bind(this),
     }
-    console.log('start filesystem')
+    //console.log('start filesystem')
     this.socketIO.registerCallbacks(callbacks)
     //addEventListers: an unorthodox approach (for simplification)
     this.addNoteListClickListener()
     this.addOptionsListener()
     this.addNoteListDragListener()
+    this.addVaultIconListener()
+    this.addLogInFormListener()
+    this.addVaultListListener()
   }
   constructFileSystem(firstChild, fileArr) {
     const nodeMap = {}
@@ -30,7 +40,7 @@ class FileSystemController extends BaseController{
       const node = new Node(data.id, data.firstChild, data.next, data.type, data.name)
       nodeMap[node.id] = node
     }
-    console.log(nodeMap)
+    //console.log(nodeMap)
     this.fileSystem.buildTree(nodeMap, this.buildFileOrFolder.bind(this))
     // this.fileSystem.printTree()
   }
@@ -54,9 +64,9 @@ class FileSystemController extends BaseController{
     if(!element.matches('.folder')){
       return
     }
-    console.log(element, isHiding)
+    //console.log(element, isHiding)
     const icon = getElement('.sort-down-icon', element)
-    console.log(icon)
+    //console.log(icon)
     if (isHiding){
       icon.classList.remove('fa-sort-down')
       icon.classList.add('fa-caret-right')
@@ -66,7 +76,7 @@ class FileSystemController extends BaseController{
     }
   }
   showHiddenFiles(id, isHiding, isFirst) {
-    console.log(id)
+    //console.log(id)
     const element = domMap[id]
     const node = this.fileSystem.nodeMap[id]
     if(!isFirst){
@@ -148,7 +158,7 @@ class FileSystemController extends BaseController{
   }
   receiveNewFile(id, prevID, type) {
     const node = new Node(id, null, null, type, 'Untitled')
-    console.log(id, prevID, type)
+    //console.log(id, prevID, type)
     if (prevID != null){
       const prevNode = this.fileSystem.nodeMap[prevID]
       this.fileSystem.insertAfter(node, prevNode)
@@ -199,7 +209,7 @@ class FileSystemController extends BaseController{
       const fileID = p.parentNode.dataset.id
       const node = this.fileSystem.nodeMap[fileID]
       let name = p.innerText.trim()
-      console.log(name, node.name)
+      //console.log(name, node.name)
       p.style['pointer-events'] = 'none'
       p.setAttribute("contenteditable", false)
       if ((/^\s*$/).test(name) || name == node.name){
@@ -214,7 +224,7 @@ class FileSystemController extends BaseController{
   }
 
   changeName(fileID, name) {
-    console.log(fileID, name)
+    //console.log(fileID, name)
     const node = this.fileSystem.nodeMap[fileID]
     const dom = domMap[fileID]
     const p = getElement('p', dom)
@@ -223,7 +233,7 @@ class FileSystemController extends BaseController{
   }
   addNoteListDragListener() {
     noteList.addEventListener('dragend', (e) => {
-      console.log(dragTarget)
+      //console.log(dragTarget)
         e.target.classList.remove('dragging')
         if (dragTarget !== null){
           if (dragTarget.matches('.note-list')){
@@ -272,7 +282,7 @@ class FileSystemController extends BaseController{
     return true
   }
   moveFile(id, targetID, isFirst, isNotSent) {
-    console.log('moveFile', id, targetID, isFirst, isNotSent)
+    //console.log('moveFile', id, targetID, isFirst, isNotSent)
     let node = this.fileSystem.nodeMap[id]
     let targetNode = this.fileSystem.nodeMap[targetID]
     if(isFirst){
@@ -285,7 +295,7 @@ class FileSystemController extends BaseController{
     domMap[id] = element
     if (isFirst){
       if(isNotSent){
-        console.log('sent')
+        //console.log('sent')
         this.sendMoveMessage(node, targetNode)
       }
       const type = targetNode.type
@@ -347,6 +357,73 @@ class FileSystemController extends BaseController{
     }
     this.socketIO.moveFile([nodeData, before, after], node.id, targetNode.id)
   }
+
+  addLogInFormListener(){
+    signUpForm.addEventListener('submit', async (event) => {
+      event.preventDefault()
+      const isLogIn = await submitFormData(event.target.action, event.target, FORM_TYPE.SIGN_UP)
+      if (isLogIn){
+        await this.selectVault()
+      }
+    })
+
+    signInForm.addEventListener('submit', async (event) => {
+      event.preventDefault()
+      const isLogIn = await submitFormData(event.target.action, event.target, FORM_TYPE.SIGN_IN)
+      if (isLogIn){
+        await this.selectVault()
+      }
+    })
+  }
+  async selectVault(){
+    $('#vault').modal('toggle');
+    const result = await this.api.getVaults()
+    console.log(result)
+    const data = result.data
+    if(!data.vaults){
+      return
+    } 
+    vaultList.innerHTML = ''
+    this.vaultSet = new Set()
+    for (const vault of data.vaults){
+      const option = createElement('option', [])
+      option.value = vault.id
+      option.label = vault.created_at + '    ' + vault.name
+      this.vaultSet.add(String(vault.id))
+      vaultList.append(option)
+    }
+  }
+  addVaultIconListener(){
+    vaultIcon.addEventListener('click', () => {
+      const storage = window.sessionStorage
+      if(storage.getItem
+    ('access_token') !== null){
+        this.selectVault()
+      } else{
+        $('#sign-in-modal').modal('toggle')
+      }
+    })
+  }
+  addVaultListListener(){
+    enterBtn.addEventListener('click', (event) => {
+      event.preventDefault()
+      const vault = vaultInput.value.trim()
+      if ((/^\s*$/).test(vault)){
+        return
+      }
+      if(this.vaultSet.has(vault)){
+        const storage = window.sessionStorage
+        $('#vault').modal('toggle');
+        storage.setItem('vault_id', vault)
+        noteList.innerHTML = ''
+        this.socketIO.init(vault, storage.getItem('access_token'))
+      } else{
+
+        
+      }
+    })
+  }
+
 }
 
 

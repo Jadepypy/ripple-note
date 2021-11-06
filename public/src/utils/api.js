@@ -5,9 +5,6 @@ class API {
     this.API_HOST = 'http://localhost:3000/api'
     this.accessToken = null
   }
-  async signIn(data){
-
-  }
   async createElement(data){
     return fetch(`${this.API_HOST}/file`, {
       body: JSON.stringify(data),
@@ -26,6 +23,26 @@ class API {
       const result = await res.json()
       console.log(result)
       return result.id
+    })
+  }
+
+  getVaults(){
+    const storage = window.sessionStorage
+    const accessToken = storage.getItem
+    ('access_token')
+    return fetch(`${this.API_HOST}/user/vaults`, {
+      headers: new Headers({
+        Authorization: `Bearer ${accessToken}`,
+      }),
+    }).then((response) => {
+      console.log(response)
+      if (response.status === 401) {
+        throw new Error('請先登入');
+      }
+      if (response.status === 403) {
+        throw new Error('內容錯誤或權限不足');
+      }
+      return response.json();
     })
   }
 

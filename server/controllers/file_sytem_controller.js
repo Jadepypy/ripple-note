@@ -17,12 +17,12 @@ const changeFileName = async (id, name) => {
   return await FileSystem.changeFileName(id, name)
 }
 const moveFile = async (dataArr, vaultID) => {
-  console.log(dataArr, vaultID)
+  //console.log(dataArr, vaultID)
   FileSystem.moveFile(dataArr, vaultID)
 }
 
 const getFileSystem = async (vaultID) => {
-  // console.log(vaultID)
+  console.log(vaultID)
   const result = await FileSystem.getFileSystem(vaultID)
   // console.log(result)
 
@@ -37,20 +37,22 @@ const getFileSystem = async (vaultID) => {
                   type: file.type
                 })
   })
-  console.log('init files', files)
+  console.log('init files')
   return [firstChild, files]
 }
 
 const getFile = async (fileID) => {
-  const {text, revision_id} = await FileSystem.getFile(fileID)
-  // console.log(text, revision_id)
-  return {revisionID: revision_id, doc: text}
+  const result = await FileSystem.getFile(fileID)
+  if (result.error){
+    return {error: result.error}
+  }
+  const file = result.file
+  console.log(file)
+  if(!file){
+    return {error: 'Database query error'}
+  } 
+  return {revisionID: file.revision_id, doc: file.text}
 }
-
-// const getFileSystem = async (vaultID) => {
-//   return await FileSystem.getFileSystem(vaultID)
-// }
-
 
 module.exports =  { 
                     createFile,

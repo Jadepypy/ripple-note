@@ -1,4 +1,5 @@
  
+require('dotenv').config()
 const socketIO = require("socket.io")
 const {
   getFile,
@@ -18,26 +19,28 @@ const {
 const {
   DATA_TYPE
 } = require('../server/models/file_system')
-let callbacks = {}
+const {
+  wsAuthenticate
+} = require('./util')
 const fileArr = {}
 const LogOp = {}
 // const dataArr = [[0, 1, null, -1, 'vault'], [1, 4, 2, 0, 'Folder1'], [2, 5, 3, 0, 'Folder2'], [3, 10, null, 0, 'Folder3'], [4, null, 8, 1, 'File4'],  [8, null, 9, 1, 'File8'], [9, null, null, 1, 'File9'], [5, null, 6, 1, 'File5'], [6, null, null, 1, 'File6'], [10, 11, null, 0, 'Folder10'], [11, null, null, 1, 'File11']]
 const start = (io) => {
 io.of(/^\/[0-9]+$/)
-  .use((socket, next) => {
-    if(socket.handshake.auth) {
-      socket.userID = 1
-      return next()
-    }
-  })
+  .use(wsAuthenticate)
   .on('connection', async (socket) => {
     const vaultID = socket.nsp.name.replace('/', '')
+    console.log(`user connected on ${vaultID}`)
     const result = await getFileSystem(vaultID)
     socket.emit('fileSystem', result[0], result[1])
     socket.on('joinFile', async (id) => {
       socket.join(id)
       socket.fileID = id
-     const {revisionID, doc}= await getFile(id)
+     const result = await getFile(id)
+     if(result.error){
+       socket.emit('error', result.error)
+     }
+     const {revisionID, doc} = result
       fileArr[id] = {
         revisionID,
         doc

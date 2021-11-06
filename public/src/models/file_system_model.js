@@ -8,7 +8,7 @@ class FileSystemModel {
     this.head = nodeMap[0] //can not be null
     this.nodeMap = nodeMap
     this.buildNode = (node, depth, prev, parents) => {
-      console.log(node, depth, prev, parents)
+      //console.log(node, depth, prev, parents)
       node.depth = depth
       node.prev = prev
       node.next = node.next === null? null: this.nodeMap[node.next]
@@ -28,8 +28,8 @@ class FileSystemModel {
       }
     }
     this.buildNode(this.head, 0, null, {'-1': null})
-    this.printTree()
-    console.log('map', this.nodeMap)
+    //this.printTree()
+    //console.log('map', this.nodeMap)
   }
   //find the previous node_id of the new folder/file, a bit tricky since js doesn't support insertAftr
   // getDataBeforeInsertion() {
@@ -86,8 +86,8 @@ class FileSystemModel {
     return node
   }
   insertAfter(node, prev) {
-    console.log('node', node)
-    console.log('prev', prev)
+    //console.log('node', node)
+    //console.log('prev', prev)
     node.parent = prev.parent
     node.depth = prev.depth
     node.prev = prev
@@ -160,7 +160,7 @@ class FileSystemModel {
     }
   }
   insertUnderAsFirstChild(node, parent) {
-    console.log('insertUnderAsFirstChild', node, parent)
+    //console.log('insertUnderAsFirstChild', node, parent)
     if (parent.firstChild !== null){
       this.insertBefore(node, parent.firstChild)
     } else {
@@ -208,8 +208,7 @@ class FileSystemModel {
     }
   }
   getDuplicateElementID(name, node, type, id) {
-    console.log('?')
-    console.log(name, node, type, id)
+    //console.log(name, node, type, id)
     if(node === null){
       return null
     } else if (node.name == name && node.type == type){

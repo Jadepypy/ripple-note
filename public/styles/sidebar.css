@@ -9,12 +9,13 @@
   flex-direction: column;
   justify-content: space-between;
 }
-#user-circle, #arrow, #setting{
+#user-circle, #arrow, #setting, #vault-icon{
   color: #dddcdc;
   font-size: 25px;
   -webkit-text-stroke: 1.7px #7e7b7b;
 }
-#user-circle:hover,#arrow:hover, #setting:hover{
+#user-circle:hover,#arrow:hover, 
+#setting:hover, #vault-icon:hover{
   color: rgb(106, 201, 218);
   cursor: pointer;
 }
@@ -22,6 +23,7 @@
   color: rgb(106, 201, 218); 
 }
 .user-circle-span{
-  display: block;
   margin-top: 8px;
+  display: block;
+  margin-bottom: 8px;
 }
