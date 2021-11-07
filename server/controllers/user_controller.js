@@ -47,7 +47,6 @@ const nativeSignIn = async (email, password) => {
 const signUp = async (req, res) => {
   const {email, password} = req.body
   let {name} = req.body
-  console.log(email, password)
 
   if(!name || !email || !password){
     res.status(400).send({error:'Name, email, and password are required'})
@@ -144,13 +143,51 @@ const createVault = async (req, res) => {
     return res.status(403).send({error: result.error})
   }
   const id = result.id
-  console.log(result, 'success')
   res.status(200).send({
     data: {
       id
     }
   }) 
+}
 
+const addVaultUser = async (req, res) => {
+  if (!req.user){
+    res.status(400).send({error:'Wrong Request'})
+    return  
+  }
+  const {emails, vault_id} = req.body
+  console.log(vault_id)
+  const user = req.user
+  for (const email of emails){
+    if (!validator.isEmail(email)) {
+      res.status(400).send({error:'Invalid email format'})
+      return
+    }
+  }
+  const result = await User.addVaultUser(user.id, vault_id, emails)
+  if(result.error){
+    return res.status(403).send({error: result.error})
+  }
+  res.sendStatus(200)
+}
+
+const changeVaultName = async(req, res) => {
+  if (!req.user){
+    res.status(400).send({error:'Wrong Request'})
+    return  
+  }
+  const user = req.user
+  const vaultID = req.params.id
+  const {name} = req.body
+  if (!name){
+    res.status(400).send({error:'Wrong Request'})
+    return  
+  }
+  const result = await User.changeVaultName(user.id, vaultID, name)
+  if(result.error){
+    return res.status(403).send({error: result.error})
+  }
+  res.sendStatus(200)
 }
 
 const signOut = async(req, res) => {
@@ -162,6 +199,8 @@ module.exports =  {
                     getVault,
                     deleteVault,
                     createVault,
+                    addVaultUser,
+                    changeVaultName,
                     signIn,
                     signUp,
                     signOut

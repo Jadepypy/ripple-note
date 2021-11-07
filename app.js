@@ -14,7 +14,8 @@ app.use(express.urlencoded({extended:true}))
 app.use('/api', 
         [
           require('./server/routes/user_route'),
-          require('./server/routes/file_route')
+          require('./server/routes/file_route'),
+          require('./server/routes/vault_route')
         ]
 )
 

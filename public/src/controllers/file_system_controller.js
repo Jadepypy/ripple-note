@@ -4,7 +4,6 @@ import {Node} from '../utils/utils.js'
 class FileSystemController extends BaseController{
   constructor (operation, fileSystem, socketIO, api){
     super(operation, fileSystem, socketIO, api)
-
   }
   init() {
     const storage = window.sessionStorage
@@ -32,6 +31,9 @@ class FileSystemController extends BaseController{
     this.addVaultListListener()
     this.addSettingIconListener()
     this.addLeaveBtnClickListener()
+    this.addUserBtnClickListener()
+    this.addVaultNameInputBlurListener()
+    this.addSaveBtnClickListener()
   }
   constructFileSystem(firstChild, fileArr) {
     this.changeSelectedFile(null)
@@ -431,6 +433,7 @@ class FileSystemController extends BaseController{
     })
   }
   addSettingIconListener(){
+    console.log(settingIcon)
     settingIcon.addEventListener('click', async () => {
       const storage = window.sessionStorage
       if(storage.getItem('access_token') !== null){
@@ -449,11 +452,16 @@ class FileSystemController extends BaseController{
     const vaultID =  storage.getItem('vault_id')
     const result = await this.api.getVault(vaultID)
     const users = result.data.users
-    vaultName.value = users[0].name
+    vaultNameInput.value = users[0].name
     userEmailList.innerHTML = ''
+    this.vaultUserEmails = new Set()
+    this.newVaultUserEmails = new Set()
+    this.vaultName = users[0].name
+    this.vaultNameChanged = false
     for (const user of users){
       const li = createElement('li', ['user-email'])
       li.innerText = user.email
+      this.vaultUserEmails.add(user.email)
       userEmailList.append(li)
     }
     $('#setting-modal').modal('toggle')
@@ -467,6 +475,59 @@ class FileSystemController extends BaseController{
       await this.api.deleteVault(vaultID)
       storage.setItem('vault_id', DEMO_VAULT_ID)
       location.reload();
+    })
+  }
+  addUserBtnClickListener() {
+    addUserBtn.addEventListener('click', (event) => {
+      event.preventDefault()
+      const email = addUserInput.value.trim()
+      if((/^\s*$/).test(email)){
+        return
+      } else if (!this.vaultUserEmails.has(email) && !this.newVaultUserEmails.has(email)){
+        this.newVaultUserEmails.add(email)
+        const li = createElement('li', ['user-email'])
+        li.innerText = email
+        $('#user-email-list').prepend(li)
+      }
+      addUserInput.value = ''
+      //console.log(this.newVaultUserEmails)
+    })
+  }
+  addVaultNameInputBlurListener() {
+    vaultNameInput.addEventListener('blur', (event) => {
+      event.preventDefault()
+      const vaultName = vaultNameInput.value.trim()
+      if((/^\s*$/).test(vaultName)){
+        vaultNameInput.value = this.vaultName
+        return
+      } else{
+        if(this.vaultName != vaultName){
+          this.vaultNameChanged = true
+        }
+        this.vaultName = vaultName
+        vaultNameInput.value = vaultName
+      }
+    })
+  }
+  addSaveBtnClickListener() {
+    saveBtn.addEventListener('click', async (event) => {
+      console.log('click')
+      event.preventDefault()
+      const storage = window.sessionStorage
+      const vaultID = storage.getItem('vault_id')
+      if(this.vaultNameChanged){
+        await this.api.changeVaultName(vaultID, {name: this.vaultName})
+      }
+      console.log(this.newVaultUserEmails.size)
+      if(this.newVaultUserEmails.size > 0){
+        const data = {
+          vault_id: vaultID,
+          emails: [...this.newVaultUserEmails]
+        }
+        console.log(data)
+        await this.api.addVaultUsers(data)
+      }
+      $('#setting-modal').modal('toggle')
     })
   }
 

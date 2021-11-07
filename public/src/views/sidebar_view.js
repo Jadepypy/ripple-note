@@ -10,11 +10,13 @@ const vaultInput = getElement('#vault-input')
 const enterBtn = getElement('#enter-btn')
 const vaultIcon = getElement('#vault-icon')
 const settingIcon = getElement('#setting')
-const vaultName = getElement('#vault-name')
+const vaultNameInput = getElement('#vault-name')
 const addUserInput = getElement('#add-user-input')
 const addUserBtn = getElement('#add-user-btn')
 const userEmailList = getElement('#user-email-list')
 const LeaveBtn = getElement('#leave-button')
+const saveBtn = getElement('#save-button')
+const settingError = getElement('#setting-error')
 const FORM_TYPE = {
   SIGN_IN: 0,
   SIGN_UP: 1

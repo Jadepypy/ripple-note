@@ -85,7 +85,6 @@ class API {
     })
   }
   createVault(name) {
-    console.log('name', name)
     const storage = window.sessionStorage
     const accessToken = storage.getItem('access_token')
     return fetch(`${this.API_HOST}/user/vault`, {
@@ -104,6 +103,50 @@ class API {
         throw new Error('內容錯誤或權限不足');
       }
       return response.json();
+    })
+  }
+  addVaultUsers(data){
+    const storage = window.sessionStorage
+    const accessToken = storage.getItem('access_token')
+    console.log(data)
+    return fetch(`${this.API_HOST}/vault/users`, {
+      body: JSON.stringify(data),
+      headers: new Headers({
+        Authorization: `Bearer ${accessToken}`,
+        'Content-Type': 'application/json',
+      }),
+      method: 'POST',
+    }).then((response) => {
+      console.log(response)
+      if (response.status === 401) {
+        throw new Error('請先登入');
+      }
+      if (response.status === 403) {
+        throw new Error('內容錯誤或權限不足');
+      }
+      return
+    })
+  }
+  changeVaultName(vaultID, data){
+    const storage = window.sessionStorage
+    const accessToken = storage.getItem('access_token')
+    console.log(data)
+    return fetch(`${this.API_HOST}/vault/${vaultID}`, {
+      body: JSON.stringify(data),
+      headers: new Headers({
+        Authorization: `Bearer ${accessToken}`,
+        'Content-Type': 'application/json',
+      }),
+      method: 'PATCH',
+    }).then((response) => {
+      console.log(response)
+      if (response.status === 401) {
+        throw new Error('請先登入');
+      }
+      if (response.status === 403) {
+        throw new Error('內容錯誤或權限不足');
+      }
+      return
     })
   }
 
