@@ -146,6 +146,19 @@ class FileSystemModel {
     // console.log(';nnode', node)
     // console.log('pprev', node.prev)
   }
+  //find all children including self (tidy data for backend)
+  findAllChildren(node, ids, isFirst){
+    ids.add(node.id)
+    if(isFirst && node.firstChild !== null){
+      return this.findAllChildren(node.firstChild, ids, false)
+    }else if (node.firstChild !== null){
+      //semi tail recursion???
+      this.findAllChildren(node.firstChild, ids, false)
+    }
+    if(node.next !== null){
+      return this.findAllChildren(node.next, ids, false)
+    }
+  }
   //worse O(N), have to change each child's depth
   insertUnder(node, parent) {
     if (parent.lastChild !== null){
