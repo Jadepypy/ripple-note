@@ -18,10 +18,8 @@ class OperationController extends BaseController{
     this.addTextAreaListener()
   }
   initializeNote(revisionID, doc) {
-    console.log('init??')
     this.operation.revisionID = revisionID
     this.operation.doc = doc
-    console.log('???')
     renderEditor(doc, this.operation.name)
   }
 

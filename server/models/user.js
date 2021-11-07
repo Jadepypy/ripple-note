@@ -86,9 +86,71 @@ const getVaults = async (id) => {
     return {error}
   }
 }
+const getVault = async (userID, vaultID) => {
+  try{
+    let [users] = await pool.query(
+      `SELECT vault_id FROM vault_user
+      WHERE user_id = ? and vault_id = ?`, [userID, vaultID])
+    if(users.length < 1){
+      return {error: 'Permission Denied'}
+    }
+    [users] = await pool.query( 
+    `SELECT vaults.name, users.email
+    FROM vault_user join vaults 
+    on vault_user.vault_id = vaults.id
+    join users on users.id = vault_user.user_id
+    WHERE vault_user.vault_id = ?`, [vaultID])
+    console.log(vaultID, users)
+    return {users}
+  } catch (error){
+    console.log(error)
+    return {error}
+  }
+}
+const deleteVault = async (userID, vaultID) => {
+  const conn = await pool.getConnection()
+  try{
+    await conn.query('START TRANSACTION')
+    const [result] = await conn.query('DELETE FROM vault_user WHERE vault_id = ? and user_id = ?', [vaultID, userID])
+    const [users] = await conn.query('SELECT user_id FROM vault_user WHERE vault_id = ?', [vaultID])
+    if(users.length < 1){
+      await conn.query('DELETE FROM vaults WHERE id = ?', [vaultID])
+    }
+    await conn.query('COMMIT')
+    return {}
+  } catch(error) {
+    await conn.query('ROLLBACK')
+    conn.release()
+    console.log(error)
+    return {error}
+  } finally{
+    conn.release()
+  }
+}
+const createVault = async (userID, createdAt, name) => {
+  const conn = await pool.getConnection()
+  try{
+    await conn.query('START TRANSACTION')
+    const [result] = await conn.query('INSERT INTO vaults (name, created_at) VALUES (?, ?)', [name, createdAt])
+    await conn.query('INSERT INTO vault_user (vault_id, user_id) VALUES (?, ?)', [result.insertId, userID])
+    await conn.query('COMMIT')
+    return {id: result.insertId}
+  } catch(error) {
+    await conn.query('ROLLBACK')
+    conn.release()
+    console.log(error)
+    return {error}
+  } finally{
+    conn.release()
+  }
+}
 
 module.exports = {  CONNECTION_TYPE,
                     signUp,
                     nativeSignIn,
                     getVaults,
+                    getVault,
+                    deleteVault,
+                    createVault,
+
 }

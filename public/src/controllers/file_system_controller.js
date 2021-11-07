@@ -30,9 +30,15 @@ class FileSystemController extends BaseController{
     this.addVaultIconListener()
     this.addLogInFormListener()
     this.addVaultListListener()
+    this.addSettingIconListener()
+    this.addLeaveBtnClickListener()
   }
   constructFileSystem(firstChild, fileArr) {
+    this.changeSelectedFile(null)
+    showEditor(false)
     const nodeMap = {}
+    domMap = {}
+    noteList.innerHTML = ''
     //we do not use vault id as root id to avoid duplicate key bwtween vault and files
     const root = new Node(0, firstChild, null, DATA_TYPE.VAULT, 'root')
     nodeMap[0] = root
@@ -378,7 +384,6 @@ class FileSystemController extends BaseController{
   async selectVault(){
     $('#vault').modal('toggle');
     const result = await this.api.getVaults()
-    console.log(result)
     const data = result.data
     if(!data.vaults){
       return
@@ -404,23 +409,64 @@ class FileSystemController extends BaseController{
       }
     })
   }
-  addVaultListListener(){
-    enterBtn.addEventListener('click', (event) => {
+  async addVaultListListener(){
+    enterBtn.addEventListener('click', async (event) => {
       event.preventDefault()
       const vault = vaultInput.value.trim()
       if ((/^\s*$/).test(vault)){
         return
       }
+      const storage = window.sessionStorage
       if(this.vaultSet.has(vault)){
-        const storage = window.sessionStorage
         $('#vault').modal('toggle');
         storage.setItem('vault_id', vault)
-        noteList.innerHTML = ''
         this.socketIO.init(vault, storage.getItem('access_token'))
       } else{
-
-        
+        const result = await this.api.createVault(vault)
+        const newVaultID = result.data.id
+        $('#vault').modal('toggle');
+        storage.setItem('vault_id', newVaultID)
+        this.socketIO.init(newVaultID, storage.getItem('access_token'))
       }
+    })
+  }
+  addSettingIconListener(){
+    settingIcon.addEventListener('click', async () => {
+      const storage = window.sessionStorage
+      if(storage.getItem('access_token') !== null){
+        if(storage.getItem('vault_id') != DEMO_VAULT_ID){
+          await this.getSetting()
+        } else{
+          await this.selectVault()
+        }
+      } else{
+        $('#sign-in-modal').modal('toggle')
+      }
+    })
+  }
+  async getSetting(){
+    const storage = window.sessionStorage
+    const vaultID =  storage.getItem('vault_id')
+    const result = await this.api.getVault(vaultID)
+    const users = result.data.users
+    vaultName.value = users[0].name
+    userEmailList.innerHTML = ''
+    for (const user of users){
+      const li = createElement('li', ['user-email'])
+      li.innerText = user.email
+      userEmailList.append(li)
+    }
+    $('#setting-modal').modal('toggle')
+
+  }
+  addLeaveBtnClickListener(){
+    LeaveBtn.addEventListener('click', async (event) => {
+      event.preventDefault()
+      const storage = window.sessionStorage
+      const vaultID =  storage.getItem('vault_id')
+      await this.api.deleteVault(vaultID)
+      storage.setItem('vault_id', DEMO_VAULT_ID)
+      location.reload();
     })
   }
 

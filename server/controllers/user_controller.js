@@ -100,6 +100,58 @@ const getVaults = async (req, res) => {
     }
   }) 
 }
+const getVault = async (req, res) => {
+  if (!req.user){
+    res.status(400).send({error:'Wrong Request'})
+    return  
+  }
+  const user = req.user
+  const vaultID = req.params.id
+  const result = await User.getVault(user.id, vaultID)
+  if(result.error){
+    return res.status(403).send({error: result.error})
+  }
+  const users = result.users
+  res.status(200).send({
+    data: {
+      users
+    }
+  }) 
+}
+const deleteVault = async (req, res) => {
+  if (!req.user){
+    res.status(400).send({error:'Wrong Request'})
+    return  
+  }
+  const user = req.user
+  const vaultID = req.params.id
+  const result = await User.deleteVault(user.id, vaultID)
+  if(result.error){
+    return res.status(403).send({error: result.error})
+  }
+  res.sendStatus(200) 
+}
+const createVault = async (req, res) => {
+  const userID = req.user.id
+  const {name} = req.body
+  const createdAt = new Date().toISOString().slice(0, 19).replace('T', ' ')
+  if(!name){
+    res.status(400).send({error:'Wrong request'});
+    return;
+  }
+  const result = await User.createVault(userID, createdAt, name)
+  if(result.error){
+    return res.status(403).send({error: result.error})
+  }
+  const id = result.id
+  console.log(result, 'success')
+  res.status(200).send({
+    data: {
+      id
+    }
+  }) 
+
+}
 
 const signOut = async(req, res) => {
 
@@ -107,6 +159,9 @@ const signOut = async(req, res) => {
 
 module.exports =  { 
                     getVaults,
+                    getVault,
+                    deleteVault,
+                    createVault,
                     signIn,
                     signUp,
                     signOut

@@ -8,6 +8,9 @@ body {
   margin: 0;
   padding:0;
 }
+a{
+  cursor: pointer;
+}
 .custom-container {
   display: grid;
   padding: 0;
@@ -61,7 +64,7 @@ button{
   box-shadow: none;
   outline: 0 none;
 }
-#add-user-input, #basic-addon1{
+#add-user-input, #add-user-btn{
   height: 31px;
 }
 a{
@@ -140,21 +143,24 @@ a{
 li.user-email {
   height: 30px;
   padding: 5px 20px;
-    color: #7e7b7b;
+  color: #7e7b7b;
   font-family: monospace;
+  background-color: #ffffff;
   border-bottom: 1px solid #ccc; 
 }
-li.user-email:last-child {
+/* li.user-email:last-child {
   border-bottom: none;
-}
+} */
 li.user-email:nth-child(even) {
   background: #eeeeee;
 }
 small{
-  color: rgba(255, 0, 0, 0.774);
+  color: #7e7b7b;
   font-family: monospace;
 }
-
+.error-message{
+  color: rgba(255, 0, 0, 0.774);
+}
 @media only screen and (min-width: 768px) {
   .editor-container {
     grid-template-columns: 300px auto;

@@ -45,6 +45,67 @@ class API {
       return response.json();
     })
   }
+  getVault(vaultID){
+    const storage = window.sessionStorage
+    const accessToken = storage.getItem
+    ('access_token')
+    return fetch(`${this.API_HOST}/vault/${vaultID}`, {
+      headers: new Headers({
+        Authorization: `Bearer ${accessToken}`,
+      }),
+    }).then((response) => {
+      console.log(response)
+      if (response.status === 401) {
+        throw new Error('請先登入');
+      }
+      if (response.status === 403) {
+        throw new Error('內容錯誤或權限不足');
+      }
+      return response.json();
+    })
+  }
+  deleteVault(vaultID){
+    const storage = window.sessionStorage
+    const accessToken = storage.getItem
+    ('access_token')
+    return fetch(`${this.API_HOST}/user/vault/${vaultID}`, {
+      headers: new Headers({
+        Authorization: `Bearer ${accessToken}`,
+      }),
+      method: 'DELETE',
+    }).then((response) => {
+      console.log(response)
+      if (response.status === 401) {
+        throw new Error('請先登入');
+      }
+      if (response.status === 403) {
+        throw new Error('內容錯誤或權限不足');
+      }
+      return
+    })
+  }
+  createVault(name) {
+    console.log('name', name)
+    const storage = window.sessionStorage
+    const accessToken = storage.getItem('access_token')
+    return fetch(`${this.API_HOST}/user/vault`, {
+      body: JSON.stringify({name}),
+      headers: new Headers({
+        Authorization: `Bearer ${accessToken}`,
+        'Content-Type': 'application/json',
+      }),
+      method: 'POST',
+    }).then((response) => {
+      console.log(response)
+      if (response.status === 401) {
+        throw new Error('請先登入');
+      }
+      if (response.status === 403) {
+        throw new Error('內容錯誤或權限不足');
+      }
+      return response.json();
+    })
+  }
 
 }
 

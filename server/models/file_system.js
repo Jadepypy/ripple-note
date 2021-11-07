@@ -76,6 +76,7 @@ const changeFileName = async (fileID, name) => {
     console.log(e)
   } 
 }
+
 const moveFile = async(dataArr, vaultID) => {
   const conn = await pool.getConnection()
   try{
