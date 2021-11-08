@@ -6,6 +6,13 @@ class FileSystemController extends BaseController{
     super(operation, fileSystem, socketIO, api)
   }
   init() {
+    $(window).on('load', () => {
+      $('#sign-in-modal').modal({
+          backdrop: 'static',
+          keyboard: false
+      })
+      $('#sign-in-modal').modal('show')
+    })
     const storage = window.sessionStorage
     const accessToken =  storage.getItem('access_token')
     const vaultID =  storage.getItem('vault_id')

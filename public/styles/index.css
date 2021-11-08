@@ -37,10 +37,19 @@ a{
 }
 .form-group{
   margin-bottom: 15px;
+  margin-top: 15px;
+  margin-bottom: 15px;
 }
 label, option, .sign-up{
   color: #7e7b7b;
   font-family: monospace;
+}
+.modal-title{ 
+  margin-top: 35px;
+  font-size: 24px;
+  font-weight:700;
+  font-family: monospace;
+  color: #7e7b7b;
 }
 button{
   font-family: monospace;
@@ -111,7 +120,7 @@ a{
 #leave-button{
   background-color: rgba(255, 0, 0, 0.774);
 }
-#sign-up-trigger{
+#sign-up-trigger, #sign-in-trigger{
   padding-left: 9px;
   color:rgb(106, 201, 218);
 }
