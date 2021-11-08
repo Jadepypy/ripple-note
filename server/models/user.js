@@ -33,8 +33,10 @@ const signUp = async (name, email, password) => {
   const conn = await pool.getConnection()
   try {
     const hash = await hashPassword(password)
+    await conn.query('START TRANSACTION')
     const users = await conn.query('SELECT id, email, is_registered FROM users WHERE email = ? FOR UPDATE', [email])
-    let user, result, id
+    const createdAt = new Date().toISOString().slice(0, 19).replace('T', ' ')
+    let user, id, vaultID
     if(users[0].length > 0){
       [user] = users[0]
       if( user.is_registered == 1){
@@ -42,15 +44,21 @@ const signUp = async (name, email, password) => {
         return {error: 'Email already exists'}
       }
       id = user.id
-      await conn.query('UPDATE users SET name = ?, provider = "native", is_registered = 1 WHERE id = ?', [name, id])
+      const [vault] = await conn.query('SELECT vault_id from vault_user WHERE user_id = ? LIMIT 1', [id])
+      vaultID = vault[0].vault_id
+      await conn.query('UPDATE users SET name = ?, provider = "native", last_entered_vault_id = ?, password = ?,is_registered = 1 WHERE id = ?', [name, vaultID, hash, id])
     } else{
-      [result] = await conn.query('INSERT INTO users (name, email, password, provider) VALUES (?, ?, ?, ?)', [name, email , hash, 'native'])
+      const [vault] = await conn.query('INSERT INTO vaults (name, created_at) VALUES (?, ?)', ['Default', createdAt])
+      vaultID = vault.insertId
+      const [result] = await conn.query('INSERT INTO users (name, email, password, provider, last_entered_vault_id) VALUES (?, ?, ?, ?, ?)', [name, email , hash, 'native', vaultID])
       id = result.insertId
+      await conn.query('INSERT INTO vault_user (vault_id, user_id) VALUES (?, ?)', [vaultID, id])
     }
     user = {
       id,
       name,
-      email
+      email,
+      last_entered_vault_id: vaultID
     }
     const access_token = jwt.sign(user, JWT_KEY)
     user.access_token = access_token
@@ -65,24 +73,40 @@ const signUp = async (name, email, password) => {
   }
 }
 const nativeSignIn = async (email, password) => {
+  const conn = await pool.getConnection()
   try {
-    const users = await pool.query('SELECT id, email, name, password, is_registered FROM users WHERE email = ?', [email])
+    await conn.query('START TRANSACTION')
+    const users = await conn.query('SELECT id, email, name, password, is_registered, last_entered_vault_id FROM users WHERE email = ?', [email])
     if(users[0].length === 0){
+      await conn.query('COMMIT')
       return {error: 'Email not registered'}
     } 
     const [user] = users[0]
     if (user.is_registered == 0){
-       return {error: 'Email not registered'}
+      await conn.query('COMMIT')
+      return {error: 'Email not registered'}
+    }
+    if(!user.last_entered_vault_id){
+      const createdAt = new Date().toISOString().slice(0, 19).replace('T', ' ')
+      const [vault] = await conn.query('INSERT INTO vaults (name, created_at) VALUES (?, ?)', ['Default', createdAt])
+      await conn.query('INSERT INTO vault_user (vault_id, user_id) VALUES (?, ?)', [vault.insertId, user.id])
+      await conn.query('UPDATE users SET last_entered_vault_id = ? WHERE id = ?', [vault.insertId, user.id])
+      user.last_entered_vault_id = vault.insertId
     }
     const isSame = await comparePassword(password,user.password)
     if(!isSame){
+      await conn.query('COMMIT')
       return {error: 'Wrong Password'}
     }
     user.access_token = jwt.sign(user, JWT_KEY)
+    await conn.query('COMMIT')
     return {user}
   } catch (error) {
     console.log(error)
+    conn.release()
     return {error}
+  } finally{
+    conn.release()
   }
 }
 const getVaults = async (id) => {
@@ -121,9 +145,13 @@ const deleteVault = async (userID, vaultID) => {
   const conn = await pool.getConnection()
   try{
     await conn.query('START TRANSACTION')
-    const [result] = await conn.query('DELETE FROM vault_user WHERE vault_id = ? and user_id = ?', [vaultID, userID])
+    await conn.query('DELETE FROM vault_user WHERE vault_id = ? and user_id = ?', [vaultID, userID])
+    //delete files and folders
+
     const [users] = await conn.query('SELECT user_id FROM vault_user WHERE vault_id = ?', [vaultID])
     if(users.length < 1){
+      await conn.query('DELETE files FROM files INNER JOIN folder_file ON files.id = folder_file.id WHERE folder_file.vault_id = ?', [vaultID])
+      await conn.query('DELETE FROM folder_file WHERE vault_id = ?', [vaultID])
       await conn.query('DELETE FROM vaults WHERE id = ?', [vaultID])
     }
     await conn.query('COMMIT')

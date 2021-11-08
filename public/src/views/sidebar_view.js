@@ -5,7 +5,7 @@ const signUpForm = getElement('#signup')
 const signInForm = getElement('#signin') 
 const signInError = getElement('#signin-error-message') 
 const signUpError = getElement('#signup-error-message') 
-const vaultList = getElement('#vault-list')
+const vaultList = getElement('#vault-list-sidebar')
 const vaultInput = getElement('#vault-input')
 const enterBtn = getElement('#enter-btn')
 const vaultIcon = getElement('#vault-icon')
@@ -17,6 +17,8 @@ const userEmailList = getElement('#user-email-list')
 const LeaveBtn = getElement('#leave-button')
 const saveBtn = getElement('#save-button')
 const settingError = getElement('#setting-error')
+const vaultCloseBtn = getElement('#vault-close-btn')
+const vaultModal = new bootstrap.Modal($('#vault'))
 const FORM_TYPE = {
   SIGN_IN: 0,
   SIGN_UP: 1
@@ -54,17 +56,18 @@ async function submitFormData(url, data, type) {
     }
     return false
   } else {
-    const data = await response.json()
+    const result = await response.json()
+    const data = result.data
     const storage = window.sessionStorage
-    storage.setItem('access_token', data.data.access_token)
-    storage.setItem('vault_id', DEMO_VAULT_ID)
+    storage.setItem('access_token', data.access_token)
+    storage.setItem('vault_id', data.user.last_entered_vault_id)
     if(type === FORM_TYPE.SIGN_IN){
       $('#sign-in-modal').modal('toggle');    
     } else{
       $('#sign-up-modal').modal('toggle');    
     }
+    return [data.user.last_entered_vault_id, data.access_token]
   }
-  return true
 }
 
 

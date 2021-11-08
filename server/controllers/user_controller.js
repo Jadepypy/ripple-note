@@ -27,7 +27,8 @@ const signIn = async(req, res) => {
         user: {
           id: user.id,
           name: user.name,
-          email: user.email
+          email: user.email,
+          last_entered_vault_id: user.last_entered_vault_id
         }
     }
   })
@@ -72,7 +73,8 @@ const signUp = async (req, res) => {
         user: {
           id: user.id,
           name: user.name,
-          email: user.email
+          email: user.email,
+          last_entered_vault_id: user.last_entered_vault_id
         }
     }
   })

@@ -50,6 +50,9 @@ class SocketIO {
   leaveRoom() {
     this.socket.emit('leaveRoom', this.fileID)
   }
+  disconnect(){
+    this.socket.disconnect()
+  }
   sendOperation(revisionID, opInfo) {
     this.socket.emit('operation', revisionID, opInfo) 
   }

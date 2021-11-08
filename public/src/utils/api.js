@@ -2,10 +2,11 @@
 class API {
   constructor(){
     this.tempCount = 99
-    this.API_HOST = 'http://localhost:3000/api'
+    this.API_HOST = '/api'
     this.accessToken = null
   }
   async createElement(data){
+    console.log(`${this.API_HOST}/file`)
     return fetch(`${this.API_HOST}/file`, {
       body: JSON.stringify(data),
       headers: new Headers({

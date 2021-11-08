@@ -13,9 +13,40 @@
   <script src="https://kit.fontawesome.com/6c244c09d5.js" crossorigin="anonymous"></script>
 </head>
 <body>
+<div class="modal fade" id="vault" tabindex="-1" role="dialog" aria-labelledby="exampleModalCenterTitle" aria-hidden="true">
+  <div class="modal-dialog modal-dialog-centered modal-lg" role="document">
+    <div class="modal-content">
+      <div class="modal-body" id="vault-list-modal-body">
+        <div id="vault-list-container">
 
-  <div class=" custom-container">
-    <!-- Modal -->
+<div class="list-group" id="vault-list-sidebar">
+  <a class="list-group-item list-group-item-action vault-element">
+    The current link item
+    <small class="vault-created-time">
+      2021-01-01
+    </small>
+  </a>
+  <a class="list-group-item list-group-item-action vault-element active">A second link item</a>
+  <a href="#" class="list-group-item list-group-item-action vault-element">A third link item</a>
+  <a href="#" class="list-group-item list-group-item-action vault-element">A fourth link item</a>
+</div>
+<div id="outer-input-vault-container">
+        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close" id="vault-close-btn"></button>
+<div id="new-vault-section">
+   <div class="input-group input-group-sm mb-3" id="vault-input-group">
+  <input type="text" list="vault-list" class="form-control" id="vault-input" placeholder="Create new vault">
+  <div class="input-group-append">
+    <button type="button" class="input-group-text" id="enter-btn">Enter</button></span>
+  </div>
+</div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+</div>
+</div>
+
 <div class="modal fade" id="sign-in-modal" tabindex="-1" role="dialog" aria-labelledby="exampleModalCenterTitle" aria-hidden="true">
   <div class="modal-dialog modal-dialog-centered" role="document">
     <div class="modal-content">
@@ -131,7 +162,8 @@
   
 
 </div>
-<div class="modal fade" id="vault" tabindex="-1" role="dialog" aria-labelledby="exampleModalCenterTitle" aria-hidden="true">
+
+<!-- <div class="modal fade" id="vault" tabindex="-1" role="dialog" aria-labelledby="exampleModalCenterTitle" aria-hidden="true">
   <div class="modal-dialog modal-dialog-centered" role="document" id="vault-dialog">
     <div class="modal-content">
       <div class="modal-header">
@@ -139,7 +171,7 @@
       </div>
       <div class="modal-body" id="vault-body">
 			<form id="vault-list-form">
-    <!-- <label class="vault-label" for="vault-input">Select Vault Or Create One</label> -->
+    <label class="vault-label" for="vault-input">Select Vault Or Create One</label>
         <div class="input-group input-group-sm mb-3">
   <input type="text" list="vault-list" class="form-control" id="vault-input" placeholder="Create new vault or select below">
   <div class="input-group-append">
@@ -152,10 +184,8 @@
       </div>
     </div>
   </div>
-  
-
-</div>
-
+</div> -->
+<div class="custom-container">
     <div class="sidebar">
       <span>
         <i class="fas fa-angle-double-left" data-state="0" id="arrow"></i>

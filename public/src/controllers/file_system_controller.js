@@ -6,28 +6,41 @@ class FileSystemController extends BaseController{
     super(operation, fileSystem, socketIO, api)
   }
   init() {
-    $(window).on('load', () => {
-      $('#sign-in-modal').modal({
-          backdrop: 'static',
-          keyboard: false
-      })
-      $('#sign-in-modal').modal('show')
-    })
+    // $(window).on('load', () => {
+    //   $('#vault').modal('show')
+    // })
+    // return
     const storage = window.sessionStorage
     const accessToken =  storage.getItem('access_token')
     const vaultID =  storage.getItem('vault_id')
-    if(accessToken !== null && vaultID !== null){
-      this.socketIO.init(vaultID, accessToken)
+    if (accessToken == null || vaultID == null){
+      $(window).on('load', () => {
+        $('#sign-in-modal').modal({
+            backdrop: 'static',
+            keyboard: false
+        })
+        $('#sign-up-modal').modal({
+            backdrop: 'static',
+            keyboard: false
+        })
+        $('#sign-in-modal').modal('show')
+      })
     } else{
-      this.socketIO.init(DEMO_VAULT_ID, '')
+      this.socketIO.init(vaultID, accessToken)
     }
+    //this.socketIO.init(vaultID, accessToken)
+    // if(accessToken !== null && vaultID !== null){
+    //   this.socketIO.init(vaultID, accessToken)
+    // }
+    //  else{
+    //   this.socketIO.init(DEMO_VAULT_ID, '')
+    // }
     const callbacks = {
       fileSystem: this.constructFileSystem.bind(this),
       changeName: this.changeName.bind(this),
       createFile: this.receiveNewFile.bind(this),
       moveFile: this.receiveMoveFile.bind(this),
     }
-    //console.log('start filesystem')
     this.socketIO.registerCallbacks(callbacks)
     //addEventListers: an unorthodox approach (for simplification)
     this.addNoteListClickListener()
@@ -376,36 +389,46 @@ class FileSystemController extends BaseController{
   addLogInFormListener(){
     signUpForm.addEventListener('submit', async (event) => {
       event.preventDefault()
-      const isLogIn = await submitFormData(event.target.action, event.target, FORM_TYPE.SIGN_UP)
-      if (isLogIn){
-        await this.selectVault()
-      }
+      const result = await submitFormData(event.target.action, event.target, FORM_TYPE.SIGN_UP)
+      this.socketIO.init(result[0], result[1])
     })
 
     signInForm.addEventListener('submit', async (event) => {
       event.preventDefault()
-      const isLogIn = await submitFormData(event.target.action, event.target, FORM_TYPE.SIGN_IN)
-      if (isLogIn){
-        await this.selectVault()
-      }
+      const result = await submitFormData(event.target.action, event.target, FORM_TYPE.SIGN_IN)
+      this.socketIO.init(result[0], result[1])
     })
   }
-  async selectVault(){
-    $('#vault').modal('toggle');
+  async selectVault(isForced){
     const result = await this.api.getVaults()
     const data = result.data
     if(!data.vaults){
       return
     } 
     vaultList.innerHTML = ''
-    this.vaultSet = new Set()
-    for (const vault of data.vaults){
-      const option = createElement('option', [])
-      option.value = vault.id
-      option.label = vault.created_at + '    ' + vault.name
-      this.vaultSet.add(String(vault.id))
-      vaultList.append(option)
+    //this.vaultSet = new Set()
+    const storage = window.sessionStorage
+    if(isForced){
+      vaultModal._config.backdrop = 'static'
+      vaultModal._config.keyboard = false
+      vaultCloseBtn.classList.toggle('hidden', true)
+    } else{
+      vaultModal._config.backdrop = true
+      vaultModal._config.keyboard = true
+      vaultCloseBtn.classList.toggle('hidden', false)
     }
+    for (const vault of data.vaults){
+      const a = createElement('a', ['list-group-item', 'list-group-item-action', 'vault-element'])
+      if(storage.getItem('vault_id') == vault.id){
+        a.classList.add('active')
+      }
+      a.dataset.id = vault.id
+      a.innerHTML = `${vault.name}<small class="vault-created-time">${vault.created_at}</small>`
+      a.dataset.id = vault.id
+      //this.vaultSet.add(String(vault.id))
+      vaultList.append(a)
+    }
+    $('#vault').modal('toggle');
   }
   addVaultIconListener(){
     vaultIcon.addEventListener('click', () => {
@@ -423,19 +446,27 @@ class FileSystemController extends BaseController{
       event.preventDefault()
       const vault = vaultInput.value.trim()
       if ((/^\s*$/).test(vault)){
+        vaultInput.value = ''
         return
       }
       const storage = window.sessionStorage
-      if(this.vaultSet.has(vault)){
+      const result = await this.api.createVault(vault)
+      const newVaultID = result.data.id
+      $('#vault').modal('toggle');
+      vaultInput.value = ''
+      storage.setItem('vault_id', newVaultID)
+      this.socketIO.init(newVaultID, storage.getItem('access_token'))
+      
+    })
+    vaultList.addEventListener('click', (event) => {
+      event.preventDefault()
+      const target = event.target
+      if(target.matches('.vault-element')){
+        const storage = window.sessionStorage
         $('#vault').modal('toggle');
-        storage.setItem('vault_id', vault)
-        this.socketIO.init(vault, storage.getItem('access_token'))
-      } else{
-        const result = await this.api.createVault(vault)
-        const newVaultID = result.data.id
-        $('#vault').modal('toggle');
-        storage.setItem('vault_id', newVaultID)
-        this.socketIO.init(newVaultID, storage.getItem('access_token'))
+        const vaultID = target.dataset.id
+        storage.setItem('vault_id', vaultID)
+        this.socketIO.init(vaultID, storage.getItem('access_token'))
       }
     })
   }
@@ -479,9 +510,13 @@ class FileSystemController extends BaseController{
       event.preventDefault()
       const storage = window.sessionStorage
       const vaultID =  storage.getItem('vault_id')
+      storage.removeItem('vault_id')
       await this.api.deleteVault(vaultID)
-      storage.setItem('vault_id', DEMO_VAULT_ID)
-      location.reload();
+      this.socketIO.disconnect()
+      $('#setting-modal').modal('toggle')
+      this.selectVault(true)
+      //storage.setItem('vault_id', DEMO_VAULT_ID)
+      //location.reload();
     })
   }
   addUserBtnClickListener() {
