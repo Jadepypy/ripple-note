@@ -75,6 +75,7 @@ const signUp = async (name, email, password) => {
 const nativeSignIn = async (email, password) => {
   const conn = await pool.getConnection()
   try {
+    var vault
     await conn.query('START TRANSACTION')
     const users = await conn.query('SELECT id, email, name, password, is_registered, last_entered_vault_id FROM users WHERE email = ?', [email])
     if(users[0].length === 0){
@@ -86,9 +87,13 @@ const nativeSignIn = async (email, password) => {
       await conn.query('COMMIT')
       return {error: 'Email not registered'}
     }
-    if(!user.last_entered_vault_id){
+    [vault] = await conn.query('SELECT vault_id from vault_user WHERE user_id = ? LIMIT 1', [user.id])
+    if(vault.length > 0){
+      await conn.query('UPDATE users SET last_entered_vault_id = ? WHERE id = ?', [vault[0].vault_id, user.id])
+      user.last_entered_vault_id = vault[0].vault_id
+    } else if(!user.last_entered_vault_id){
       const createdAt = new Date().toISOString().slice(0, 19).replace('T', ' ')
-      const [vault] = await conn.query('INSERT INTO vaults (name, created_at) VALUES (?, ?)', ['Default', createdAt])
+      var [vault] = await conn.query('INSERT INTO vaults (name, created_at) VALUES (?, ?)', ['Default', createdAt])
       await conn.query('INSERT INTO vault_user (vault_id, user_id) VALUES (?, ?)', [vault.insertId, user.id])
       await conn.query('UPDATE users SET last_entered_vault_id = ? WHERE id = ?', [vault.insertId, user.id])
       user.last_entered_vault_id = vault.insertId
@@ -147,6 +152,7 @@ const deleteVault = async (userID, vaultID) => {
     await conn.query('START TRANSACTION')
     await conn.query('DELETE FROM vault_user WHERE vault_id = ? and user_id = ?', [vaultID, userID])
     //delete files and folders
+    await conn.query('UPDATE users SET last_entered_vault_id = NULL WHERE id = ?', [userID])
 
     const [users] = await conn.query('SELECT user_id FROM vault_user WHERE vault_id = ?', [vaultID])
     if(users.length < 1){
