@@ -72,7 +72,7 @@ class OperationModel {
         const op2First = {...op2}
         op2First.position += 1
         op2First.count = (op1Temp.position + 1) - op2First.position
-        const op2Second = {type: OP_TYPE.DELETE, pos: op1Temp.position, count: op2.count - op2First.count} 
+        const op2Second = {type: OP_TYPE.DELETE, position: op1Temp.position, count: op2.count - op2First.count} 
         op2 = [op2First, op2Second]
       }
     } else {

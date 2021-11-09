@@ -41,6 +41,8 @@ class OperationController extends BaseController{
     this.operation.revisionID = revisionID
     let outstandingOp = this.operation.outstandingOp
     let bufferOp = this.operation.bufferOp
+    //console.log('outstanding', outstandingOp)
+    //console.log('bufferOp', bufferOp)
     if (outstandingOp.length > 0){
       this.operation.iterateOT([...outstandingOp], syncOp)
     }
@@ -63,8 +65,8 @@ class OperationController extends BaseController{
           doc = doc.substring(0, op.position + op.count) + doc.substring(op.position, doc.length)
           break;
       }
-      renderEditor(doc)
     }
+    renderEditor(doc)
   }
   addTrashIconListener(){
     trash.addEventListener('click', (event) => {

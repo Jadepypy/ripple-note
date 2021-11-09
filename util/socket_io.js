@@ -33,6 +33,7 @@ io.of(/^\/[0-9]+$/)
     console.log(`user connected on ${vaultID}`)
     const result = await getFileSystem(vaultID)
     socket.emit('fileSystem', result[0], result[1])
+
     socket.on('joinFile', async (id) => {
       socket.join(id)
       socket.fileID = id
@@ -73,20 +74,20 @@ io.of(/^\/[0-9]+$/)
       io.of(vaultID).emit('createFile', id, prevID, type, socket.id)
     })
     .on('operation', (clientRevisionID, operation) => {
-      const userID = socket.userID
-      //const vaultID = socket.nsp.name.replace('/', '')
-      const fileID = socket.fileID
-      console.log('received')
-      if(LogOp[fileID] == undefined){
-        LogOp[fileID] = []
-      }
-      const time = new Date().toISOString().slice(0, 19).replace('T', ' ')
-      let revisionID = fileArr[fileID].revisionID
-      let doc = fileArr[fileID].doc
-      console.log('files', fileArr[fileID], fileArr[fileID].doc)
-      console.log('doc', doc)
       // console.log(clientRevisionID, operation)
       setTimeout(async () => {
+        const userID = socket.userID
+        //const vaultID = socket.nsp.name.replace('/', '')
+        const fileID = socket.fileID
+        console.log('received')
+        if(LogOp[fileID] == undefined){
+          LogOp[fileID] = []
+        }
+        const time = new Date().toISOString().slice(0, 19).replace('T', ' ')
+        let revisionID = fileArr[fileID].revisionID
+        let doc = fileArr[fileID].doc
+        //console.log('files', fileArr[fileID], fileArr[fileID].doc)
+        console.log('inittial doc', doc)
         // console.log("ID", clientRevisionID, "SERVER INFO:", operation)
         if (revisionID > clientRevisionID) {
           for (let i = clientRevisionID + 1; i < LogOp[fileID].length; i++){
@@ -100,9 +101,10 @@ io.of(/^\/[0-9]+$/)
         doc = applyOperation(doc, operation)
         //console.log('pending...')
         socket.emit('ack', revisionID)
+        console.log('Sync OP', revisionID, operation)
         socket.to(socket.fileID).emit('syncOp', revisionID, operation);
         LogOp[fileID][revisionID] = operation
-        console.log(operation)
+        //console.log(operation)
         const backUpOp = operation.map((op) => {
           return [  revisionID,  
                     userID,
@@ -114,11 +116,11 @@ io.of(/^\/[0-9]+$/)
                     time
                   ]
         })
-        console.log('create Operation', fileID, revisionID, doc, operation)
-        await createOperation(fileID, revisionID, doc, backUpOp)
+        //console.log('create Operation', fileID, revisionID, operation, doc)
+        //await createOperation(fileID, revisionID, doc, backUpOp)
         fileArr[fileID].doc = doc
         fileArr[fileID].revisionID = revisionID
-      }, 0)
+      }, 3000)
     })
   })
 

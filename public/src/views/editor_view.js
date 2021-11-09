@@ -55,3 +55,12 @@ preview.addEventListener('click', () => {
   }
 })
 
+function dblClickEvt(obj) {
+  let pos = obj.selectionStart;
+  let text = obj.value;
+  let lineStart = text.lastIndexOf("\n", pos);
+  if (lineStart > 0){
+    obj.selectionStart = lineStart
+  }
+}
+

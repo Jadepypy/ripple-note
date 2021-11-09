@@ -6,35 +6,29 @@ class FileSystemController extends BaseController{
     super(operation, fileSystem, socketIO, api)
   }
   init() {
-    // $(window).on('load', () => {
-    //   $('#vault').modal('show')
-    // })
-    // return
-    const storage = window.sessionStorage
-    const accessToken =  storage.getItem('access_token')
-    const vaultID =  storage.getItem('vault_id')
-    if (accessToken == null || vaultID == null){
-      $(window).on('load', () => {
-        $('#sign-in-modal').modal({
-            backdrop: 'static',
-            keyboard: false
-        })
-        $('#sign-up-modal').modal({
-            backdrop: 'static',
-            keyboard: false
-        })
-        $('#sign-in-modal').modal('show')
-      })
-    } else{
-      this.socketIO.init(vaultID, accessToken)
-    }
-    //this.socketIO.init(vaultID, accessToken)
-    // if(accessToken !== null && vaultID !== null){
+    this.socketIO.init(1, 'abc')
+
+    ///temp start
+    // const storage = window.sessionStorage
+    // const accessToken =  storage.getItem('access_token')
+    // const vaultID =  storage.getItem('vault_id')
+    // if (accessToken == null || vaultID == null){
+    //   $(window).on('load', () => {
+    //     $('#sign-in-modal').modal({
+    //         backdrop: 'static',
+    //         keyboard: false
+    //     })
+    //     $('#sign-up-modal').modal({
+    //         backdrop: 'static',
+    //         keyboard: false
+    //     })
+    //     $('#sign-in-modal').modal('show')
+    //   })
+    // } else{
     //   this.socketIO.init(vaultID, accessToken)
     // }
-    //  else{
-    //   this.socketIO.init(DEMO_VAULT_ID, '')
-    // }
+    ///temp end
+
     const callbacks = {
       fileSystem: this.constructFileSystem.bind(this),
       changeName: this.changeName.bind(this),
