@@ -56,17 +56,31 @@ class OperationController extends BaseController{
   applyOperation(operation){
     console.log('APPLY OP:', operation)
     let doc = textarea.value
+    let currentStart = textarea.selectionStart
+    let currentEnd = textarea.selectionEnd
     for (const op of operation){
       switch (op.type) {
         case OP_TYPE.INSERT :
+          if(op.position < currentStart){
+            currentStart++
+          }
+          if(op.position < currentEnd){
+            currentEnd++
+          }
           doc = doc.substring(0, op.position) + op.key + doc.substring(op.position, doc.length)
           break;
         case OP_TYPE.DELETE :
+          if(op.position + op.count <= currentStart){
+            currentStart = op.position + op.count
+          }
+          if(op.position + op.count <= currentEnd){
+            currentEnd = op.position + op.count
+          }
           doc = doc.substring(0, op.position + op.count) + doc.substring(op.position, doc.length)
           break;
       }
     }
-    renderEditor(doc)
+    renderEditor(doc, undefined, currentStart, currentEnd)
   }
   addTrashIconListener(){
     trash.addEventListener('click', (event) => {

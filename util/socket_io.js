@@ -120,7 +120,7 @@ io.of(/^\/[0-9]+$/)
         //await createOperation(fileID, revisionID, doc, backUpOp)
         fileArr[fileID].doc = doc
         fileArr[fileID].revisionID = revisionID
-      }, 3000)
+      }, 0)
     })
   })
 

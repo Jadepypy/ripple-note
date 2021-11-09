@@ -8,11 +8,14 @@ const reminder = getElement('.reminder')
 const preview = getElement('#preview-icon')
 const previewWindow = document.querySelector('#preview-window')
 
-function renderEditor(content, name) {
+function renderEditor(content, name, currentStart, currentEnd) {
   if (name){
     noteTitle.value = name
   }
   textarea.value = content
+  if(currentEnd != undefined){
+    textarea.setSelectionRange(currentStart, currentEnd)
+  }
 }
 
 function showEditor(fileIsOpen) {
