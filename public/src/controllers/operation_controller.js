@@ -157,13 +157,28 @@ class OperationController extends BaseController{
       if(!this.keydownOn){
         return
       }
-      console.log('white space triggered')
+      if(event.key == 'Backspace' && event.ctrlKey || event.key == 'Backspace' && event.metaKey){
+        event.preventDefault()
+        event.stopPropagation()
+        return
+      }
+      if(event.keyCode == 46 && event.ctrlKey){
+        event.preventDefault()
+        event.stopPropagation()
+        return
+      }
       const indexStart = textarea.selectionStart
       const indexEnd = textarea.selectionEnd
-      //if (SPECIAL_KEYS.includes(key)) return
       let opInfo = []
       if (event.key == 'Backspace'){
         opInfo.push({type: OP_TYPE.DELETE, position: indexEnd, count: Math.min(indexStart - indexEnd, -1)})
+      }
+      if (event.keyCode == 46){
+        if(indexEnd > indexStart){
+          opInfo.push({type: OP_TYPE.DELETE, position: indexEnd, count: indexStart - indexEnd})
+        } else{
+          opInfo.push({type: OP_TYPE.DELETE, position: indexEnd + 1, count: -1})   
+        }
       }
       this.lastStart = indexStart
       this.lastEnd = indexEnd
