@@ -1,6 +1,5 @@
  
 require('dotenv').config()
-const socketIO = require("socket.io")
 const {
   getFile,
   getFileSystem,
@@ -79,7 +78,7 @@ io.of(/^\/[0-9]+$/)
         const userID = socket.userID
         //const vaultID = socket.nsp.name.replace('/', '')
         const fileID = socket.fileID
-        console.log('received')
+        console.log('received', operation)
         if(LogOp[fileID] == undefined){
           LogOp[fileID] = []
         }
@@ -120,7 +119,7 @@ io.of(/^\/[0-9]+$/)
         //await createOperation(fileID, revisionID, doc, backUpOp)
         fileArr[fileID].doc = doc
         fileArr[fileID].revisionID = revisionID
-      }, 0)
+      }, 3000)
     })
   })
 

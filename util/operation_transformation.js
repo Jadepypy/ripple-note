@@ -35,7 +35,11 @@ const applyOperation = (doc, operation) => {
   for (const op of operation){
     switch (op.type) {
       case OP_TYPE.INSERT :
-        doc = doc.substring(0, op.position) + op.key + doc.substring(op.position, doc.length)
+        let prevPart = doc.substring(0, op.position)
+        if(prevPart == ''){
+          prevPart = ' '.repeat(Math.max(op.position, 0))
+        }
+        doc = prevPart + op.key + doc.substring(op.position, doc.length)
         break;
       case OP_TYPE.DELETE :
         doc = doc.substring(0, op.position + op.count) + doc.substring(op.position, doc.length)
