@@ -38,6 +38,12 @@ class SocketIO {
       console.log('changeName', id, name)
       this.trigger('changeName', id, name)
     })
+    // this.socket.on('joinFile', (id) => {
+    //   this.trigger('joinFile', id)
+    // })
+    this.socket.on('leaveRoom', (id) => {
+      this.trigger('leaveRoom', id)
+    })
   }
   joinFile(fileID) {
     if(this.fileID !== null){

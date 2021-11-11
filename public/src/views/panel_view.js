@@ -3,6 +3,7 @@ const fileOption = getElement('#file-option')
 const searchBox = getElement('#search-box')
 const noteList = getElement('.note-list')
 const options = getElement('.options')
+const tools = getElement('.tools')
 let dragTarget = null
 // function bindClickNoteList(showHiddenFiles, titleChangeHandler, titleChangeOnNewElem, checkIsDuplicate, changeSelectedFile, moveFileHandler) {
 //   handleNoteListFocus(titleChangeOnNewElem, checkIsDuplicate, changeSelectedFile)

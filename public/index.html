@@ -259,6 +259,7 @@
     <script src="node_modules/socket.io-client/dist/socket.io.js"></script>
   <script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
     <script type="text/javascript" src="node_modules/dompurify/dist/purify.min.js"></script>
+    <script type="text/javascript" src="./src/utils/textarea-caret.js"></script>
     <script>
       const DEMO_VAULT_ID = 1
       const DATA_TYPE = {
@@ -273,10 +274,12 @@
       const OP_TYPE = {
         INSERT: 0,
         DELETE: 1,
+        RETAIN: 2,
         NOOP: -1
       }
       let domMap = {}
       const SPECIAL_KEYS = ['Alt', 'Shift', 'Meta', 'Control', 'CapsLock', 'Tab', 'ArrowDown', 'ArrowUp', 'ArrowLeft', 'ArrowRight']
+      const ARROW_KEYS = ['ArrowDown', 'ArrowUp', 'ArrowLeft', 'ArrowRight']
       const backlink = {
   name: 'backlink',
   level: 'inline',                                     // Is this a block-level or inline-level tokenizer?

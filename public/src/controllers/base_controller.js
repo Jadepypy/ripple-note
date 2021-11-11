@@ -13,6 +13,9 @@ class BaseController {
   }
 
   changeSelectedFile(file) {
+    console.log('change')
+    const storage = window.sessionStorage
+    storage.removeItem('file_id')
     if (this.fileSystem.file !== null){
       toggleTag(this.fileSystem.file, 'selected', false)
     }
@@ -26,6 +29,11 @@ class BaseController {
     this.socketIO.joinFile(file.dataset.id)
     this.operation.id = file.dataset.id
     this.operation.name = file.children[file.children.length - 1].innerText
+    storage.setItem('file_id', file.dataset.id)
+    for(const id in this.operation.carets){
+      this.operation.carets[id].remove()
+    }
+    this.operation.carets = {}
   }
   getNodeData(id){
     const node = this.fileSystem.nodeMap[id]

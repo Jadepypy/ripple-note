@@ -90,5 +90,11 @@ backlink {
   color: rgb(106, 201, 218);
   text-decoration: underline;
 }
-
+.custom-caret{
+  color: rgba(255, 0, 0, 0.274);
+  padding:1px 1px;
+  background-color: rgba(255, 0, 0, 0.274);
+  font-size: 16px;
+  position:absolute;
+}
 

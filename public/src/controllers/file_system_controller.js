@@ -6,27 +6,26 @@ class FileSystemController extends BaseController{
     super(operation, fileSystem, socketIO, api)
   }
   init() {
-    this.socketIO.init(1, 'abc')
+    //this.socketIO.init(1, 'abc')
+    const storage = window.sessionStorage
+    const accessToken =  storage.getItem('access_token')
+    const vaultID =  storage.getItem('vault_id')
+    if (accessToken == null || vaultID == null){
+      $(window).on('load', () => {
+        $('#sign-in-modal').modal({
+            backdrop: 'static',
+            keyboard: false
+        })
+        $('#sign-up-modal').modal({
+            backdrop: 'static',
+            keyboard: false
+        })
+        $('#sign-in-modal').modal('show')
+      })
+    } else{
+      this.socketIO.init(vaultID, accessToken)
+    }
 
-    ///temp start
-    // const storage = window.sessionStorage
-    // const accessToken =  storage.getItem('access_token')
-    // const vaultID =  storage.getItem('vault_id')
-    // if (accessToken == null || vaultID == null){
-    //   $(window).on('load', () => {
-    //     $('#sign-in-modal').modal({
-    //         backdrop: 'static',
-    //         keyboard: false
-    //     })
-    //     $('#sign-up-modal').modal({
-    //         backdrop: 'static',
-    //         keyboard: false
-    //     })
-    //     $('#sign-in-modal').modal('show')
-    //   })
-    // } else{
-    //   this.socketIO.init(vaultID, accessToken)
-    // }
     ///temp end
 
     const callbacks = {
@@ -50,7 +49,6 @@ class FileSystemController extends BaseController{
     this.addSaveBtnClickListener()
   }
   constructFileSystem(firstChild, fileArr) {
-    this.changeSelectedFile(null)
     showEditor(false)
     const nodeMap = {}
     domMap = {}
@@ -65,6 +63,14 @@ class FileSystemController extends BaseController{
     //console.log(nodeMap)
     this.fileSystem.buildTree(nodeMap, this.buildFileOrFolder.bind(this))
     // this.fileSystem.printTree()
+    const fileID = window.sessionStorage.getItem('file_id')
+    if(fileID != null){
+      console.log('send')
+      const file = domMap[fileID]
+      this.changeSelectedFile(file)
+    } else{
+      this.changeSelectedFile(null)
+    }
   }
   buildFileOrFolder(id, name, type, depth) {
     if (type == DATA_TYPE.FOLDER){
@@ -449,6 +455,7 @@ class FileSystemController extends BaseController{
       $('#vault').modal('toggle');
       vaultInput.value = ''
       storage.setItem('vault_id', newVaultID)
+      storage.removeItem('file_id')
       this.socketIO.init(newVaultID, storage.getItem('access_token'))
       
     })
@@ -460,6 +467,7 @@ class FileSystemController extends BaseController{
         $('#vault').modal('toggle');
         const vaultID = target.dataset.id
         storage.setItem('vault_id', vaultID)
+        storage.removeItem('file_id')
         this.socketIO.init(vaultID, storage.getItem('access_token'))
       }
     })

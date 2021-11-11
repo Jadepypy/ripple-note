@@ -1,3 +1,4 @@
+const sidebar = getElement('.sidebar')
 const arrow = getElement('#arrow')
 const panel =  getElement('.panel')
 const editorContainer = getElement('.editor-container')

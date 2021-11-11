@@ -8,6 +8,7 @@ class OperationModel {
     this.name = null
     this.revisionID = null
     this.doc = null
+    this.carets = {}
   }
 
   iterateOT (opArr1, opArr2) {

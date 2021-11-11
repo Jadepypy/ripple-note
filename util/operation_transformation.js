@@ -1,8 +1,9 @@
-let revisionID = 0
-const LogOp = []
+//let revisionID = 0
+//const LogOp = []
 const OP_TYPE = {
   INSERT: 0,
   DELETE: 1,
+  RETAIN: 2,
   NOOP: -1
 }
 
@@ -144,5 +145,5 @@ function Tdd(op1, op2){
 module.exports = {
   iterateOT,
   applyOperation,
-  transformation
+  OP_TYPE
 }

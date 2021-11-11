@@ -4,13 +4,14 @@ import BaseController from "./base_controller.js"
 class OperationController extends BaseController{
   constructor (operation, fileSystem, socketIO, api){
     super(operation, fileSystem, socketIO, api)
-
   }
   init() {
     const callbacks = {
       init: this.initializeNote.bind(this),
       ack: this.handleAcknowledgement.bind(this),
-      syncOp: this.handleSyncOperation.bind(this) 
+      syncOp: this.handleSyncOperation.bind(this),
+      joinFile: this.handleJoinFile.bind(this),
+      leaveRoom: this.handleLeaveRoom.bind(this)
     }
     this.inputOn = true
     this.keydownOn = true
@@ -26,6 +27,20 @@ class OperationController extends BaseController{
     this.operation.revisionID = revisionID
     this.operation.doc = doc
     renderEditor(doc, this.operation.name)
+  }
+  handleJoinFile(id){
+    const caret = createElement('span', ['custom-caret'])
+    caret.innerText = 'l'
+    this.operation.carets[id] = caret
+    caret.style.top = `${tools.offsetHeight + coordinate.top}px`
+    caret.style.left = `${noteList.offsetWidth + sidebar.offsetWidth + coordinate.left}px`
+    editor.appendChild(caret)
+  }
+  handleLeaveRoom(id){
+    console.log('leave room!')
+    const caret = this.operation.carets[id]
+    caret.remove()
+    delete this.operation.carets[id]
   }
 
   handleAcknowledgement(revisionID) {
@@ -87,6 +102,12 @@ class OperationController extends BaseController{
           }
           doc = doc.substring(0, op.position + op.count) + doc.substring(op.position, doc.length)
           break;
+        case OP_TYPE.RETAIN:
+          if(!this.operation.carets[op.id]){
+            this.createCaret(op.id)
+          }
+          this.setCaretLocation(op.id, op.position)
+          break
       }
     }
     renderEditor(doc, undefined, currentStart, currentEnd)
@@ -99,6 +120,14 @@ class OperationController extends BaseController{
   }
 
   addTextAreaListener() {
+    textarea.addEventListener('mouseup', () => {
+      this.handleTextAreaOperation([{type: OP_TYPE.RETAIN, position: textarea.selectionEnd, id: this.socketIO.socket.id}])
+    })
+    textarea.addEventListener('keyup', (event) => {
+      if(ARROW_KEYS.includes(event.key) || event.key == 'Backspace' || event.keyCode == 46 || event.key == 'Enter'){
+        this.handleTextAreaOperation([{type: OP_TYPE.RETAIN, position: textarea.selectionEnd, id: this.socketIO.socket.id}])      
+      }
+    })
     textarea.addEventListener('paste', (event) => {
       const indexStart = textarea.selectionStart
       const indexEnd = textarea.selectionEnd
@@ -193,18 +222,21 @@ class OperationController extends BaseController{
       }
     })
     textarea.addEventListener('input', (event) => {
+      let opInfo = []
       if(!this.inputOn){
         this.inputOn = true
+        opInfo.push({type: OP_TYPE.RETAIN, position: textarea.selectionEnd, id: this.socketIO.socket.id})
+        this.handleTextAreaOperation(opInfo)
         return
       }
       if(event.data !== null){
-        let opInfo = []
         //const indexEnd = textarea.selectionEnd
         console.log('input triggered')
         if(this.lastEnd - this.lastStart > 0){
           opInfo.push({type: OP_TYPE.DELETE, position: this.lastEnd, count: this.lastStart - this.lastEnd})
         }
         opInfo.push({type: OP_TYPE.INSERT, position: this.lastStart, key: event.data})
+        opInfo.push({type: OP_TYPE.RETAIN, position: textarea.selectionEnd, id: this.socketIO.socket.id})
         this.handleTextAreaOperation(opInfo)
       }
     })
@@ -225,6 +257,21 @@ class OperationController extends BaseController{
     //   }
     //   this.handleTextAreaOperation(opInfo)
     // })
+  }
+  createCaret(id){
+    const caret = createElement('span', ['custom-caret'])
+    caret.innerText = 'l'
+    this.operation.carets[id] = caret
+    this.setCaretLocation(id, 0)
+    console.log(caret)
+    //editor.appendChild(caret)
+  }
+  setCaretLocation(id, position){
+    const caret = this.operation.carets[id]
+    let coordinate = getCaretCoordinates(textarea, position)
+    caret.style.top = `${tools.offsetHeight + coordinate.top}px`
+    caret.style.left = `${noteList.offsetWidth + sidebar.offsetWidth + coordinate.left}px`
+    //console.log('selection', textarea.selectionEnd)
   }
   handleTextAreaOperation(opInfo){
     let state = this.operation.state

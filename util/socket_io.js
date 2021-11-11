@@ -13,7 +13,7 @@ const {
 const {
   iterateOT,
   applyOperation,
-  transformation
+  OP_TYPE
 } = require('./operation_transformation')
 const {
   DATA_TYPE
@@ -48,6 +48,7 @@ io.of(/^\/[0-9]+$/)
       socket.emit('init', revisionID, doc) 
       console.log(`user ${socket.userID} joined room ${id}`)
       console.log(`send revisionID  ${fileArr[id].revisionID} text ${fileArr[id].doc}`)
+      socket.to(socket.fileID).emit('joinFile', socket.id)
     })
     .on('changeName', async (id, name, type) => {
       if(type == DATA_TYPE.VAULT){
@@ -60,6 +61,7 @@ io.of(/^\/[0-9]+$/)
     })
     .on('leaveRoom', (id) => {
       socket.leave(id)
+      socket.to(socket.fileID).emit('leaveRoom', socket.id)
       console.log(`user ${socket.userID} left room ${id}`)
     })
     .on('moveFile', (dataArr, id, targetID) => {
@@ -104,19 +106,38 @@ io.of(/^\/[0-9]+$/)
         socket.to(socket.fileID).emit('syncOp', revisionID, operation);
         LogOp[fileID][revisionID] = operation
         //console.log(operation)
-        const backUpOp = operation.map((op) => {
-          return [  revisionID,  
-                    userID,
-                    fileID,
-                    op.type,
-                    op.position,
-                    op.count != undefined? op.count: 0,
-                    op.key != undefined? op.key: '',
-                    time
-                  ]
-        })
+        // const backUpOp = operation.map((op) => {
+        //     return [  revisionID,  
+        //               userID,
+        //               fileID,
+        //               op.type,
+        //               op.position,
+        //               op.count != undefined? op.count: 0,
+        //               op.key != undefined? op.key: '',
+        //               time
+        //             ]
+          
+        // })
+        const backUpOp = operation.reduce((result, op) => {
+          if(op.type != OP_TYPE.RETAIN){
+            result.push([  revisionID,  
+                          userID,
+                          fileID,
+                          op.type,
+                          op.position,
+                          op.count != undefined? op.count: 0,
+                          op.key != undefined? op.key: '',
+                          time
+                        ])
+          }
+          //console.log(op.type)
+          return result
+        }, [])
+        console.log('backUP', backUpOp)
         //console.log('create Operation', fileID, revisionID, operation, doc)
-        await createOperation(fileID, revisionID, doc, backUpOp)
+        if(backUpOp.length > 0){
+          await createOperation(fileID, revisionID, doc, backUpOp)
+        }
         fileArr[fileID].doc = doc
         fileArr[fileID].revisionID = revisionID
       }, 3000)
