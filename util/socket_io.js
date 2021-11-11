@@ -93,7 +93,7 @@ io.of(/^\/[0-9]+$/)
         let revisionID = fileArr[fileID].revisionID
         let doc = fileArr[fileID].doc
         //console.log('files', fileArr[fileID], fileArr[fileID].doc)
-        console.log('inittial doc', doc)
+        //console.log('inittial doc', doc)
         // console.log("ID", clientRevisionID, "SERVER INFO:", operation)
         if (revisionID > clientRevisionID) {
           for (let i = clientRevisionID + 1; i < LogOp[fileID].length; i++){

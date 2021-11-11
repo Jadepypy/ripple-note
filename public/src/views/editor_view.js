@@ -31,6 +31,7 @@ function showEditor(fileIsOpen) {
 
 function convertHtmlToMD() {
   const html = DOMPurify.sanitize(marked.parse(textarea.value), config)
+  console.log(html)
   previewWindow.innerHTML = html
 }
 

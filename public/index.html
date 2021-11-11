@@ -300,7 +300,7 @@
     return `<backlink>${this.parser.parseInline(token.backlink)}</backlink>`; // parseInline to turn child tokens into HTML
   }
 }
-marked.use({ extensions: [backlink]})
+marked.use({ extensions: [backlink], breaks: true})
 const config = {
   ADD_TAGS: ['backlink']
 }
