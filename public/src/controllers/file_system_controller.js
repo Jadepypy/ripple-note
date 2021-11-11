@@ -326,8 +326,10 @@ class FileSystemController extends BaseController{
   }
   checkValidity(node, targetNode){
     if (targetNode.id != this.fileSystem.head.id){
-      if (targetNode.parent.id == node.id)
+      if(this.fileSystem.checkIsAncestor(node, targetNode)){
+        console.log('ineffective')
         return false
+      }
       if (targetNode.next !== null && targetNode.type == DATA_TYPE.FILE){
         if(targetNode.next.id == node.id){
           console.log('ineffective')

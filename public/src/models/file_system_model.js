@@ -174,6 +174,16 @@ class FileSystemModel {
       return this.findAllChildren(node.next, ids, false)
     }
   }
+  checkIsAncestor(node, target){
+    if(target.parent.id == this.head.id){
+      return false
+    }
+    if(target.parent.id == node.id){
+      return true
+    } else{
+      return this.checkIsAncestor(node, target.parent)
+    }
+  }
   //worse O(N), have to change each child's depth
   insertUnder(node, parent) {
     if (parent.lastChild !== null){
