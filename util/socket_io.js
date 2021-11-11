@@ -5,7 +5,7 @@ const {
   getFileSystem,
   moveFile,
   changeFileName,
-  createFile
+  removeFiles
 } = require('../server/controllers/file_sytem_controller')
 const {
   createOperation
@@ -55,7 +55,7 @@ io.of(/^\/[0-9]+$/)
 
       } else{
         await changeFileName(id, name)
-        io.of(vaultID).emit('changeName', id, name)
+        io.of(vaultID).emit('changeName', id, name, socket.id)
         console.log('change name', id, name)
       }
     })
@@ -73,6 +73,11 @@ io.of(/^\/[0-9]+$/)
     .on('createFile', (id, prevID, type) => {
       console.log(id, prevID, type)
       io.of(vaultID).emit('createFile', id, prevID, type, socket.id)
+    })
+    .on('removeFiles', (id, idArr, data) => {
+      console.log('remove')
+      removeFiles(idArr, data, vaultID)
+      io.of(vaultID).emit('removeFiles', id, socket.id)
     })
     .on('operation', (clientRevisionID, operation) => {
       // console.log(clientRevisionID, operation)
@@ -133,7 +138,6 @@ io.of(/^\/[0-9]+$/)
           //console.log(op.type)
           return result
         }, [])
-        console.log('backUP', backUpOp)
         //console.log('create Operation', fileID, revisionID, operation, doc)
         if(backUpOp.length > 0){
           await createOperation(fileID, revisionID, doc, backUpOp)

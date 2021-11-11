@@ -10,7 +10,9 @@ class FileSystemController extends BaseController{
     const storage = window.sessionStorage
     const accessToken =  storage.getItem('access_token')
     const vaultID =  storage.getItem('vault_id')
-    if (accessToken == null || vaultID == null){
+    if(accessToken != null && vaultID == null){
+       this.selectVault(true)
+    } else if (accessToken == null || vaultID == null){
       $(window).on('load', () => {
         $('#sign-in-modal').modal({
             backdrop: 'static',
@@ -22,17 +24,16 @@ class FileSystemController extends BaseController{
         })
         $('#sign-in-modal').modal('show')
       })
-    } else{
+    } else {
       this.socketIO.init(vaultID, accessToken)
     }
-
-    ///temp end
 
     const callbacks = {
       fileSystem: this.constructFileSystem.bind(this),
       changeName: this.changeName.bind(this),
       createFile: this.receiveNewFile.bind(this),
       moveFile: this.receiveMoveFile.bind(this),
+      removeFiles: this.receiveRemoveFiles.bind(this)
     }
     this.socketIO.registerCallbacks(callbacks)
     //addEventListers: an unorthodox approach (for simplification)
@@ -186,7 +187,6 @@ class FileSystemController extends BaseController{
   }
   receiveNewFile(id, prevID, type) {
     const node = new Node(id, null, null, type, 'Untitled')
-    //console.log(id, prevID, type)
     if (prevID != null){
       const prevNode = this.fileSystem.nodeMap[prevID]
       this.fileSystem.insertAfter(node, prevNode)
@@ -205,6 +205,10 @@ class FileSystemController extends BaseController{
   addNoteListClickListener(){
     noteList.addEventListener('click',(event) => {
       const target = event.target
+      if(target.matches('.remove-icon-container')){
+        const id = target.parentNode.dataset.id
+        this.removeFiles(id)
+      }
       if (!target.matches('.file') && !target.matches('.folder'))
         return
       if (event.detail === 1){
@@ -250,7 +254,38 @@ class FileSystemController extends BaseController{
       this.socketIO.changeName(node.id, name, node.type)
     })
   }
-
+  removeFiles(id){
+    const node = this.fileSystem.nodeMap[id]
+    let nodeData
+    let nextID = null
+    if(node.next !== null){
+      nextID = node.next.id
+    }
+    if(node.prev !== null){
+      nodeData = {id: node.prev.id, prop: 'next_id', change_to: nextID}
+    } else{
+      if(node.parent.id == this.fileSystem.head.id){
+        nodeData = {vault_id: node.parent.id, prop: 'first_child_id', change_to: nextID}
+      } else{
+        nodeData = {id: node.parent.id, prop: 'first_child_id', change_to: nextID}        
+      }
+    }
+    const idArr = this.fileSystem.removeAll(node, [], true)
+    const file = this.fileSystem.file
+    if(file !== null){
+      const fileID = file.dataset.id
+      idArr.forEach(id => {
+        if(id == fileID){
+          this.changeSelectedFile(null)
+        }
+      })
+    }
+    this.socketIO.removeFiles(id, idArr, nodeData)
+  }
+  receiveRemoveFiles(id){
+    const node = this.fileSystem.nodeMap[id]
+    const idArr = this.fileSystem.removeAll(node, [], true)
+  }
   changeName(fileID, name) {
     //console.log(fileID, name)
     const node = this.fileSystem.nodeMap[fileID]

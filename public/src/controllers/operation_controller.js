@@ -26,6 +26,7 @@ class OperationController extends BaseController{
   initializeNote(revisionID, doc) {
     this.operation.revisionID = revisionID
     this.operation.doc = doc
+    console.log(this.operation.name)
     renderEditor(doc, this.operation.name)
   }
   handleJoinFile(id){
@@ -37,10 +38,10 @@ class OperationController extends BaseController{
     editor.appendChild(caret)
   }
   handleLeaveRoom(id){
-    console.log('leave room!')
-    const caret = this.operation.carets[id]
-    caret.remove()
-    delete this.operation.carets[id]
+    // console.log('leave room!')
+    // const caret = this.operation.carets[id]
+    // caret.remove()
+    // delete this.operation.carets[id]
   }
 
   handleAcknowledgement(revisionID) {

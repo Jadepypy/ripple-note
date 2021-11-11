@@ -95,8 +95,8 @@ const moveFile = async(dataArr, vaultID) => {
       await conn.query(sql, bind)
     }
     await conn.query('COMMIT')
-  } catch(e) {
-    console.log(e)
+  } catch(error) {
+    console.log(error)
     conn.query('ROLLBACK')
   } finally{
     await conn.release()
@@ -104,12 +104,31 @@ const moveFile = async(dataArr, vaultID) => {
 
 }
 
-const removeFile = async () => {
-
-}
-
-const removeFolder = async () => {
-
+const removeFiles = async (idArr, data, vaultID) => {
+  const conn = await pool.getConnection()
+  try{
+    await conn.query('START TRANSACTION')
+    if (data.id){
+      console.log('data', data)
+      sql = `UPDATE folder_file SET ${data.prop} = ? WHERE id = ?`
+      bind = [data.change_to, data.id]
+    } else{
+      console.log('vault', data)
+      sql = `UPDATE vaults SET ${data.prop} = ? WHERE id = ?`
+      bind = [data.change_to, vaultID]
+    }
+    await conn.query(sql, bind)
+    await conn.query('DELETE FROM folder_file WHERE id IN (?)',[idArr])
+    await conn.query('DELETE FROM files WHERE id IN (?)',[idArr])
+    await conn.query('COMMIT')
+    return {}
+  } catch(error) {
+    console.log(error)
+    conn.query('ROLLBACK')
+    return {error}
+  } finally{
+    await conn.release()
+  }
 }
 
 module.exports = {  DATA_TYPE,
@@ -118,7 +137,8 @@ module.exports = {  DATA_TYPE,
                     moveFile,
                     changeFileName,
                     insertFileAfter,
-                    insertFileUnderRoot
+                    insertFileUnderRoot,
+                    removeFiles
 }
 
 

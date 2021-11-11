@@ -21,6 +21,7 @@ class BaseController {
     }
     this.fileSystem.file = file
     if (file === null){
+      showEditor(false)
       return
     } else {
       showEditor(true)
@@ -28,7 +29,7 @@ class BaseController {
     toggleTag(file, 'selected', true)
     this.socketIO.joinFile(file.dataset.id)
     this.operation.id = file.dataset.id
-    this.operation.name = file.children[file.children.length - 1].innerText
+    this.operation.name = file.children[file.children.length - 2].innerText
     storage.setItem('file_id', file.dataset.id)
     for(const id in this.operation.carets){
       this.operation.carets[id].remove()

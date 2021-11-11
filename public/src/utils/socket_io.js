@@ -34,15 +34,21 @@ class SocketIO {
         this.trigger('moveFile', id, targetID)
       }
     })
-    this.socket.on('changeName', (id, name) => {
-      console.log('changeName', id, name)
-      this.trigger('changeName', id, name)
+    this.socket.on('changeName', (id, name, socketID) => {
+      if (this.socket.id != socketID){
+        this.trigger('changeName', id, name)
+      }
     })
     // this.socket.on('joinFile', (id) => {
     //   this.trigger('joinFile', id)
     // })
     this.socket.on('leaveRoom', (id) => {
       this.trigger('leaveRoom', id)
+    })
+    this.socket.on('removeFiles', (id, socketID) => {
+      if (this.socket.id != socketID){
+        this.trigger('removeFiles', id)
+      }
     })
   }
   joinFile(fileID) {
@@ -70,6 +76,9 @@ class SocketIO {
   }
   createFile(id, prevID, type){
     this.socket.emit('createFile', id, prevID, type)
+  }
+  removeFiles(id, idArr, nodeData){
+    this.socket.emit('removeFiles', id, idArr, nodeData)
   }
   registerCallbacks(cb) {
     this.callbacks = {...this.callbacks, ...cb}

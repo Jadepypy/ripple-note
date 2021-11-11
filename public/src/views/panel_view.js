@@ -153,7 +153,7 @@ function renderPanel() {
 
 }
 function createFolderOrFile(type, id, prevID, depth) {
-  console.log(id, prevID)
+  //console.log(id, prevID)
   let element, p
   let paddingLeft = depth*15
   if(type === DATA_TYPE.FOLDER){
@@ -174,6 +174,9 @@ function createFolderOrFile(type, id, prevID, depth) {
   element.style.paddingLeft= `${paddingLeft}px`
   p.innerText = 'Untitled'
   element.appendChild(p)
+  const div = createElement('div', ['remove-icon-container'])
+  div.innerHTML = `<i class="fas fa-times remove-icon"></i>`
+  element.appendChild(div)
   const prevDom = domMap[prevID]
   if(prevDom){
     noteList.insertBefore(element, prevDom.nextSibling)
@@ -229,7 +232,8 @@ function buildFolder(id, name) {
   folder.dataset.id = id
   folder.setAttribute('draggable', true)
   folder.innerHTML = `<i class="fas fa-sort-down sort-down-icon"></i>
-                        <p class="folder-title" contenteditable="false" dataset-placehoder="Untitled">${name}</p>`
+                        <p class="folder-title" contenteditable="false" dataset-placehoder="Untitled">${name}</p>
+                        <div class="remove-icon-container"><i class="fas fa-times remove-icon"></i></div>`
   noteList.appendChild(folder)
   return folder
 }
@@ -238,7 +242,7 @@ function buildFile(id, name) {
   const file = createElement('li', ['file', 'draggable'])
   file.dataset.id = id
   file.setAttribute('draggable', true)
-  file.innerHTML = `<p class="file-title" dataset-placehoder="Untitled" contenteditable="false">${name}</p>`
+  file.innerHTML = `<p class="file-title" dataset-placehoder="Untitled" contenteditable="false">${name}</p><div class="remove-icon-container"><i class="fas fa-times remove-icon"></i></div>`
   noteList.appendChild(file) 
   return file 
 }

@@ -115,6 +115,21 @@ class FileSystemModel {
       node.parent.firstChild = node
     }
   }
+  removeAll(node, idArr, isFirst) {
+    idArr.push(node.id)
+    domMap[node.id].remove()
+    delete domMap[node.id]
+    if(isFirst){
+      this.remove(node)
+    }
+    if(node.firstChild !== null){
+      this.removeAll(node.firstChild, idArr, false)
+    } 
+    if(!isFirst && node.next !== null){
+      return this.removeAll(node.next, idArr, false)
+    }
+    return idArr 
+  }
   //self including all children removed
   remove(node) {
     const prev = node.prev

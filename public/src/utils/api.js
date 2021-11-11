@@ -6,7 +6,7 @@ class API {
     this.accessToken = null
   }
   async createElement(data){
-    console.log(`${this.API_HOST}/file`)
+    //console.log(`${this.API_HOST}/file`)
     return fetch(`${this.API_HOST}/file`, {
       body: JSON.stringify(data),
       headers: new Headers({

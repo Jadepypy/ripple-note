@@ -47,11 +47,21 @@ const getFile = async (fileID) => {
     return {error: result.error}
   }
   const file = result.file
-  console.log(file)
   if(!file){
     return {error: 'Database query error'}
   } 
   return {revisionID: file.revision_id, doc: file.text}
+}
+
+const removeFiles = async (idArr, nodeData, vaultID) => {
+  if(idArr.length == 0){
+    return
+  }
+  const result = await FileSystem.removeFiles(idArr, nodeData, vaultID)
+  if (result.error){
+    return {error: result.error}
+  }
+  return
 }
 
 module.exports =  { 
@@ -60,4 +70,5 @@ module.exports =  {
                     getFile,
                     moveFile,
                     changeFileName,
+                    removeFiles
 }
