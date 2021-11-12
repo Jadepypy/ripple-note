@@ -7,7 +7,7 @@ const {
   deleteVault,
   signIn,
   signUp,
-  signOut
+  getUserProfile
 } = require('../controllers/user_controller')
 
 router.route('/user/vaults')
@@ -18,8 +18,8 @@ router.route('/user/signin')
     .post(signIn)
 router.route('/user/signup')
     .post(signUp)
-router.route('/user/signout')
-    .get(signOut)
+router.route('/user/profile')
+    .get(httpAuthenticate, wrapAsync(getUserProfile))
 router.route('/user/vault/:id')
     .delete(httpAuthenticate, wrapAsync(deleteVault))
 

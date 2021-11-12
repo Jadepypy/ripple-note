@@ -79,6 +79,19 @@ const signUp = async (req, res) => {
     }
   })
 }
+const getUserProfile = async (req, res) => {
+  if (!req.user){
+    res.status(400).send({error:'Wrong Request'})
+    return  
+  }
+  const user = req.user
+  res.status(200).send({
+    data : {
+      name: user.name,
+      email: user.email
+    }
+  })
+}
 const getVaults = async (req, res) => {
   if (!req.user){
     res.status(400).send({error:'Wrong Request'})
@@ -192,10 +205,6 @@ const changeVaultName = async(req, res) => {
   res.sendStatus(200)
 }
 
-const signOut = async(req, res) => {
-
-}
-
 module.exports =  { 
                     getVaults,
                     getVault,
@@ -203,7 +212,7 @@ module.exports =  {
                     createVault,
                     addVaultUser,
                     changeVaultName,
+                    getUserProfile,
                     signIn,
                     signUp,
-                    signOut
 }

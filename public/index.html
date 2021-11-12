@@ -163,6 +163,29 @@
 
 </div>
 
+<div class="modal fade" id="user-profile-modal" tabindex="-1" role="dialog" aria-labelledby="exampleModalCenterTitle" aria-hidden="true">
+  <div class="modal-dialog modal-dialog-centered" role="document">
+    <div class="modal-content">
+      <div class="modal-header">
+        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+      </div>
+      <div class="modal-body">
+      <h2 class="modal-title mt-0">User Profile</h2>
+            <form>
+      	<div class="user-name-container form-group">
+					<label for="user-name">Name</label>
+					<input name="text" type="text" id="user-name" class="form-control form-control-sm" readonly>
+				</div>
+				<div class="user-email-container form-group">
+					<label for="user-email-data">Email</label>
+					<input name="email" type="email" id="user-email-data" class="form-control form-control-sm" readonly>
+				</div>
+				<button type="button" class="btn btn-block" id="sign-out-button">Sign Out</button>
+        			</form>
+      </div>
+    </div>
+  </div>
+</div>
 <!-- <div class="modal fade" id="vault" tabindex="-1" role="dialog" aria-labelledby="exampleModalCenterTitle" aria-hidden="true">
   <div class="modal-dialog modal-dialog-centered" role="document" id="vault-dialog">
     <div class="modal-content">
@@ -198,7 +221,7 @@
         </a>
       </span>
       <span class="user-circle-span">
-        <a data-bs-toggle="modal" data-bs-target="#sign-in-modal">
+        <a data-bs-toggle="modal" data-bs-target="#user-profile-modal">
        <i class="fas fa-user-circle" id="user-circle"></i></a>
       </span>
        <span>

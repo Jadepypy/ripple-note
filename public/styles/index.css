@@ -81,25 +81,25 @@ a{
   display: flex;
   align-items: center;
 }
-#setting-body, #vault-body{
+/* #setting-body, #vault-body{
   padding-left: 40px;
   padding-right: 40px; 
-}
-#vault-body{
+} */
+/* #vault-body{
   padding-top: 21px;
-}
+} */
 /* .modal{
   background-color: #f6f8f4;
 } */
 .btn-close{
   font-size: 10px;
 }
-#setting-dialog, #vault-dialog{
+/* #setting-dialog, #vault-dialog{
   max-width: 600px;
   min-height: 550px;
-}
+} */
 #sign-in-button, #sign-up-button, 
-#leave-button, #save-button {
+#leave-button, #save-button,  #sign-out-button{
   color: #f6f8f4;
   margin-top: 8px;
   margin-bottom: 10px;

@@ -20,6 +20,10 @@ const saveBtn = getElement('#save-button')
 const settingError = getElement('#setting-error')
 const vaultCloseBtn = getElement('#vault-close-btn')
 const vaultModal = new bootstrap.Modal($('#vault'))
+const userName = getElement('#user-name')
+const userEmail = getElement('#user-email-data')
+const userCircle = getElement('#user-circle')
+const signOutBtn =  getElement('#sign-out-button')
 const FORM_TYPE = {
   SIGN_IN: 0,
   SIGN_UP: 1
@@ -71,6 +75,12 @@ async function submitFormData(url, data, type) {
   }
 }
 
+//add event listeners without need of controller functions
+signOutBtn.addEventListener('click', () => {
+  const storage = window.sessionStorage
+  storage.clear()
+  location.reload()
+})
 
 
 

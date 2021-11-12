@@ -48,6 +48,7 @@ class FileSystemController extends BaseController{
     this.addUserBtnClickListener()
     this.addVaultNameInputBlurListener()
     this.addSaveBtnClickListener()
+    this.addUserIconClinkListener()
   }
   constructFileSystem(firstChild, fileArr) {
     showEditor(false)
@@ -609,6 +610,14 @@ class FileSystemController extends BaseController{
         await this.api.addVaultUsers(data)
       }
       $('#setting-modal').modal('toggle')
+    })
+  }
+  addUserIconClinkListener(){
+    userCircle.addEventListener('click', async () => {
+      const result = await this.api.getUserProfile()
+      const data = result.data
+      userName.value = data.name
+      userEmail.value = data.email
     })
   }
 

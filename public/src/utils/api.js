@@ -106,6 +106,24 @@ class API {
       return response.json();
     })
   }
+  getUserProfile(){
+    const storage = window.sessionStorage
+    const accessToken = storage.getItem('access_token')
+    return fetch(`${this.API_HOST}/user/profile`, {
+      headers: new Headers({
+        Authorization: `Bearer ${accessToken}`,
+      }),
+    }).then((response) => {
+      console.log(response)
+      if (response.status === 401) {
+        throw new Error('請先登入');
+      }
+      if (response.status === 403) {
+        throw new Error('內容錯誤或權限不足');
+      }
+      return response.json();
+    })
+  }
   addVaultUsers(data){
     const storage = window.sessionStorage
     const accessToken = storage.getItem('access_token')
