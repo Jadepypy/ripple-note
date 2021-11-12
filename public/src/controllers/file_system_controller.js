@@ -67,7 +67,7 @@ class FileSystemController extends BaseController{
     // this.fileSystem.printTree()
     const fileID = window.sessionStorage.getItem('file_id')
     if(fileID != null){
-      console.log('send')
+      //console.log('send')
       const file = domMap[fileID]
       this.changeSelectedFile(file)
     } else{
@@ -224,7 +224,6 @@ class FileSystemController extends BaseController{
             this.changeFolderIcon(target, false)
             this.showHiddenFiles(target.dataset.id, false, true)
           } else if (target.matches('.file')) {
-            target.classList.toggle('selected', true)
             this.changeSelectedFile(target)
           }
         } else if (event.detail === 2){
@@ -297,9 +296,9 @@ class FileSystemController extends BaseController{
   }
   addNoteListDragListener() {
     noteList.addEventListener('dragend', (e) => {
-      //console.log(dragTarget)
+      console.log(dragTarget)
         e.target.classList.remove('dragging')
-        if (dragTarget !== null){
+        if (dragTarget !== null && dragTarget != undefined){
           if (dragTarget.matches('.note-list')){
             this.moveFile(e.target.dataset.id, this.fileSystem.head.id, true, true)
             return
@@ -328,17 +327,17 @@ class FileSystemController extends BaseController{
   checkValidity(node, targetNode){
     if (targetNode.id != this.fileSystem.head.id){
       if(this.fileSystem.checkIsAncestor(node, targetNode)){
-        console.log('ineffective')
+        console.log('ineffective1')
         return false
       }
       if (targetNode.next !== null && targetNode.type == DATA_TYPE.FILE){
         if(targetNode.next.id == node.id){
-          console.log('ineffective')
+          console.log('ineffective2')
           return false
         }
       } else if(targetNode.firstChild !== null && targetNode.type == DATA_TYPE.FOLDER) {
         if(targetNode.firstChild.id == node.id){
-          console.log('ineffective')
+          console.log('ineffective3')
           return false
         }
       }
@@ -511,7 +510,7 @@ class FileSystemController extends BaseController{
     })
   }
   addSettingIconListener(){
-    console.log(settingIcon)
+    //console.log(settingIcon)
     settingIcon.addEventListener('click', async () => {
       const storage = window.sessionStorage
       if(storage.getItem('access_token') !== null){
@@ -593,20 +592,20 @@ class FileSystemController extends BaseController{
   }
   addSaveBtnClickListener() {
     saveBtn.addEventListener('click', async (event) => {
-      console.log('click')
+      //console.log('click')
       event.preventDefault()
       const storage = window.sessionStorage
       const vaultID = storage.getItem('vault_id')
       if(this.vaultNameChanged){
         await this.api.changeVaultName(vaultID, {name: this.vaultName})
       }
-      console.log(this.newVaultUserEmails.size)
+      //console.log(this.newVaultUserEmails.size)
       if(this.newVaultUserEmails.size > 0){
         const data = {
           vault_id: vaultID,
           emails: [...this.newVaultUserEmails]
         }
-        console.log(data)
+        //console.log(data)
         await this.api.addVaultUsers(data)
       }
       $('#setting-modal').modal('toggle')

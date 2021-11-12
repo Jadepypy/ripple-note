@@ -2,11 +2,18 @@
 // import {backlink, config} from "../utils/utils.js"
 const noteTitle = getElement('#note-title')
 const textarea = getElement('#note')
-const trash = getElement('#trash-icon')
+//const trash = getElement('#trash-icon')
 const editor = getElement('.editor')
 const reminder = getElement('.reminder')
 const preview = getElement('#preview-icon')
 const previewWindow = document.querySelector('#preview-window')
+const textAreaContainer = document.querySelector('.textarea-container')
+
+$(window).on('load', () => {
+  $('.linked').scroll(function(){
+    $('.linked').scrollTop($(this).scrollTop());    
+  })
+})
 
 function renderEditor(content, name, currentStart, currentEnd) {
   if (name){
@@ -31,7 +38,7 @@ function showEditor(fileIsOpen) {
 
 function convertHtmlToMD() {
   const html = DOMPurify.sanitize(marked.parse(textarea.value), config)
-  console.log(html)
+  //console.log(html)
   previewWindow.innerHTML = html
 }
 

@@ -138,13 +138,13 @@ io.of(/^\/[0-9]+$/)
           //console.log(op.type)
           return result
         }, [])
-        //console.log('create Operation', fileID, revisionID, operation, doc)
+        //console.log('create Operation', fileID, revisionID, operatin, doc)
         if(backUpOp.length > 0){
           await createOperation(fileID, revisionID, doc, backUpOp)
         }
         fileArr[fileID].doc = doc
         fileArr[fileID].revisionID = revisionID
-      }, 3000)
+      }, 0)
     })
   })
 

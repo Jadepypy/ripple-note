@@ -20,13 +20,13 @@ class OperationController extends BaseController{
     this.lastEnd = 0
     this.socketIO.registerCallbacks(callbacks)
     //addEventListers: an unorthodox approach (for simplification)
-    this.addTrashIconListener()
+    //this.addTrashIconListener()
     this.addTextAreaListener()
   }
   initializeNote(revisionID, doc) {
     this.operation.revisionID = revisionID
     this.operation.doc = doc
-    console.log(this.operation.name)
+    //console.log(this.operation.name)
     renderEditor(doc, this.operation.name)
   }
   handleJoinFile(id){
@@ -113,12 +113,12 @@ class OperationController extends BaseController{
     }
     renderEditor(doc, undefined, currentStart, currentEnd)
   }
-  addTrashIconListener(){
-    trash.addEventListener('click', (event) => {
-      showEditor(false)
-      this.changeSelectedFile(null)
-    })
-  }
+  // addTrashIconListener(){
+  //   trash.addEventListener('click', (event) => {
+  //     showEditor(false)
+  //     this.changeSelectedFile(null)
+  //   })
+  // }
 
   addTextAreaListener() {
     textarea.addEventListener('mouseup', () => {
@@ -133,7 +133,7 @@ class OperationController extends BaseController{
       const indexStart = textarea.selectionStart
       const indexEnd = textarea.selectionEnd
       let opInfo = []
-      console.log('paste triggered')
+      //console.log('paste triggered')
       this.inputOn = false
       let paste = (event.clipboardData || window.clipboardData).getData('text')
       //console.log(paste.length, textarea.selectionEnd)
@@ -147,7 +147,7 @@ class OperationController extends BaseController{
       this.handleTextAreaOperation(opInfo)
     })
     textarea.addEventListener('cut', () => {
-      console.log('cut triggered')
+      //console.log('cut triggered')
       this.inputOn = false
       let opInfo = []
       const indexStart = textarea.selectionStart
@@ -158,19 +158,19 @@ class OperationController extends BaseController{
       this.handleTextAreaOperation(opInfo)
     })
     textarea.addEventListener('compositionstart', () => {
-      console.log('compositionstart triggered')
+      //console.log('compositionstart triggered')
       this.inputOn = false
       this.keydownOn = false
       this.lastStart = textarea.selectionStart
       this.lastEnd = textarea.selectionEnd
     }) 
     textarea.addEventListener('compositionupdate', () => {
-      console.log('compositionupdate triggered')
+      //console.log('compositionupdate triggered')
       this.keydownOn = false
       this.inputOn = false
     }) 
     textarea.addEventListener('compositionend', (event) => {
-      console.log('compositionend triggered')
+      //console.log('compositionend triggered')
       let opInfo = []
       if(this.lastEnd - this.lastStart > 0){
         opInfo.push({type: OP_TYPE.DELETE, position: this.lastEnd, count: this.lastStart - this.lastEnd})
@@ -232,7 +232,7 @@ class OperationController extends BaseController{
       }
       if(event.data !== null){
         //const indexEnd = textarea.selectionEnd
-        console.log('input triggered')
+        //console.log('input triggered')
         if(this.lastEnd - this.lastStart > 0){
           opInfo.push({type: OP_TYPE.DELETE, position: this.lastEnd, count: this.lastStart - this.lastEnd})
         }
@@ -264,8 +264,8 @@ class OperationController extends BaseController{
     caret.innerText = 'l'
     this.operation.carets[id] = caret
     this.setCaretLocation(id, 0)
-    console.log(caret)
-    //editor.appendChild(caret)
+    //console.log(caret)
+    //textAreaContainer.appendChild(caret)
   }
   setCaretLocation(id, position){
     const caret = this.operation.carets[id]

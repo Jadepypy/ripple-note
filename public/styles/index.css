@@ -6,9 +6,9 @@
 body {
   background: #f6f8f4;
   margin: 0;
-  padding:0;
+  padding: 0;
 }
-a{
+a {
   cursor: pointer;
 }
 .custom-container {
@@ -19,7 +19,7 @@ a{
   margin: 0;
 }
 .note-container {
-  grid-area: main; 
+  grid-area: main;
 }
 .modal-header {
   background-color: #f6f8f4;
@@ -28,56 +28,62 @@ a{
   margin-bottom: 0;
   padding-bottom: 0;
 }
-.modal-body{
+.modal-body {
   color: #7e7b7b;
   background-color: #f6f8f4;
   padding-top: 0;
   padding-left: 40px;
-  padding-right: 40px; 
+  padding-right: 40px;
 }
-.form-group{
+.form-group {
   margin-bottom: 15px;
   margin-top: 15px;
   margin-bottom: 15px;
 }
-label, option, .sign-up{
+label,
+option,
+.sign-up {
   color: #7e7b7b;
-  font-family: monospace;
+  font-family: Trebuchet MS;
 }
-.modal-title{ 
+.modal-title {
   margin-top: 35px;
   font-size: 24px;
-  font-weight:700;
-  font-family: monospace;
+  font-weight: 700;
+  font-family: Trebuchet MS;
   color: #7e7b7b;
 }
-button{
-  font-family: monospace;
+button {
+  font-family: Trebuchet MS;
 }
-#vault-input, .input-group-text, 
-#vault-name, #add-user-input {
+#vault-input,
+.input-group-text,
+#vault-name,
+#add-user-input {
   color: #7e7b7b;
-  font-family: monospace;
+  font-family: Trebuchet MS;
 }
-#vault-name{
+#vault-name {
   font-size: 16px;
 }
 /* #add-input-label{
   margin-top: 15px;
 } */
-#vault-input:focus, #add-user-input:focus,
+#vault-input:focus,
+#add-user-input:focus,
 #vault-name {
   box-shadow: none;
   outline: 0 none;
 }
-#add-user-input, #add-user-btn{
+#add-user-input,
+#add-user-btn {
   height: 31px;
 }
-a{
-  text-decoration:none;
+a {
+  text-decoration: none;
   color: #7e7b7b;
 }
-.footer-container{
+.footer-container {
   display: flex;
   align-items: center;
 }
@@ -91,15 +97,18 @@ a{
 /* .modal{
   background-color: #f6f8f4;
 } */
-.btn-close{
+.btn-close {
   font-size: 10px;
 }
 /* #setting-dialog, #vault-dialog{
   max-width: 600px;
   min-height: 550px;
 } */
-#sign-in-button, #sign-up-button, 
-#leave-button, #save-button,  #sign-out-button{
+#sign-in-button,
+#sign-up-button,
+#leave-button,
+#save-button,
+#sign-out-button {
   color: #f6f8f4;
   margin-top: 8px;
   margin-bottom: 10px;
@@ -110,23 +119,24 @@ a{
   padding-right: 15px;
   background-color: #7e7b7b;
 }
-#save-button{
+#save-button {
   width: 78px;
-  margin-top: 30px
+  margin-top: 30px;
 }
-#leave-button{
+#leave-button {
   background-color: rgba(255, 0, 0, 0.774);
 }
-#sign-up-trigger, #sign-in-trigger{
+#sign-up-trigger,
+#sign-in-trigger {
   padding-left: 9px;
-  color:rgb(106, 201, 218);
+  color: rgb(106, 201, 218);
 }
-#enter-btn{
+#enter-btn {
   color: #f6f8f4;
-  background-color:rgb(106, 201, 218);
+  background-color: rgb(106, 201, 218);
   border-radius: 0px 0px;
 }
-.vault-label{
+.vault-label {
   font-size: 20px;
 }
 
@@ -140,7 +150,7 @@ a{
   overflow: scroll;
   margin: 0;
   padding: 0;
-  border: 2px solid #ccc; 
+  border: 2px solid #ccc;
   font-size: 16px;
   font-family: Arial, sans-serif;
   -webkit-overflow-scrolling: touch;
@@ -150,9 +160,9 @@ li.user-email {
   height: 30px;
   padding: 5px 20px;
   color: #7e7b7b;
-  font-family: monospace;
+  font-family: Trebuchet MS;
   background-color: #ffffff;
-  border-bottom: 1px solid #ccc; 
+  border-bottom: 1px solid #ccc;
 }
 /* li.user-email:last-child {
   border-bottom: none;
@@ -160,21 +170,21 @@ li.user-email {
 li.user-email:nth-child(even) {
   background: #eeeeee;
 }
-small{
+small {
   color: #7e7b7b;
-  font-family: monospace;
+  font-family: Trebuchet MS;
 }
-.error-message{
+.error-message {
   color: rgba(255, 0, 0, 0.774);
 }
 
-#vault-list-modal-body{
+#vault-list-modal-body {
   margin: 0;
   padding: 0;
   width: 800px;
   height: 400px;
 }
-#vault-list-container{
+#vault-list-container {
   margin: 0;
   padding: 0;
   width: 100%;
@@ -183,10 +193,10 @@ small{
   grid-template-columns: 300px auto;
   grid-template-areas: "side main";
 }
-#vault-list-header{
+#vault-list-header {
   width: 800px;
 }
-#vault-list-sidebar{
+#vault-list-sidebar {
   grid-area: side;
   border-radius: 0px;
   border-top: 1px solid #e1e1e1;
@@ -194,7 +204,7 @@ small{
   background: transparent;
   overflow: auto;
 }
-.vault-element{
+.vault-element {
   width: 300px;
   height: 80px;
   border: none;
@@ -205,44 +215,44 @@ small{
   flex-wrap: wrap;
   background: transparent;
   color: #7e7b7b;
-  font-family: monospace;
+  font-family: Trebuchet MS;
   font-size: 18px;
   justify-content: space-around;
 }
 /* .vault-element:nth-child(even){
   background-color: #fff;
 } */
-#new-vault-section{
+#new-vault-section {
   height: 93%;
   display: flex;
   align-items: center;
   padding: 15px;
 }
-.vault-element.active{
+.vault-element.active {
   border: none;
   border-bottom: 1px solid #e1e1e1;
   border-right: 1px solid #e1e1e1;
   background-color: rgba(165, 231, 245, 0.322);
   color: #7e7b7b;
 }
-#vault-input-group{
+#vault-input-group {
   width: 100%;
   text-align: center;
 }
-#outer-input-vault-container{
+#outer-input-vault-container {
   text-align: end;
 }
-#vault-input{
+#vault-input {
   font-size: 18px;
   width: 150px;
 }
-#vault-close-btn{
+#vault-close-btn {
   margin: 10px;
 }
-#new-vault-section{
+#new-vault-section {
   grid-area: main;
 }
-.vault-created-time{
+.vault-created-time {
   pointer-events: none;
 }
 @media only screen and (min-width: 768px) {

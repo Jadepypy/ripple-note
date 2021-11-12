@@ -105,7 +105,7 @@ function handleNoteListDragEvent(moveFileHandler, showHiddenFiles) {
               target.classList.toggle('opened', true)
               showHiddenFiles(target.dataset.id, false, true)
             } else if (target.matches('.file')) {
-              target.classList.toggle('selected', true)
+              //target.classList.toggle('selected', true)
               changeSelectedFile(target)
             }
           } else if (event.detail === 2){
@@ -287,11 +287,30 @@ noteList.addEventListener('dragenter', (e) => {
   if(e.target.matches('.dragging')){
     return
   } else if (e.target.matches('.folder') || e.target.matches('.file')){
-    e.target.classList.add('entered')
     dragTarget = e.target
+    console.log(dragTarget)
+    e.target.classList.add('entered')
   }
-  console.log(dragTarget)
 })
+
+noteList.addEventListener('dragover', (event) => {
+  const element = getDragAfterElement(event.clientY)
+  if(element){
+    dragTarget = element
+  }
+})
+function getDragAfterElement(y) {
+  const draggableElements = [...noteList.querySelectorAll('.draggable:not(.dragging)')]
+  return draggableElements.reduce((closest, child) => {
+    const box = child.getBoundingClientRect()
+    const offset = y - box.top - box.height / 2
+    if (offset > 0 && offset < closest.offset && offset < box.height) {
+      return { offset: offset, element: child }
+    } else {
+      return closest
+    }
+  }, {offset: Number.POSITIVE_INFINITY}).element
+}
 document.addEventListener('dragleave', (e) => {
   if(e.target.matches('.dragging')){
     return
@@ -299,10 +318,9 @@ document.addEventListener('dragleave', (e) => {
     e.target.classList.remove('entered')
   } else if (e.target.matches('.note-list')){
     dragTarget = noteList
-  } else{
-     dragTarget = null
   }
 })
+
 
 
 
