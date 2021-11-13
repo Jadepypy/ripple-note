@@ -2,7 +2,7 @@
 // import {backlink, config} from "../utils/utils.js"
 const noteTitle = getElement('#note-title')
 const textarea = getElement('#note')
-//const trash = getElement('#trash-icon')
+const trash = getElement('#trash-icon')
 const editor = getElement('.editor')
 const reminder = getElement('.reminder')
 const preview = getElement('#preview-icon')

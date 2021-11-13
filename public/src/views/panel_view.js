@@ -95,7 +95,7 @@ function createFolderOrFile(type, id, prevID, depth) {
   p.innerText = 'Untitled'
   element.appendChild(p)
   const div = createElement('div', ['remove-icon-container'])
-  div.innerHTML = `<i class="fas fa-times remove-icon"></i>`
+  div.innerHTML = `<i class="fas fa-trash remove-icon"></i>`
   element.appendChild(div)
   const prevDom = domMap[prevID]
   if(prevDom){
@@ -115,7 +115,7 @@ function buildFolder(id, name) {
   folder.setAttribute('draggable', true)
   folder.innerHTML = `<i class="fas fa-sort-down sort-down-icon"></i>
                         <p class="folder-title" contenteditable="false" dataset-placehoder="Untitled">${name}</p>
-                        <div class="remove-icon-container"><i class="fas fa-times remove-icon"></i></div>`
+                        <div class="remove-icon-container"><i class="fas fa-trash remove-icon"></i></div>`
   noteList.appendChild(folder)
   return folder
 }
@@ -124,7 +124,7 @@ function buildFile(id, name) {
   const file = createElement('li', ['file', 'draggable'])
   file.dataset.id = id
   file.setAttribute('draggable', true)
-  file.innerHTML = `<p class="file-title" dataset-placehoder="Untitled" contenteditable="false">${name}</p><div class="remove-icon-container"><i class="fas fa-times remove-icon"></i></div>`
+  file.innerHTML = `<p class="file-title" dataset-placehoder="Untitled" contenteditable="false">${name}</p><div class="remove-icon-container"><i class="fas fa-trash remove-icon"></i></div>`
   noteList.appendChild(file) 
   return file 
 }

@@ -22,7 +22,7 @@ class API {
         throw new Error('內容錯誤或權限不足');
       }
       const result = await res.json()
-      console.log(result)
+      //console.log(result)
       return result.id
     })
   }
@@ -36,7 +36,7 @@ class API {
         Authorization: `Bearer ${accessToken}`,
       }),
     }).then((response) => {
-      console.log(response)
+      //console.log(response)
       if (response.status === 401) {
         throw new Error('請先登入');
       }
@@ -55,7 +55,7 @@ class API {
         Authorization: `Bearer ${accessToken}`,
       }),
     }).then((response) => {
-      console.log(response)
+      //console.log(response)
       if (response.status === 401) {
         throw new Error('請先登入');
       }
@@ -75,7 +75,7 @@ class API {
       }),
       method: 'DELETE',
     }).then((response) => {
-      console.log(response)
+      //console.log(response)
       if (response.status === 401) {
         throw new Error('請先登入');
       }
@@ -96,7 +96,7 @@ class API {
       }),
       method: 'POST',
     }).then((response) => {
-      console.log(response)
+      //console.log(response)
       if (response.status === 401) {
         throw new Error('請先登入');
       }
@@ -114,7 +114,7 @@ class API {
         Authorization: `Bearer ${accessToken}`,
       }),
     }).then((response) => {
-      console.log(response)
+      //console.log(response)
       if (response.status === 401) {
         throw new Error('請先登入');
       }
@@ -127,7 +127,7 @@ class API {
   addVaultUsers(data){
     const storage = window.sessionStorage
     const accessToken = storage.getItem('access_token')
-    console.log(data)
+    //console.log(data)
     return fetch(`${this.API_HOST}/vault/users`, {
       body: JSON.stringify(data),
       headers: new Headers({
@@ -136,7 +136,7 @@ class API {
       }),
       method: 'POST',
     }).then((response) => {
-      console.log(response)
+      //console.log(response)
       if (response.status === 401) {
         throw new Error('請先登入');
       }
@@ -149,7 +149,7 @@ class API {
   changeVaultName(vaultID, data){
     const storage = window.sessionStorage
     const accessToken = storage.getItem('access_token')
-    console.log(data)
+    //console.log(data)
     return fetch(`${this.API_HOST}/vault/${vaultID}`, {
       body: JSON.stringify(data),
       headers: new Headers({
@@ -158,7 +158,7 @@ class API {
       }),
       method: 'PATCH',
     }).then((response) => {
-      console.log(response)
+      //console.log(response)
       if (response.status === 401) {
         throw new Error('請先登入');
       }

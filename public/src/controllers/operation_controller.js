@@ -20,7 +20,7 @@ class OperationController extends BaseController{
     this.lastEnd = 0
     this.socketIO.registerCallbacks(callbacks)
     //addEventListers: an unorthodox approach (for simplification)
-    //this.addTrashIconListener()
+    this.addTrashIconListener()
     this.addTextAreaListener()
   }
   initializeNote(revisionID, doc) {
@@ -113,12 +113,12 @@ class OperationController extends BaseController{
     }
     renderEditor(doc, undefined, currentStart, currentEnd)
   }
-  // addTrashIconListener(){
-  //   trash.addEventListener('click', (event) => {
-  //     showEditor(false)
-  //     this.changeSelectedFile(null)
-  //   })
-  // }
+  addTrashIconListener(){
+    trash.addEventListener('click', (event) => {
+      showEditor(false)
+      this.changeSelectedFile(null)
+    })
+  }
 
   addTextAreaListener() {
     textarea.addEventListener('mouseup', () => {

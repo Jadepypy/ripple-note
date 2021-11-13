@@ -461,8 +461,9 @@ class FileSystemController extends BaseController{
       vaultModal._config.keyboard = true
       vaultCloseBtn.classList.toggle('hidden', false)
     }
-    if(data.vaults.length > 0){
-      vaultList.innerHTML = ''
+    vaultList.innerHTML = ''
+    if(data.vaults.length == 0){
+      vaultList.innerHTML = `<h4 style="text-align: center; padding-top: 50px;">No existing vault</h4>`
     }
     for (const vault of data.vaults){
       const a = createElement('a', ['list-group-item', 'list-group-item-action', 'vault-element'])

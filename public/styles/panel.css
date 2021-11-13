@@ -139,6 +139,7 @@ p:empty:not(:focus)::before {
   position: absolute;
   right: 7px; */
   -webkit-text-stroke: 1.7px #eeeeee;
+  color: #a8a4a4;
 }
 .remove-icon-container {
   z-index: 100;
