@@ -76,12 +76,22 @@ function createFolderOrFile(type, id, prevID, depth) {
   //console.log(id, prevID)
   let element, p
   let paddingLeft = depth*15
+  const div = createElement('div', ['dropdown','remove-icon-container'])
+  div.innerHTML = `
+    <button class="btn mx-0 shadow-none" type="button" id="dropdownMenuButton" data-bs-toggle="dropdown" aria-expanded="false">
+      <i class="fas fa-ellipsis-v" id="dot-icon"></i></button>`
   if(type === DATA_TYPE.FOLDER){
     element = createElement('li', ['folder', 'opened', 'draggable'])
     element.innerHTML = `<i class="fas fa-sort-down sort-down-icon"></i>`
     p = createElement('p', ['folder-title'])
     element.setAttribute('draggable', true)
     element.dataset.type = DATA_TYPE.FOLDER
+    div.innerHTML += `<ul class="dropdown-menu" aria-labelledby="dropdownMenuButton" data-id="${id}">
+    <li><a class="dropdown-item" id="remove-btn">Remove</a></li>
+    <li><a class="dropdown-item" id="rename-btn">Rename</a></li>
+    <li><a class="dropdown-item" id="new-note">New Note</a></li>
+    <li><a class="dropdown-item" id="new-folder">New Folder</a></li>
+  </ul>`
   } else {
     paddingLeft += 5
     element = createElement('li', ['file', 'draggable'])
@@ -89,13 +99,14 @@ function createFolderOrFile(type, id, prevID, depth) {
     p = createElement('p', ['file-title'])
 
     element.dataset.type = DATA_TYPE.FILE
+    div.innerHTML += `<ul class="dropdown-menu" aria-labelledby="dropdownMenuButton" data-id="${id}">
+    <li><a class="dropdown-item" id="remove-btn">Remove</a></li>
+    <li><a class="dropdown-item" id="rename-btn">Rename</a></li></ul>`
   }
   element.dataset.id = id
   element.style.paddingLeft= `${paddingLeft}px`
   p.innerText = 'Untitled'
   element.appendChild(p)
-  const div = createElement('div', ['remove-icon-container'])
-  div.innerHTML = `<i class="fas fa-trash remove-icon"></i>`
   element.appendChild(div)
   const prevDom = domMap[prevID]
   if(prevDom){
@@ -115,7 +126,17 @@ function buildFolder(id, name) {
   folder.setAttribute('draggable', true)
   folder.innerHTML = `<i class="fas fa-sort-down sort-down-icon"></i>
                         <p class="folder-title" contenteditable="false" dataset-placehoder="Untitled">${name}</p>
-                        <div class="remove-icon-container"><i class="fas fa-trash remove-icon"></i></div>`
+                        <div class="remove-icon-container btn-group dropend">
+                        <button class="btn mx-0 px-0 shadow-none" type="button" id="dropdownMenuButton" data-bs-toggle="dropdown" aria-expanded="false">
+                          <i class="fas fa-ellipsis-v" id="dot-icon"></i>
+                        </button>
+                        <ul class="dropdown-menu" aria-labelledby="dropdownMenuButton" data-id="${id}">
+                          <li><a class="dropdown-item" id="remove-btn">Remove</a></li>
+                          <li><a class="dropdown-item" id="rename-btn">Rename</a></li>
+                          <li><a class="dropdown-item" id="new-note">New Note</a></li>
+                          <li><a class="dropdown-item" id="new-folder">New Folder</a></li>
+                        </ul>
+                        </div>`
   noteList.appendChild(folder)
   return folder
 }
@@ -124,7 +145,16 @@ function buildFile(id, name) {
   const file = createElement('li', ['file', 'draggable'])
   file.dataset.id = id
   file.setAttribute('draggable', true)
-  file.innerHTML = `<p class="file-title" dataset-placehoder="Untitled" contenteditable="false">${name}</p><div class="remove-icon-container"><i class="fas fa-trash remove-icon"></i></div>`
+  file.innerHTML = `<p class="file-title" dataset-placehoder="Untitled" contenteditable="false">${name}</p>
+                    <div class="remove-icon-container dropdown dropstart">
+                      <button class="btn mx-0 px-0 shadow-none" type="button" id="dropdownMenuButton" data-bs-toggle="dropdown" aria-expanded="false">
+                        <i class="fas fa-ellipsis-v" id="dot-icon"></i>
+                      </button>
+                      <ul class="dropdown-menu" aria-labelledby="dropdownMenuButton" data-id="${id}">
+                        <li><a class="dropdown-item" id="remove-btn">Remove</a></li>
+                        <li><a class="dropdown-item" id="rename-btn">Rename</a></li>
+                      </ul>
+                    </div>`
   noteList.appendChild(file) 
   return file 
 }
@@ -202,6 +232,8 @@ document.addEventListener('dragleave', (e) => {
     dragTarget = noteList
   }
 })
+
+
 
 
 

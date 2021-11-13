@@ -1,6 +1,7 @@
 import BaseController from "./base_controller.js"
 import {Node} from '../utils/utils.js'
 
+
 class FileSystemController extends BaseController{
   constructor (operation, fileSystem, socketIO, api){
     super(operation, fileSystem, socketIO, api)
@@ -118,6 +119,10 @@ class FileSystemController extends BaseController{
       } else{
         element.style.display = ''
       }
+    } else{
+      element.classList.toggle('opened', !isHiding)
+      element.classList.toggle('closed', isHiding)
+      this.changeFolderIcon(element, isHiding)
     }
     if (node.firstChild !== null && (isFirst ||isHiding)){
       this.showHiddenFiles(node.firstChild.id, isHiding)
@@ -146,10 +151,35 @@ class FileSystemController extends BaseController{
         domMap[id] = element
       }
     })
+    noteList.addEventListener('click', async (event) => {
+      const target = event.target
+      //console.log('event', event.target)
+     if(target.matches('#new-note')){
+        let element
+        const targetID = target.parentNode.parentNode.dataset.id
+        let [id, prevID, depth] = await this.createFileOrFolder(DATA_TYPE.FILE, targetID)
+        element = createFolderOrFile(DATA_TYPE.FILE, id, prevID, depth)
+        this.changeSelectedFile(element)
+        domMap[id] = element
+        this.showHiddenFiles(targetID, false, true)
+        event.stopPropagation()
+        return
+      }
+      if(target.matches('#new-folder')){
+        let element
+        const targetID = target.parentNode.parentNode.dataset.id
+        let [id, prevID, depth] = await this.createFileOrFolder(DATA_TYPE.FOLDER, targetID)
+        element = createFolderOrFile(DATA_TYPE.FOLDER, id, prevID, depth)
+        domMap[id] = element
+        this.showHiddenFiles(targetID, false, true)
+        event.stopPropagation()
+        return
+      }
+    })
   }
-  async createFileOrFolder(type){
+  async createFileOrFolder(type, targetID){
     const vaultID = this.socketIO.vaultID
-    let node, prevID, id
+    let node, prevID, parentID, id
     let data = {
                   new:  {
                     type,
@@ -157,13 +187,25 @@ class FileSystemController extends BaseController{
                     vault_id: vaultID
                   }
                 }
-    if(this.fileSystem.file !== null){
+    if(targetID){
+      parentID = targetID
+      const parentNode = this.fileSystem.nodeMap[parentID]
+      if (parentNode.firstChild !== null){
+        data.new['next_id'] = parentNode.firstChild.id
+      }
+      data['parent'] = parentNode.id
+      id = await this.api.createElement({data})
+      node = new Node(id, null, null, type, 'Untitled')
+      prevID = parentID
+      this.fileSystem.insertUnderAsFirstChild(node, parentNode)
+    }else if(this.fileSystem.file !== null){
       prevID = this.fileSystem.file.dataset.id
       const prevNode = this.fileSystem.nodeMap[prevID]
       data['prev'] = prevNode.id
       if (prevNode.next !== null){
         data.new['next_id'] = prevNode.next.id
       }
+      this.openAncestors(prevNode)
       id = await this.api.createElement({data})
       node = new Node(id, null, null, type, 'Untitled')
       this.fileSystem.insertAfter(node, prevNode)
@@ -204,11 +246,23 @@ class FileSystemController extends BaseController{
   }
 
   addNoteListClickListener(){
-    noteList.addEventListener('click',(event) => {
+    noteList.addEventListener('click', (event) => {
       const target = event.target
-      if(target.matches('.remove-icon-container')){
-        const id = target.parentNode.dataset.id
+      if(target.matches('#remove-btn')){
+        const id = target.parentNode.parentNode.dataset.id
+        console.log(id)
         this.removeFiles(id)
+        return
+      }
+      if(target.matches('#rename-btn')){
+        const id = target.parentNode.parentNode.dataset.id
+        const p = getElement('p', domMap[id])
+        this.selectedName = p.innerText
+        p.style['pointer-events'] = 'auto'
+        p.setAttribute("contenteditable", true)
+        p.focus()
+        this.addBlurListener(p)
+        return
       }
       if (!target.matches('.file') && !target.matches('.folder'))
         return
@@ -232,7 +286,7 @@ class FileSystemController extends BaseController{
           p.style['pointer-events'] = 'auto'
           p.setAttribute("contenteditable", true)
           this.addBlurListener(p)
-      }
+        }
     })
   }
 
@@ -307,16 +361,12 @@ class FileSystemController extends BaseController{
         if(element === null){
           return
         }
-        // if(target.matches('.folder.opened')&& e.target.matches('.folder.closed')){
-        //   e.target.style.display = ''
-        //   this.showHiddenFiles(e.target.dataset.id, false, true)
-        // } else if(target.matches('.folder.closed')&& e.target.matches('.folder.opened')) {
-        //   element.style.display = 'none'
-        //   element.classList.remove('opened')
-        //   element.classList.add('closed')
-        //   // console.log('current', e.target)
-        //   this.showHiddenFiles(e.target.dataset.id, true, true)
-        // }
+        this.showHiddenFiles(e.target.dataset.id, true, true)
+        if(dragTarget.matches('.folder.closed')){
+          this.showHiddenFiles(dragTarget.dataset.id, true, true)
+        } else if(dragTarget.matches('.folder.opened')) {
+          this.showHiddenFiles(dragTarget.dataset.id, false, true)
+        }
       }
       dragTarget = null
     })
@@ -400,6 +450,16 @@ class FileSystemController extends BaseController{
     }
     return element
     //this.fileSystem.printTree()
+  }
+  openAncestors(node){
+    console.log('enter node', node.id, node.parent.id)
+    if(node.type == DATA_TYPE.FOLDER){
+      this.showHiddenFiles(node.id, false, true)
+    }
+    if(node.parent.id !== this.fileSystem.head.id){
+      return this.openAncestors(node.parent)
+    }
+    return
   }
   sendMoveMessage(node, targetNode){
     let before, after

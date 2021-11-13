@@ -7,6 +7,8 @@ const createFile = async(req, res) => {
   let id
   if(data.prev){
     id = await FileSystem.insertFileAfter(newFile, data['prev'], data.new.type)
+  } else if (data.parent) {
+    id = await FileSystem.insertFileUnder(newFile, data['parent'], data.new.type)
   } else{
     id = await FileSystem.insertFileUnderRoot(newFile, newFile.vault_id, data.new.type)
   }

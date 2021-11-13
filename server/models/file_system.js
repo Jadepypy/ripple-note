@@ -50,6 +50,25 @@ const insertFileAfter = async (newFile, prevID, type) => {
   }
 }
 
+const insertFileUnder = async (newFile, parentID, type) => {
+  const conn = await pool.getConnection()
+  try{
+    conn.query('START TRANSACTION')
+    const [result] = await conn.query('INSERT INTO folder_file SET ?', newFile)
+    if(type == DATA_TYPE.FILE){
+      await conn.query('INSERT INTO files (id, revision_id, text) VALUES (?, ?, ?)', [result.insertId, 0, ""])
+    }
+    await conn.query('UPDATE folder_file SET first_child_id = ? WHERE id = ?', [result.insertId, parentID])
+    await conn.query('COMMIT')
+    return result.insertId
+  } catch(e) {
+    console.log(e)
+    conn.query('ROLLBACK')
+  } finally{
+    await conn.release()
+  }
+}
+
 const insertFileUnderRoot = async (newFile, vaultID, type) => {
   const conn = await pool.getConnection()
   try{
@@ -138,6 +157,7 @@ module.exports = {  DATA_TYPE,
                     changeFileName,
                     insertFileAfter,
                     insertFileUnderRoot,
+                    insertFileUnder,
                     removeFiles
 }
 

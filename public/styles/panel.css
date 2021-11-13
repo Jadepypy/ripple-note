@@ -78,7 +78,6 @@
   color: #7e7b7b;
   pointer-events: none;
 }
-
 .folder,
 .file {
   list-style-type: none;
@@ -147,7 +146,22 @@ p:empty:not(:focus)::before {
   margin: 0;
   padding: 0;
   position: absolute;
-  right: 7px;
+  right: 1px;
+  text-align: right;
+}
+#dropdownMenuButton{
+  border:0px; 
+  outline:0px;
+  background: none;
+	color: inherit;
+	border: none;
+	padding: 0;
+	font: inherit;
+	cursor: pointer;
+	outline: inherit;
+}
+#dot-icon{
+  text-align: right;
 }
 .file.selected .remove-icon {
   -webkit-text-stroke: 1.7px #f6f8f4;
@@ -173,6 +187,25 @@ p:empty:not(:focus)::before {
 .selected:hover {
   background-color: #f6f8f4;
 }
+.dropdown-menu {
+  margin-left: -18px !important;
+  background-color: #f6f8f4;
+}
+
+.dropdown-item{
+  font-family: Trebuchet MS;
+  color: #7e7b7b;
+}
+#dot-icon{
+  -webkit-text-stroke: 1.7px #eee;
+}
+.entered #dot-icon{
+  -webkit-text-stroke: 1.7px rgba(216, 231, 233, 0.753);
+}
+.selected #dot-icon{
+  -webkit-text-stroke: 1.7px #f6f8f4;;
+}
+
 
 /* .folder .remove-icon-container{
   display: none;
