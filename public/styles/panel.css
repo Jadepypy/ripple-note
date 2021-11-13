@@ -72,14 +72,6 @@
   overflow-y: auto;
   padding: 0;
 }
-.note-tools {
-  background-color: #f6f8f4;
-  border-bottom: 1px solid #e1e1e1;
-  text-align: right;
-  margin: 0;
-  padding-left: 5px;
-  line-height: 50px;
-}
 .sort-down-icon,
 .remove-icon {
   margin-right: 10px;

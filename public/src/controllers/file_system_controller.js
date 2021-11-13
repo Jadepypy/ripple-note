@@ -36,7 +36,7 @@ class FileSystemController extends BaseController{
       removeFiles: this.receiveRemoveFiles.bind(this)
     }
     this.socketIO.registerCallbacks(callbacks)
-    //addEventListers: an unorthodox approach (for simplification)
+    //addEventListers: an unorthodox approach to put under controller (for simplification)
     this.addNoteListClickListener()
     this.addOptionsListener()
     this.addNoteListDragListener()
@@ -296,30 +296,30 @@ class FileSystemController extends BaseController{
   }
   addNoteListDragListener() {
     noteList.addEventListener('dragend', (e) => {
-      console.log(dragTarget)
-        e.target.classList.remove('dragging')
-        if (dragTarget !== null && dragTarget != undefined){
-          if (dragTarget.matches('.note-list')){
-            this.moveFile(e.target.dataset.id, this.fileSystem.head.id, true, true)
-            return
-          }
-          const element = this.moveFile(e.target.dataset.id, dragTarget.dataset.id, true, true)
-          if(element === null){
-            return
-          }
-          // if(target.matches('.folder.opened')&& e.target.matches('.folder.closed')){
-          //   e.target.style.display = ''
-          //   this.showHiddenFiles(e.target.dataset.id, false, true)
-          // } else if(target.matches('.folder.closed')&& e.target.matches('.folder.opened')) {
-          //   element.style.display = 'none'
-          //   element.classList.remove('opened')
-          //   element.classList.add('closed')
-          //   // console.log('current', e.target)
-          //   this.showHiddenFiles(e.target.dataset.id, true, true)
-          // }
+      //console.log(dragTarget)
+      e.target.classList.remove('dragging')
+      if (dragTarget !== null && dragTarget != undefined){
+        if (dragTarget.matches('.note-list')){
+          this.moveFile(e.target.dataset.id, this.fileSystem.head.id, true, true)
+          return
         }
-        dragTarget = null
-      })
+        const element = this.moveFile(e.target.dataset.id, dragTarget.dataset.id, true, true)
+        if(element === null){
+          return
+        }
+        // if(target.matches('.folder.opened')&& e.target.matches('.folder.closed')){
+        //   e.target.style.display = ''
+        //   this.showHiddenFiles(e.target.dataset.id, false, true)
+        // } else if(target.matches('.folder.closed')&& e.target.matches('.folder.opened')) {
+        //   element.style.display = 'none'
+        //   element.classList.remove('opened')
+        //   element.classList.add('closed')
+        //   // console.log('current', e.target)
+        //   this.showHiddenFiles(e.target.dataset.id, true, true)
+        // }
+      }
+      dragTarget = null
+    })
   }
   receiveMoveFile(id, targetID){
     this.moveFile(id, targetID, true, false)
@@ -390,6 +390,14 @@ class FileSystemController extends BaseController{
       paddingLeft += 5
     }
     element.style.paddingLeft= `${paddingLeft}px`
+    if(node.parent.id == this.fileSystem.head.id){
+      element.style.display = ''
+    }
+    if(this.fileSystem.file != null){
+      if(this.fileSystem.file.dataset.id == id){
+        this.fileSystem.file = domMap[id]
+      }
+    }
     return element
     //this.fileSystem.printTree()
   }
@@ -442,7 +450,6 @@ class FileSystemController extends BaseController{
     if(!data.vaults){
       return
     } 
-    vaultList.innerHTML = ''
     //this.vaultSet = new Set()
     const storage = window.sessionStorage
     if(isForced){
@@ -453,6 +460,9 @@ class FileSystemController extends BaseController{
       vaultModal._config.backdrop = true
       vaultModal._config.keyboard = true
       vaultCloseBtn.classList.toggle('hidden', false)
+    }
+    if(data.vaults.length > 0){
+      vaultList.innerHTML = ''
     }
     for (const vault of data.vaults){
       const a = createElement('a', ['list-group-item', 'list-group-item-action', 'vault-element'])

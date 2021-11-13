@@ -58,86 +58,6 @@ function handleNoteListDragEvent(moveFileHandler, showHiddenFiles) {
     target = null
   })
 }
-// function changeFolderIcon(isOpen){
-
-
-// }
-// function handleNoteListFocus(titleChangeOnNewElem, checkIsDuplicate, changeSelectedFile) {
-//     noteList.addEventListener('focusin', (e) => {
-//       if(e.target.matches('#new')){
-//         const p = e.target
-//         p.addEventListener('blur', async () => {
-//           p.innerText = p.innerText.trim()
-//           p.style['pointer-events'] = 'none'
-//           p.setAttribute("contenteditable", false)
-//           if (p.innerText.length === 0 || (/^\s+$/).test(p.innerText)){
-//             p.parentNode.remove()
-//             toggleOptionFunctionality(true)
-//             changeSelectedFile(null)
-//             return
-//           } else {
-//             if(checkIsDuplicate(p.innerText, p.dataset.parent, p.parentNode.dataset.type, true)){
-//               alert('There\'s already a file with the same name')
-//               p.parentNode.remove()
-//               toggleOptionFunctionality(true)
-//               return
-//             }
-//             p.removeAttribute('id')
-//             await titleChangeOnNewElem(p.parentNode, p.innerText, p.parentNode.dataset.type, p.dataset.parent, p.dataset.prev)
-//           }
-//           toggleOptionFunctionality(true)
-//         }, {once: true})
-//       }
-//     })
-//   }
- function handleNoteListClick(showHiddenFiles, titleChangeHandler, checkIsDuplicate, changeSelectedFile) {
-    noteList.addEventListener('click',(event) => {
-      const target = event.target
-      if (!target.matches('.file') && !target.matches('.folder'))
-        return
-        if (event.detail === 1){
-            if (target.matches('.folder.opened')){
-              target.classList.toggle('opened', false)
-              target.classList.toggle('closed', true)
-              showHiddenFiles(target.dataset.id, true, true)
-            } else if (target.matches('.folder.closed')) {
-              target.classList.toggle('closed', false)
-              target.classList.toggle('opened', true)
-              showHiddenFiles(target.dataset.id, false, true)
-            } else if (target.matches('.file')) {
-              //target.classList.toggle('selected', true)
-              changeSelectedFile(target)
-            }
-          } else if (event.detail === 2){
-            const p = getElement('p', target)
-            selectedElementName = p.innerText
-            p.style['pointer-events'] = 'auto'
-            p.setAttribute("contenteditable", true);
-            p.addEventListener('blur', (e) => {
-              p.innerText = p.innerText.trim()
-              console.log(p.innerText.trim())
-              p.style['pointer-events'] = 'none'
-              p.setAttribute("contenteditable", false)
-              if (p.innerText.length === 0 || (/^\s+$/).test(p.innerText)){
-                  p.innerText = selectedElementName
-              } else {
-                if (checkIsDuplicate(p.innerText, null, p.parentNode.dataset.type, false, p.parentNode.dataset.id)) {
-                  alert('There\'s already a file with the same name')
-                  p.innerText = selectedElementName
-                } else{
-                  titleChangeHandler(target.dataset.id, p.innerText)
-                }  
-              }
-            })
-        }
-      noteList.addEventListener('keypress', (event) => {
-        if (event.target.matches('p')){
-          if (event.keyCode === 13)
-            event.target.blur()
-        }
-      }) 
-    })
-  }
 function bindClickFolderOptions(newFolderhandler){
   folderOption.addEventListener('click', () => {
     newFolderhandler()
@@ -164,7 +84,7 @@ function createFolderOrFile(type, id, prevID, depth) {
     element.dataset.type = DATA_TYPE.FOLDER
   } else {
     paddingLeft += 5
-    element = createElement('li', ['file', 'selected', 'draggable'])
+    element = createElement('li', ['file', 'draggable'])
     element.setAttribute('draggable', true)
     p = createElement('p', ['file-title'])
 
@@ -188,44 +108,6 @@ function createFolderOrFile(type, id, prevID, depth) {
   p.focus()
   return element
 }
-  // function createNewFolder(prevID) {
-  //   const folder = createElement('li', ['folder', 'opened', 'draggable'])
-  //   folder.innerHTML = `<i class="fas fa-sort-down sort-down-icon"></i>`
-  //   const p = createElement('p', ['folder-title'])
-  //   // p.dataset.placeholder = 'Untitled'
-  //   p.dataset.parent = parentID
-  //   p.dataset.prev = prevDom !== null? prevDom.dataset.id: null
-  //   folder.appendChild(p)
-  //   folder.setAttribute('draggable', true)
-  //   if (prevDom !== null){
-  //     noteList.insertBefore(folder, prevDom.nextSibling)
-  //   } else{
-  //     noteList.appendChild(folder)
-  //   }
-  //   toggleOptionFunctionality(false)
-  //   p.setAttribute("contenteditable", true)
-  //   p.setAttribute("id", "new")
-  //   p.focus()
-  //   return folder
-  // }
-  // function createNewFile(prevDom, parentID) {
-  //   const file = createElement('li', ['file', 'selected', 'draggable'])
-  //   const p = createElement('p', ['file-title'])
-  //   p.dataset.parent = parentID
-  //   p.dataset.prev = prevDom !== null? prevDom.dataset.id: null
-  //   file.appendChild(p)
-  //   file.setAttribute('draggable', true)
-  //   if (prevDom !== null){
-  //     noteList.insertBefore(file, prevDom.nextSibling)
-  //   } else{
-  //     noteList.appendChild(file)
-  //   }
-  //   toggleOptionFunctionality(false)
-  //   p.setAttribute("contenteditable", true)
-  //   p.setAttribute("id", "new")
-  //   p.focus()
-  //   return file
-  // }
 
 function buildFolder(id, name) {
   const folder = createElement('li', ['folder', 'opened', 'draggable'])
@@ -281,14 +163,14 @@ noteList.addEventListener('keypress', (event) => {
   }
 }) 
 noteList.addEventListener('dragstart', (e) => {
-  e.target.classList.add("dragging");      
+  e.target.classList.add("dragging");     
 })
 noteList.addEventListener('dragenter', (e) => {
   if(e.target.matches('.dragging')){
     return
   } else if (e.target.matches('.folder') || e.target.matches('.file')){
     dragTarget = e.target
-    console.log(dragTarget)
+    //console.log(dragTarget)
     e.target.classList.add('entered')
   }
 })

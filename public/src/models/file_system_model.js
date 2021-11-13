@@ -29,56 +29,7 @@ class FileSystemModel {
     }
     this.buildNode(this.head, 0, null, {'-1': null})
     //this.printTree()
-    //console.log('map', this.nodeMap)
   }
-  //find the previous node_id of the new folder/file, a bit tricky since js doesn't support insertAftr
-  // getDataBeforeInsertion() {
-  //   if (this.file !== null){
-  //     const prevNode = this.nodeMap[this.file.dataset.id]
-  //     if (prevNode.next !== null || prevNode.firstChild !== null){
-  //       return [this.file, prevNode, prevNode.parent]
-  //     } else if (prevNode.parent.next !== null){
-  //       return [domMap[prevNode.id], prevNode, prevNode.parent]
-  //     }  
-  //     else{
-  //       return [null, prevNode, prevNode.parent]
-  //     }
-  //   } else if (this.head.lastChild !== null){
-  //     const lastChild = this.head.lastChild
-  //     if (lastChild.lastChild !== null){
-  //       const lastDescendant = this.getLastDescendant(lastChild)
-  //           console.log(lastDescendant.id)
-
-  //       return [domMap[lastDescendant.id], lastChild, this.head]
-  //     } else if (lastChild.next !== null) {
-  //       return [domMap[lastChild.id], lastChild, this.head]
-  //     } else {
-  //       return [null, lastChild, this.head]
-  //     }
-  //   }
-  //   return [null, null, this.head.id]
-  // }
-  // insertAfterNode(node) {
-  //   if(node.next !== null){
-  //       const nextID = node.next.id
-  //       this.noteList.insertBefore(element, this.nodeMap.domMap[nextID])
-  //   } else if (node.parent.next !== null){
-  //     const nextID = node.parent.next
-  //     this.noteList.insertBefore(element, this.nodeMap.domMap[nextID])
-  //   } else {
-  //     this.noteList.appendChild(element)
-  //   }
-  // }
-  // getLastDescendant(node, lastDescendant) {
-  //   if (node.lastChild !== null){
-  //     lastDescendant = this.getLastDescendant(node.lastChild)
-  //   } else{
-  //     lastDescendant = node
-  //   }
-  //   return lastDescendant
-  // }
-
-  //rewrite to tail recursion, though chrome no longer supports
   getLastDescendant(node) {
     if (node.lastChild !== null){
       return this.getLastDescendant(node.lastChild)

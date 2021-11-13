@@ -13,12 +13,12 @@ class BaseController {
   }
 
   changeSelectedFile(file) {
-    console.log('change')
-    const storage = window.sessionStorage
-    storage.removeItem('file_id')
-    if (this.fileSystem.file !== null){
+    //console.log('change', this.fileSystem.file)
+    if (this.fileSystem.file != null){
       toggleTag(this.fileSystem.file, 'selected', false)
     }
+    const storage = window.sessionStorage
+    storage.removeItem('file_id')
     this.fileSystem.file = file
     if (file === null){
       showEditor(false)

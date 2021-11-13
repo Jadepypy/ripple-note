@@ -1,4 +1,3 @@
-import AppController from './controllers/app_controller.js'
 // import NoteController from './controllers/file_system_controller'
 import FileSystemModel from './models/file_system_model.js'
 import PanelModel from './models/panel_model.js'
@@ -15,16 +14,6 @@ const operationModel = new OperationModel()
 const fileSystemModel = new FileSystemModel()
 const socketIO = new SocketIO()
 const api = new Api()
-// const app = new AppController(
-//   operationModel,
-//   fileSystemModel,
-//   new PanelModel(),
-//   // sidebarView,
-//   // panelView,
-//   // editorView,
-//   socketIO,
-//   api
-// )
 const operationController = new OperationController(  operationModel,
                                                       fileSystemModel,
                                                       socketIO,
