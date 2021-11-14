@@ -151,11 +151,15 @@ class FileSystemController extends BaseController{
       if(target.matches('#folder-option')){
         let [id, prevID, depth] = await this.createFileOrFolder(DATA_TYPE.FOLDER)
         element = createFolderOrFile(DATA_TYPE.FOLDER, id, prevID, depth)
+        const p = getElement('p', element)
+        p.focus()
         domMap[id] = element
       }
       else if (target.matches('#file-option')){
         let [id, prevID, depth] = await this.createFileOrFolder(DATA_TYPE.FILE)
         element = createFolderOrFile(DATA_TYPE.FILE, id, prevID, depth)
+        const p = getElement('p', element)
+        p.focus()
         this.changeSelectedFile(element)
         domMap[id] = element
       }
@@ -170,6 +174,8 @@ class FileSystemController extends BaseController{
         element = createFolderOrFile(DATA_TYPE.FILE, id, prevID, depth)
         this.changeSelectedFile(element)
         domMap[id] = element
+        const p = getElement('p', element)
+        p.focus()
         this.showHiddenFiles(targetID, false, true)
         event.stopPropagation()
         return
@@ -180,6 +186,8 @@ class FileSystemController extends BaseController{
         let [id, prevID, depth] = await this.createFileOrFolder(DATA_TYPE.FOLDER, targetID)
         element = createFolderOrFile(DATA_TYPE.FOLDER, id, prevID, depth)
         domMap[id] = element
+        const p = getElement('p', element)
+        p.focus()
         this.showHiddenFiles(targetID, false, true)
         event.stopPropagation()
         return

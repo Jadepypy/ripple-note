@@ -113,7 +113,7 @@ function createFolderOrFile(type, id, prevID, depth) {
   }
   p.setAttribute("contenteditable", true)
   p.setAttribute("id", "new")
-  p.focus()
+  //p.focus()
   return element
 }
 
