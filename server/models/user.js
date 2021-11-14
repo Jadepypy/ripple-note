@@ -50,7 +50,7 @@ const signUp = async (name, email, password) => {
     } else{
       const [vault] = await conn.query('INSERT INTO vaults (name, created_at) VALUES (?, ?)', ['Default', createdAt])
       vaultID = vault.insertId
-      const [result] = await conn.query('INSERT INTO users (name, email, password, provider, last_entered_vault_id) VALUES (?, ?, ?, ?, ?)', [name, email , hash, 'native', vaultID])
+      const [result] = await conn.query('INSERT INTO users (name, email, password, provider, last_entered_vault_id, is_registered) VALUES (?, ?, ?, ?, ?, 1)', [name, email , hash, 'native', vaultID])
       id = result.insertId
       await conn.query('INSERT INTO vault_user (vault_id, user_id) VALUES (?, ?)', [vaultID, id])
     }
