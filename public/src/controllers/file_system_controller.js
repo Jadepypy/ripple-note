@@ -33,7 +33,9 @@ class FileSystemController extends BaseController{
       changeName: this.changeName.bind(this),
       createFile: this.receiveNewFile.bind(this),
       moveFile: this.receiveMoveFile.bind(this),
-      removeFiles: this.receiveRemoveFiles.bind(this)
+      removeFiles: this.receiveRemoveFiles.bind(this),
+      invalid: this.handleInvalidAction.bind(this),
+      leaveVault: this.receiveLeaveVault.bind(this)
     }
     this.socketIO.registerCallbacks(callbacks)
     //addEventListers: an unorthodox approach to put under controller (for simplification)
@@ -192,8 +194,11 @@ class FileSystemController extends BaseController{
                     type,
                     name: 'Untitled',
                     vault_id: vaultID
-                  }
+                  },
+                  vault_id: vaultID,
+                  revision_id: this.socketIO.revisionID 
                 }
+    let result 
     if(targetID){
       parentID = targetID
       const parentNode = this.fileSystem.nodeMap[parentID]
@@ -201,7 +206,12 @@ class FileSystemController extends BaseController{
         data.new['next_id'] = parentNode.firstChild.id
       }
       data['parent'] = parentNode.id
-      id = await this.api.createElement({data})
+      result = await this.api.createElement({data})
+      if(result.error){
+        this.handleInvalidAction()
+        return
+      }
+      id = result.id
       node = new Node(id, null, null, type, 'Untitled')
       prevID = parentID
       this.fileSystem.insertUnderAsFirstChild(node, parentNode)
@@ -213,7 +223,12 @@ class FileSystemController extends BaseController{
         data.new['next_id'] = prevNode.next.id
       }
       this.openAncestors(prevNode)
-      id = await this.api.createElement({data})
+      result = await this.api.createElement({data})
+      if(result.error){
+        this.handleInvalidAction()
+        return
+      }
+      id = result.id
       node = new Node(id, null, null, type, 'Untitled')
       this.fileSystem.insertAfter(node, prevNode)
     } else {
@@ -227,27 +242,47 @@ class FileSystemController extends BaseController{
         prevID = null
         lastChildID = -1
       }
-      id = await this.api.createElement({ data })
+      result = await this.api.createElement({ data })
+      if(result.error){
+        this.handleInvalidAction()
+        return
+      }
+      id = result.id
       node = new Node(id, null, null, type, 'Untitled')
       this.fileSystem.insertUnder(node, head)
     }
-    this.socketIO.createFile(id, prevID, type)
+    this.socketIO.createFile(id, prevID, type, this.socketIO.fsRevsionID)
     this.fileSystem.nodeMap[id] = node
     return [id, prevID, node.depth]
+  }
+  handleInvalidAction(){
+    console.log('invalid action!')
+    const storage = window.sessionStorage
+    alert('Invalid Action')
+    const vaultID =  storage.getItem('vault_id')
+    const accessToken =  storage.getItem('access_token')
+    this.socketIO.init(vaultID, accessToken)
   }
   receiveNewFile(id, prevID, type) {
     const node = new Node(id, null, null, type, 'Untitled')
     if (prevID != null){
       const prevNode = this.fileSystem.nodeMap[prevID]
-      this.fileSystem.insertAfter(node, prevNode)
+      if(prevNode.type == DATA_TYPE.FILE){
+        this.fileSystem.insertAfter(node, prevNode)
+      } else{
+        this.fileSystem.insertUnderAsFirstChild(node, prevNode)
+      }
     } else{
       this.fileSystem.insertUnder(node, this.fileSystem.head)
       if (this.fileSystem.head.lastChild === null){
         prevID = this.fileSystem.getLastDescendant(head).id
       }
     }
+    //this.fileSystem.printTree()
     const element = createFolderOrFile(type, id, prevID, node.depth)
-    this.changeSelectedFile(element)
+    // if(type == DATA_TYPE.FILE){
+    //   this.changeSelectedFile(element)
+    // }
     domMap[id] = element
     this.fileSystem.nodeMap[node.id] = node
   }
@@ -354,6 +389,15 @@ class FileSystemController extends BaseController{
   receiveRemoveFiles(id){
     const node = this.fileSystem.nodeMap[id]
     const idArr = this.fileSystem.removeAll(node, [], true)
+    const file = this.fileSystem.file
+    if(file !== null){
+      const fileID = file.dataset.id
+      idArr.forEach(id => {
+        if(id == fileID){
+          this.changeSelectedFile(null)
+        }
+      })
+    }
   }
   changeName(fileID, name) {
     //console.log(fileID, name)
@@ -388,6 +432,15 @@ class FileSystemController extends BaseController{
   }
   receiveMoveFile(id, targetID){
     this.moveFile(id, targetID, true, false)
+    this.showHiddenFiles(id, true, true)
+    const target = domMap[targetID]
+    if(target){
+      if(target.matches('.folder.closed')){
+        this.showHiddenFiles(targetID, true, true)
+      } else if(target.matches('.folder.opened')) {
+        this.showHiddenFiles(targetID, false, true)
+      }
+    }
   }
   checkValidity(node, targetNode){
     if (targetNode.id != this.fileSystem.head.id){
@@ -456,7 +509,7 @@ class FileSystemController extends BaseController{
     }
     element.style.paddingLeft= `${paddingLeft}px`
     if(node.parent.id == this.fileSystem.head.id){
-      element.style.display = ''
+      element.classList.toggle('hidden', false)
     }
     if(this.fileSystem.file != null){
       if(this.fileSystem.file.dataset.id == id){
@@ -552,6 +605,13 @@ class FileSystemController extends BaseController{
       vaultList.append(a)
     }
     $('#vault').modal('toggle');
+  }
+  receiveLeaveVault(){
+    console.log('?')
+    const storage = window.sessionStorage
+    storage.removeItem('vault_id')
+    storage.removeItem('file_id')
+    location.reload()
   }
   addVaultIconListener(){
     vaultIcon.addEventListener('click', () => {

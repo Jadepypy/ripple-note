@@ -22,6 +22,7 @@ const {
   wsAuthenticate
 } = require('./util')
 const fileArr = {}
+const vaults = {}
 const LogOp = {}
 // const dataArr = [[0, 1, null, -1, 'vault'], [1, 4, 2, 0, 'Folder1'], [2, 5, 3, 0, 'Folder2'], [3, 10, null, 0, 'Folder3'], [4, null, 8, 1, 'File4'],  [8, null, 9, 1, 'File8'], [9, null, null, 1, 'File9'], [5, null, 6, 1, 'File5'], [6, null, null, 1, 'File6'], [10, 11, null, 0, 'Folder10'], [11, null, null, 1, 'File11']]
 const start = (io) => {
@@ -31,7 +32,8 @@ io.of(/^\/[0-9]+$/)
     const vaultID = socket.nsp.name.replace('/', '')
     console.log(`user connected on ${vaultID}`)
     const result = await getFileSystem(vaultID)
-    socket.emit('fileSystem', result[0], result[1])
+    socket.emit('fileSystem', result[0], result[1], result[2], socket.userID)
+    vaults[vaultID] = result[2]
 
     socket.on('joinFile', async (id) => {
       socket.join(id)
@@ -50,34 +52,51 @@ io.of(/^\/[0-9]+$/)
       console.log(`send revisionID  ${fileArr[id].revisionID} text ${fileArr[id].doc}`)
       socket.to(socket.fileID).emit('joinFile', socket.id)
     })
-    .on('changeName', async (id, name, type) => {
-      if(type == DATA_TYPE.VAULT){
-
-      } else{
-        await changeFileName(id, name)
-        io.of(vaultID).emit('changeName', id, name, socket.id)
-        console.log('change name', id, name)
-      }
+    .on('changeName', async (id, name) => {
+      await changeFileName(id, name)
+      io.of(vaultID).emit('changeName', id, name, socket.id)
+      console.log('change name', id, name)
     })
     .on('leaveRoom', (id) => {
       socket.leave(id)
       socket.to(socket.fileID).emit('leaveRoom', socket.id)
       console.log(`user ${socket.userID} left room ${id}`)
     })
-    .on('moveFile', (dataArr, id, targetID) => {
-      moveFile(dataArr, vaultID)
-      io.of(vaultID).emit('moveFile', id, targetID, socket.id)
+    .on('moveFile', async (dataArr, id, targetID, revisionID) => {
+      if(revisionID < vaults[vaultID]){
+        socket.emit('invalid', id, socket.id)
+        return
+      }
+      vaults[vaultID]++
+      const result = await moveFile(dataArr, vaultID, vaults[vaultID])
+      if(result.error){
+        socket.emit('invalid', id, socket.id)
+        vaults[vaultID]--
+        return
+      }
+      io.of(vaultID).emit('moveFile', id, targetID, socket.id, vaults[vaultID])
       console.log('move file')
-      //socket.emit('moveFile', )
     })
-    .on('createFile', (id, prevID, type) => {
-      console.log(id, prevID, type)
-      io.of(vaultID).emit('createFile', id, prevID, type, socket.id)
+    .on('createFile', (id, prevID, type, revisionID) => {
+      vaults[vaultID] = ++revisionID
+      io.of(vaultID).emit('createFile', id, prevID, type, socket.id, vaults[vaultID])
     })
-    .on('removeFiles', (id, idArr, data) => {
-      console.log('remove')
-      removeFiles(idArr, data, vaultID)
-      io.of(vaultID).emit('removeFiles', id, socket.id)
+    .on('removeFiles', async (id, idArr, data, revisionID) => {
+      if(revisionID < vaults[vaultID]){
+        socket.emit('invalid', id, socket.id)
+        return
+      }
+      vaults[vaultID]++
+      const result = await removeFiles(idArr, data, vaultID, vaults[vaultID])
+      if(result.error){
+        socket.emit('invalid', id, socket.id)
+        vaults[vaultID]--
+        return
+      }
+      io.of(vaultID).emit('removeFiles', id, socket.id, vaults[vaultID])
+    })
+    .on('disconnect', () => {
+      io.of(vaultID).emit('leaveVault', socket.userID)
     })
     .on('operation', (clientRevisionID, operation) => {
       // console.log(clientRevisionID, operation)
@@ -108,8 +127,7 @@ io.of(/^\/[0-9]+$/)
         //console.log('pending...')
         socket.emit('ack', revisionID)
         console.log('Sync OP', revisionID, operation)
-        console.log('id', socket.id)
-        socket.to(socket.fileID).emit('syncOp', revisionID, operation);
+        socket.to(socket.fileID).emit('syncOp', revisionID, operation, socket.id);
         LogOp[fileID][revisionID] = operation
         //console.log(operation)
         // const backUpOp = operation.map((op) => {

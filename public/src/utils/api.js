@@ -22,8 +22,11 @@ class API {
         throw new Error('內容錯誤或權限不足');
       }
       const result = await res.json()
-      //console.log(result)
-      return result.id
+      console.log(result)
+      if(result.error){
+        return {error: result.error}
+      }
+      return {id: result.id}
     })
   }
 

@@ -9,9 +9,9 @@ const DATA_TYPE = {
 const getFileSystem = async (vaultID) => {
   const conn = await pool.getConnection()
   try{
-    const [firstChild] = await conn.query('SELECT first_child_id from vaults where id = ?', [vaultID])
+    const [vault] = await conn.query('SELECT first_child_id, revision_id from vaults where id = ?', [vaultID])
     const [files] = await conn.query('SELECT id, name, type, first_child_id, next_id from folder_file where vault_id = ?', [vaultID])
-    return [firstChild, files]
+    return [vault, files]
   } catch(e) {
     console.log(e)
   } finally{
@@ -31,58 +31,82 @@ const getFile = async (fileID) => {
   }
 }
 
-const insertFileAfter = async (newFile, prevID, type) => {
+const insertFileAfter = async (newFile, prevID, type, vaultID, revisionID) => {
   const conn = await pool.getConnection()
   try{
     conn.query('START TRANSACTION')
+    const [vaults] = await conn.query(`SELECT revision_id FROM vaults WHERE id = ? FOR UPDATE`, [vaultID])
+    const vault = vaults[0]
+    if(revisionID < vault.revision_id){
+      return {error: 'Invalid action'}
+    } else{
+      await conn.query(`UPDATE vaults SET revision_id = ? WHERE id= ?`, [++vault.revision_id, vaultID])
+    }
     const [result] = await conn.query('INSERT INTO folder_file SET ?', newFile)
     if(type == DATA_TYPE.FILE){
       await conn.query('INSERT INTO files (id, revision_id, text) VALUES (?, ?, ?)', [result.insertId, 0, ""])
     }
     await conn.query('UPDATE folder_file SET next_id = ? WHERE id = ?', [result.insertId, prevID])
     await conn.query('COMMIT')
-    return result.insertId
-  } catch(e) {
-    console.log(e)
+    return {id: result.insertId, revision_id: vault.revision_id}
+  } catch(error) {
+    console.log(error)
     conn.query('ROLLBACK')
+    return {error}
   } finally{
     await conn.release()
   }
 }
 
-const insertFileUnder = async (newFile, parentID, type) => {
+const insertFileUnder = async (newFile, parentID, type, vaultID, revisionID) => {
   const conn = await pool.getConnection()
   try{
     conn.query('START TRANSACTION')
+    const [vaults] = await conn.query(`SELECT revision_id FROM vaults WHERE id = ? FOR UPDATE`, [vaultID])
+    const vault = vaults[0]
+    if(revisionID < vault.revision_id){
+      return {error: 'Invalid action'}
+    } else{
+      await conn.query(`UPDATE vaults SET revision_id = ? WHERE id= ?`, [++vault.revision_id, vaultID])
+    }
     const [result] = await conn.query('INSERT INTO folder_file SET ?', newFile)
     if(type == DATA_TYPE.FILE){
       await conn.query('INSERT INTO files (id, revision_id, text) VALUES (?, ?, ?)', [result.insertId, 0, ""])
     }
     await conn.query('UPDATE folder_file SET first_child_id = ? WHERE id = ?', [result.insertId, parentID])
     await conn.query('COMMIT')
-    return result.insertId
-  } catch(e) {
-    console.log(e)
+    return {id: result.insertId, revision_id: vault.revision_id}
+  } catch(error) {
+    console.log(error)
     conn.query('ROLLBACK')
-  } finally{
+    return {error}
+  }finally{
     await conn.release()
   }
 }
 
-const insertFileUnderRoot = async (newFile, vaultID, type) => {
+const insertFileUnderRoot = async (newFile, vaultID, type, revisionID) => {
   const conn = await pool.getConnection()
   try{
     conn.query('START TRANSACTION')
+    const [vaults] = await conn.query(`SELECT revision_id FROM vaults WHERE id = ? FOR UPDATE`, [vaultID])
+    const vault = vaults[0]
+    if(revisionID < vault.revision_id){
+      return {error: 'Invalid action'}
+    } else{
+      await conn.query(`UPDATE vaults SET revision_id = ? WHERE id= ?`, [++vault.revision_id, vaultID])
+    }
     const [result] = await conn.query('INSERT INTO folder_file SET ?', newFile)
     if(type == DATA_TYPE.FILE){
       await conn.query('INSERT INTO files (id, revision_id, text) VALUES (?, ?, ?)', [result.insertId, 0, ""])
     }
     await conn.query('UPDATE vaults SET first_child_id = ? WHERE id = ?', [result.insertId, vaultID])
     await conn.query('COMMIT')
-    return result.insertId
-  } catch(e) {
-    console.log(e)
+    return {id: result.insertId, revision_id: vault.revision_id}
+  } catch(error) {
+    console.log(error)
     conn.query('ROLLBACK')
+    return {error}
   } finally{
     await conn.release()
   }
@@ -96,7 +120,7 @@ const changeFileName = async (fileID, name) => {
   } 
 }
 
-const moveFile = async(dataArr, vaultID) => {
+const moveFile = async(dataArr, vaultID, revisionID) => {
   const conn = await pool.getConnection()
   try{
     await conn.query('START TRANSACTION')
@@ -113,10 +137,13 @@ const moveFile = async(dataArr, vaultID) => {
       }
       await conn.query(sql, bind)
     }
+    await conn.query(`UPDATE vaults SET revision_id = ? WHERE id = ?`, [revisionID, vaultID])
     await conn.query('COMMIT')
+    return {}
   } catch(error) {
     console.log(error)
     conn.query('ROLLBACK')
+    return {error}
   } finally{
     await conn.release()
   }
@@ -146,7 +173,7 @@ const searchFileSystem = async (userID, vaultID, keyword) => {
   }
 }
 
-const removeFiles = async (idArr, data, vaultID) => {
+const removeFiles = async (idArr, data, vaultID, revisionID) => {
   const conn = await pool.getConnection()
   try{
     await conn.query('START TRANSACTION')
@@ -162,6 +189,7 @@ const removeFiles = async (idArr, data, vaultID) => {
     await conn.query(sql, bind)
     await conn.query('DELETE FROM folder_file WHERE id IN (?)',[idArr])
     await conn.query('DELETE FROM files WHERE id IN (?)',[idArr])
+    await conn.query(`UPDATE vaults SET revision_id = ? WHERE id = ?`, [revisionID, vaultID])
     await conn.query('COMMIT')
     return {}
   } catch(error) {
