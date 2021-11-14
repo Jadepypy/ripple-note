@@ -287,13 +287,14 @@ class FileSystemController extends BaseController{
           } else if (target.matches('.file')) {
             this.changeSelectedFile(target)
           }
-        } else if (event.detail === 2){
-          const p = getElement('p', target)
-          this.selectedName = p.innerText
-          p.style['pointer-events'] = 'auto'
-          p.setAttribute("contenteditable", true)
-          this.addBlurListener(p)
-        }
+        } 
+        // else if (event.detail === 2){
+        //   const p = getElement('p', target)
+        //   this.selectedName = p.innerText
+        //   p.style['pointer-events'] = 'auto'
+        //   p.setAttribute("contenteditable", true)
+        //   this.addBlurListener(p)
+        // }
     })
     searchList.addEventListener('click', (event) => {
       const target = event.target
@@ -742,6 +743,7 @@ class FileSystemController extends BaseController{
     }
     const storage = window.sessionStorage
     const fileID = storage.getItem('file_id')
+    searchDomMap = {}
     ids.forEach((id) => {
       const name = this.fileSystem.nodeMap[id].name
       searchDomMap[fileID] = this.buildFileOrFolder(id, name, DATA_TYPE.FILE, 1, true)

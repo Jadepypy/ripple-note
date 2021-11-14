@@ -18,10 +18,10 @@ class SocketIO {
       this.trigger('init', revisionID, doc)
     })
     this.socket.on('ack', (revisionID) => {
-      // console.log('ack??')
       this.trigger('ack', revisionID)
     })
     this.socket.on('syncOp', (revisionID, syncOp) => {
+      console.log('sync')
       this.trigger('syncOp', revisionID, syncOp)
     })
     this.socket.on('createFile', (id, prevID, type, socketID) => {
@@ -66,6 +66,7 @@ class SocketIO {
     this.socket.disconnect()
   }
   sendOperation(revisionID, opInfo) {
+    console.log('id', this.socket.id)
     this.socket.emit('operation', revisionID, opInfo) 
   }
   changeName(id, name, type) {

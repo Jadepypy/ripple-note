@@ -108,6 +108,7 @@ io.of(/^\/[0-9]+$/)
         //console.log('pending...')
         socket.emit('ack', revisionID)
         console.log('Sync OP', revisionID, operation)
+        console.log('id', socket.id)
         socket.to(socket.fileID).emit('syncOp', revisionID, operation);
         LogOp[fileID][revisionID] = operation
         //console.log(operation)
