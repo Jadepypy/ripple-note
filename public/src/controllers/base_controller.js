@@ -12,7 +12,7 @@ class BaseController {
     this.api = api
   }
 
-  changeSelectedFile(file) {
+  changeSelectedFile(file, name) {
     //console.log('change', this.fileSystem.file)
     if (this.fileSystem.file != null){
       toggleTag(this.fileSystem.file, 'selected', false)
@@ -27,9 +27,14 @@ class BaseController {
       showEditor(true)
     }
     toggleTag(file, 'selected', true)
+    file.scrollIntoView()
     this.socketIO.joinFile(file.dataset.id)
     this.operation.id = file.dataset.id
-    this.operation.name = file.children[file.children.length - 2].innerText
+    if(name){
+      this.operation.name = name
+    } else{
+      this.operation.name = file.children[file.children.length - 2].innerText
+    }
     storage.setItem('file_id', file.dataset.id)
     for(const id in this.operation.carets){
       this.operation.carets[id].remove()

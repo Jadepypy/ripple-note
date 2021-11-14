@@ -2,14 +2,11 @@ const folderOption = getElement('#folder-option')
 const fileOption = getElement('#file-option')
 const searchBox = getElement('#search-box')
 const noteList = getElement('.note-list')
+const searchList = getElement('.search-list')
 const options = getElement('.options')
 const tools = getElement('.tools')
 let dragTarget = null
-// function bindClickNoteList(showHiddenFiles, titleChangeHandler, titleChangeOnNewElem, checkIsDuplicate, changeSelectedFile, moveFileHandler) {
-//   handleNoteListFocus(titleChangeOnNewElem, checkIsDuplicate, changeSelectedFile)
-//   handleNoteListClick(showHiddenFiles, titleChangeHandler, checkIsDuplicate, changeSelectedFile)
-//   handleNoteListDragEvent(moveFileHandler, showHiddenFiles)
-// }
+
 function handleNoteListDragEvent(moveFileHandler, showHiddenFiles) {
   noteList.addEventListener('dragstart', (e) => {
     e.target.classList.add("dragging");      
@@ -158,6 +155,13 @@ function buildFile(id, name) {
   noteList.appendChild(file) 
   return file 
 }
+function buildSearchFile(id, name) {
+  const file = createElement('li', ['file', 'search-result'])
+  file.dataset.id = id
+  file.innerHTML = `<p class="file-title" dataset-placehoder="Untitled" contenteditable="false">${name}</p>`
+  searchList.appendChild(file) 
+  return file 
+}
 
 function toggleOptionFunctionality(isOn) {
   if (isOn) {
@@ -174,6 +178,8 @@ navigationTool.addEventListener('click', () => {
   navigationTool.classList.toggle('clicked', true)
   searchTool.classList.toggle('clicked', false)
   searchBox.classList.toggle('hidden', true)
+  searchList.classList.toggle('hidden', true)
+  noteList.classList.toggle('hidden', false)
   folderOption.style.display=''
   fileOption.style.display=''
 })
@@ -181,6 +187,8 @@ searchTool.addEventListener('click', (event) => {
   searchTool.classList.toggle('clicked', true)
   navigationTool.classList.toggle('clicked', false)
   searchBox.classList.toggle('hidden', false)
+  searchList.classList.toggle('hidden', false)
+  noteList.classList.toggle('hidden', true)
   folderOption.style.display='none'
   fileOption.style.display='none'
 })

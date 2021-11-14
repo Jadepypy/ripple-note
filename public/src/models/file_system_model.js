@@ -118,7 +118,6 @@ class FileSystemModel {
     if(isFirst && node.firstChild !== null){
       return this.findAllChildren(node.firstChild, ids, false)
     }else if (node.firstChild !== null){
-      //semi tail recursion???
       this.findAllChildren(node.firstChild, ids, false)
     }
     if(node.next !== null){

@@ -24,7 +24,6 @@ const moveFile = async (dataArr, vaultID) => {
 }
 
 const getFileSystem = async (vaultID) => {
-  console.log(vaultID)
   const result = await FileSystem.getFileSystem(vaultID)
   // console.log(result)
 
@@ -66,11 +65,40 @@ const removeFiles = async (idArr, nodeData, vaultID) => {
   return
 }
 
+const searchFileSystem = async (req, res) => {
+  const keyword = req.query.keyword
+  const vaultID = req.query.vault_id
+  const user = req.user
+  const result = await FileSystem.searchFileSystem(user.id, vaultID, keyword.toLowerCase())
+  if (result.error){
+    return {error: result.error}
+  }
+  const ids = result.ids
+  if(!ids){
+    return {error: 'Database query error'}
+  } else if (ids.length == 0){
+    return {error: 'Database query error'}
+  }
+  const idSet = new Set() 
+  ids[0].forEach((id) => {
+    if(!idSet.has(id)){
+      idSet.add(id.id)
+    }
+  })
+  ids[1].forEach((id) => {
+    if(!idSet.has(id)){
+      idSet.add(id.id)
+    }
+  })
+  res.status(200).send({data: [...idSet]})
+}
+
 module.exports =  { 
                     createFile,
                     getFileSystem,
                     getFile,
                     moveFile,
                     changeFileName,
-                    removeFiles
+                    removeFiles,
+                    searchFileSystem
 }

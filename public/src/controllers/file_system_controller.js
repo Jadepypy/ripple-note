@@ -1,7 +1,6 @@
 import BaseController from "./base_controller.js"
 import {Node} from '../utils/utils.js'
 
-
 class FileSystemController extends BaseController{
   constructor (operation, fileSystem, socketIO, api){
     super(operation, fileSystem, socketIO, api)
@@ -50,6 +49,7 @@ class FileSystemController extends BaseController{
     this.addVaultNameInputBlurListener()
     this.addSaveBtnClickListener()
     this.addUserIconClinkListener()
+    this.addSearchBoxBlurListener()
   }
   constructFileSystem(firstChild, fileArr) {
     showEditor(false)
@@ -75,7 +75,7 @@ class FileSystemController extends BaseController{
       this.changeSelectedFile(null)
     }
   }
-  buildFileOrFolder(id, name, type, depth) {
+  buildFileOrFolder(id, name, type, depth, isSearch) {
     if (type == DATA_TYPE.FOLDER){
       const folder =  buildFolder(id, name)
       folder.dataset.type = DATA_TYPE.FOLDER
@@ -84,7 +84,12 @@ class FileSystemController extends BaseController{
       folder.style.paddingLeft= `${paddingLeft}px`
       return folder
     } else {
-      const file = buildFile(id, name)
+      let file
+      if(isSearch){
+        file = buildSearchFile(id, name)
+      } else{
+        file = buildFile(id, name)
+      }
       const paddingLeft = depth*15 + 5
       file.style.paddingLeft= `${paddingLeft}px`
       file.dataset.type = DATA_TYPE.FILE
@@ -111,14 +116,16 @@ class FileSystemController extends BaseController{
     const element = domMap[id]
     const node = this.fileSystem.nodeMap[id]
     if(!isFirst){
+      element.classList.toggle('hidden', isHiding)
       if(isHiding){
-        element.style.display = 'none'
+        //element.style.display = 'none'
         element.classList.toggle('opened', !isHiding)
         element.classList.toggle('closed', isHiding)
         this.changeFolderIcon(element, isHiding)
-      } else{
-        element.style.display = ''
-      }
+      } 
+      // else{
+      //   element.style.display = ''
+      // }
     } else{
       element.classList.toggle('opened', !isHiding)
       element.classList.toggle('closed', isHiding)
@@ -288,8 +295,14 @@ class FileSystemController extends BaseController{
           this.addBlurListener(p)
         }
     })
+    searchList.addEventListener('click', (event) => {
+      const target = event.target
+      if (target.matches('.file')) {
+        const name = target.children[target.children.length - 1].innerText
+        this.changeSelectedFile(target, name)
+      }
+    })
   }
-
   addBlurListener(p) {
     p.addEventListener('blur', (e) => {
       const fileID = p.parentNode.dataset.id
@@ -305,6 +318,7 @@ class FileSystemController extends BaseController{
       if(node.type == DATA_TYPE.FILE){
         noteTitle.value = name
       }
+      node.name = name
       this.socketIO.changeName(node.id, name, node.type)
     })
   }
@@ -690,7 +704,52 @@ class FileSystemController extends BaseController{
       userEmail.value = data.email
     })
   }
-
+  addSearchBoxBlurListener(){
+    searchBox.addEventListener('input', (event) => {
+      const keyword = searchBox.value.trim()
+      this.searchFiles(keyword)
+    })
+    searchTool.addEventListener('click', () => {
+      const keyword = searchBox.value.trim()
+      if(keyword.length > 0){
+        this.searchFiles(keyword)
+      }
+    })
+    navigationTool.addEventListener('click', () => {
+      const storage = window.sessionStorage
+      const fileID = storage.getItem('file_id')
+      if(fileID != null){
+        this.changeSelectedFile(domMap[fileID])
+      } 
+    })
+  }
+  async searchFiles(keyword){
+    if(keyword.length > 0){
+      searchList.innerHTML = ''
+      const storage = window.sessionStorage
+      const vaultID = storage.getItem('vault_id')
+      const result = await this.api.searchFiles(vaultID, keyword)
+      const ids = result.data
+      this.buildSearchList(ids)
+    } else{
+      searchList.innerHTML = ''
+    }
+  }
+  buildSearchList(ids){
+    if(ids.length == 0){
+      searchList.innerHTML = '<p id="no-matches">No matches found.</p>'
+      return
+    }
+    const storage = window.sessionStorage
+    const fileID = storage.getItem('file_id')
+    ids.forEach((id) => {
+      const name = this.fileSystem.nodeMap[id].name
+      searchDomMap[fileID] = this.buildFileOrFolder(id, name, DATA_TYPE.FILE, 1, true)
+      if(fileID != null && fileID == id){
+        this.changeSelectedFile(searchDomMap[fileID], name)
+      } 
+    })    
+  }
 }
 
 

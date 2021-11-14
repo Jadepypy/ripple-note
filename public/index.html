@@ -256,6 +256,8 @@
             <p class="folder-title" contenteditable="false">Untitled</p>
           </li> -->
         </ul>
+        <ul class="search-list hidden">
+        </ul>
       </div>
       <div class="editor hidden">
           <input id="note-title" placeholder="Untitled" maxlength="60" readonly>
@@ -302,6 +304,7 @@
         NOOP: -1
       }
       let domMap = {}
+      let searchDomMap = {}
       const SPECIAL_KEYS = ['Alt', 'Shift', 'Meta', 'Control', 'CapsLock', 'Tab', 'ArrowDown', 'ArrowUp', 'ArrowLeft', 'ArrowRight']
       const ARROW_KEYS = ['ArrowDown', 'ArrowUp', 'ArrowLeft', 'ArrowRight']
       const backlink = {

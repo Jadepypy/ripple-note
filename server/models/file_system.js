@@ -123,6 +123,29 @@ const moveFile = async(dataArr, vaultID) => {
 
 }
 
+const searchFileSystem = async (userID, vaultID, keyword) => {
+  const conn = await pool.getConnection()
+  try{
+    let [users] = await conn.query(
+        `SELECT vault_id FROM vault_user
+        WHERE user_id = ? and vault_id = ?`, [userID, vaultID])
+    if(users.length < 1){
+      return {error: 'Permission Denied'}
+    }
+    const idSet = new Set()
+    const [textResult] = await conn.query(`SELECT f.id as id FROM files f JOIN folder_file ff ON f.id = ff.id WHERE ff.vault_id = ? and lower(f.text) LIKE ?`,[vaultID, `%${keyword}%`])
+    // const [nameResult] = await conn.query(`SELECT id FROM folder_file WHERE vault_id = ? and lower(name) LIKE ?`,[vaultID, `%${keyword}%`])
+    return {ids: [textResult, []]}
+  } catch(error) {
+    await conn.query('ROLLBACK')
+    conn.release()
+    console.log(error)
+    return {error}
+  } finally{
+    conn.release()
+  }
+}
+
 const removeFiles = async (idArr, data, vaultID) => {
   const conn = await pool.getConnection()
   try{
@@ -152,6 +175,7 @@ const removeFiles = async (idArr, data, vaultID) => {
 
 module.exports = {  DATA_TYPE,
                     getFileSystem,
+                    searchFileSystem,
                     getFile,
                     moveFile,
                     changeFileName,

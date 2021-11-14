@@ -168,6 +168,25 @@ class API {
       return
     })
   }
+  searchFiles(vaultID, keyword){
+    const storage = window.sessionStorage
+    const accessToken = storage.getItem
+    ('access_token')
+    return fetch(`${this.API_HOST}/files?vault_id=${vaultID}&keyword=${keyword}`, {
+      headers: new Headers({
+        Authorization: `Bearer ${accessToken}`,
+      }),
+    }).then((response) => {
+      //console.log(response)
+      if (response.status === 401) {
+        throw new Error('請先登入');
+      }
+      if (response.status === 403) {
+        throw new Error('內容錯誤或權限不足');
+      }
+      return response.json();
+    }) 
+  }
 
 }
 
