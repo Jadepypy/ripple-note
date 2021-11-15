@@ -12,10 +12,10 @@ class OperationModel {
   }
 
   iterateOT (opArr1, opArr2) {
-    console.log("BEFORE:")
-    for (const op of opArr2){
-      console.log(op)
-    }
+    // console.log("BEFORE:")
+    // for (const op of opArr2){
+    //   console.log(op)
+    // }
     let opArr1Prime = []
     //let opArr2Prime = [...opArr2]
     for (let op1 of opArr1){
@@ -36,7 +36,7 @@ class OperationModel {
         opArr1Prime.push(op1)
       }
     }
-    console.log("TRANSFORM OP:", opArr2)
+    //console.log("TRANSFORM OP:", opArr2)
     return opArr1Prime
   }
   //heart of OT
@@ -66,7 +66,7 @@ class OperationModel {
   //insert delete transformation
   Tid(op1, op2){
     const op1Temp = {...op1}
-    console.log('Tid:', op1, op2)
+    //console.log('Tid:', op1, op2)
     if (op1.position > op2.position + op2.count){
       op1.position = Math.max(op2.position + op2.count, op1Temp.position + op2.count)
       if (op1Temp.position < op2.position) {

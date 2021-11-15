@@ -26,7 +26,8 @@ class SocketIO {
     this.socket.on('ack', (revisionID) => {
       this.trigger('ack', revisionID)
     })
-    this.socket.on('syncOp', (revisionID, syncOp, socketID) => {
+    this.socket.on('syncOp', (revisionID, syncOp, socketID, doc) => {
+      publicDoc = doc
       if (this.socket.id != socketID){
         this.trigger('syncOp', revisionID, syncOp)
       }
@@ -84,7 +85,7 @@ class SocketIO {
     this.socket.disconnect()
   }
   sendOperation(revisionID, opInfo) {
-    this.socket.emit('operation', revisionID, opInfo) 
+    this.socket.emit('operation', revisionID, opInfo, textarea.value) 
   }
   changeName(id, name, type) {
     this.socket.emit('changeName', id, name)

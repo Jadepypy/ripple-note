@@ -171,7 +171,7 @@ const addVaultUser = async (req, res) => {
     return  
   }
   const {emails, vault_id} = req.body
-  console.log(vault_id)
+  //console.log(vault_id)
   const user = req.user
   for (const email of emails){
     if (!validator.isEmail(email)) {

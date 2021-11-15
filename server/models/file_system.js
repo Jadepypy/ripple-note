@@ -127,11 +127,11 @@ const moveFile = async(dataArr, vaultID, revisionID) => {
     let sql, bind
     for( const data of dataArr){
       if (data.id){
-        console.log('data', data)
+        //console.log('data', data)
         sql = `UPDATE folder_file SET ${data.prop} = ? WHERE id = ?`
         bind = [data.change_to, data.id]
       } else{
-        console.log('vault', data)
+        //console.log('vault', data)
         sql = `UPDATE vaults SET ${data.prop} = ? WHERE id = ?`
         bind = [data.change_to, vaultID]
       }
@@ -178,11 +178,11 @@ const removeFiles = async (idArr, data, vaultID, revisionID) => {
   try{
     await conn.query('START TRANSACTION')
     if (data.id){
-      console.log('data', data)
+      //console.log('data', data)
       sql = `UPDATE folder_file SET ${data.prop} = ? WHERE id = ?`
       bind = [data.change_to, data.id]
     } else{
-      console.log('vault', data)
+      //console.log('vault', data)
       sql = `UPDATE vaults SET ${data.prop} = ? WHERE id = ?`
       bind = [data.change_to, vaultID]
     }

@@ -121,14 +121,14 @@ class OperationController extends BaseController{
   }
 
   addTextAreaListener() {
-    textarea.addEventListener('mouseup', () => {
-      this.handleTextAreaOperation([{type: OP_TYPE.RETAIN, position: textarea.selectionEnd, id: this.socketIO.socket.id}])
-    })
-    textarea.addEventListener('keyup', (event) => {
-      if(ARROW_KEYS.includes(event.key) || event.key == 'Backspace' || event.keyCode == 46 || event.key == 'Enter'){
-        this.handleTextAreaOperation([{type: OP_TYPE.RETAIN, position: textarea.selectionEnd, id: this.socketIO.socket.id}])      
-      }
-    })
+    // textarea.addEventListener('mouseup', () => {
+    //   this.handleTextAreaOperation([{type: OP_TYPE.RETAIN, position: textarea.selectionEnd, id: this.socketIO.socket.id}])
+    // })
+    // textarea.addEventListener('keyup', (event) => {
+    //   if(ARROW_KEYS.includes(event.key) || event.key == 'Backspace' || event.keyCode == 46 || event.key == 'Enter'){
+    //     this.handleTextAreaOperation([{type: OP_TYPE.RETAIN, position: textarea.selectionEnd, id: this.socketIO.socket.id}])      
+    //   }
+    // })
     textarea.addEventListener('paste', (event) => {
       const indexStart = textarea.selectionStart
       const indexEnd = textarea.selectionEnd
@@ -187,6 +187,14 @@ class OperationController extends BaseController{
       if(!this.keydownOn){
         return
       }
+      // if(event.metaKey && event.keyCode == 69 || event.ctlKey && event.keyCode == 69){
+      //   if(previewWindow.matches('.hidden')){
+      //     toggleEditorDisplay(true)
+      //   } else{
+      //     toggleEditorDisplay(false)
+      //   }
+      //   return
+      // }
       if(event.key == 'Backspace' && event.ctrlKey || event.key == 'Backspace' && event.metaKey){
         event.preventDefault()
         event.stopPropagation()
@@ -201,7 +209,9 @@ class OperationController extends BaseController{
       const indexEnd = textarea.selectionEnd
       let opInfo = []
       if (event.key == 'Backspace'){
-        opInfo.push({type: OP_TYPE.DELETE, position: indexEnd, count: Math.min(indexStart - indexEnd, -1)})
+        if(indexEnd > 0){
+          opInfo.push({type: OP_TYPE.DELETE, position: indexEnd, count: Math.min(indexStart - indexEnd, -1)})
+        }
       }
       if (event.keyCode == 46){
         if(indexEnd > indexStart){
@@ -226,7 +236,7 @@ class OperationController extends BaseController{
       let opInfo = []
       if(!this.inputOn){
         this.inputOn = true
-        opInfo.push({type: OP_TYPE.RETAIN, position: textarea.selectionEnd, id: this.socketIO.socket.id})
+        // opInfo.push({type: OP_TYPE.RETAIN, position: textarea.selectionEnd, id: this.socketIO.socket.id})
         this.handleTextAreaOperation(opInfo)
         return
       }
@@ -237,7 +247,7 @@ class OperationController extends BaseController{
           opInfo.push({type: OP_TYPE.DELETE, position: this.lastEnd, count: this.lastStart - this.lastEnd})
         }
         opInfo.push({type: OP_TYPE.INSERT, position: this.lastStart, key: event.data})
-        opInfo.push({type: OP_TYPE.RETAIN, position: textarea.selectionEnd, id: this.socketIO.socket.id})
+        // opInfo.push({type: OP_TYPE.RETAIN, position: textarea.selectionEnd, id: this.socketIO.socket.id})
         this.handleTextAreaOperation(opInfo)
       }
     })
@@ -279,8 +289,13 @@ class OperationController extends BaseController{
     const outstandingOp = this.operation.outstandingOp
     const bufferOp = this.operation.bufferOp
     const revisionID = this.operation.revisionID
+    //console.log('send op', opInfo)
+    // if(opInfo.position < 0){
+    //   console.log('ALERT', opInfo)
+    // }
     if (state === STATE.CLEAR){
       outstandingOp.push(...opInfo)
+      //console.log('text', textarea.value)
       this.socketIO.sendOperation(revisionID, outstandingOp)
       this.operation.state = STATE.WAITING
     } else {

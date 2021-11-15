@@ -48,6 +48,7 @@ function toggleEditorDisplay(isOn){
     preview.classList.add('fa-edit')
     textarea.classList.toggle('hidden', true)
     previewWindow.classList.toggle('hidden', false)
+    convertHtmlToMD()
   } else{
     preview.classList.add('fa-align-right')
     preview.classList.remove('fa-edit')
@@ -60,7 +61,6 @@ function toggleEditorDisplay(isOn){
 preview.addEventListener('click', () => {
   if (preview.matches('.fa-align-right')){
     toggleEditorDisplay(true)
-    convertHtmlToMD()
   } else{
     toggleEditorDisplay(false)
   }

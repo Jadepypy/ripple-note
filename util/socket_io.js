@@ -30,7 +30,7 @@ io.of(/^\/[0-9]+$/)
   .use(wsAuthenticate)
   .on('connection', async (socket) => {
     const vaultID = socket.nsp.name.replace('/', '')
-    console.log(`user connected on ${vaultID}`)
+    //console.log(`user connected on ${vaultID}`)
     const result = await getFileSystem(vaultID)
     socket.emit('fileSystem', result[0], result[1], result[2], socket.userID)
     vaults[vaultID] = result[2]
@@ -48,19 +48,19 @@ io.of(/^\/[0-9]+$/)
         doc
       }
       socket.emit('init', revisionID, doc) 
-      console.log(`user ${socket.userID} joined room ${id}`)
-      console.log(`send revisionID  ${fileArr[id].revisionID} text ${fileArr[id].doc}`)
+      //console.log(`user ${socket.userID} joined room ${id}`)
+      //console.log(`send revisionID  ${fileArr[id].revisionID} text ${fileArr[id].doc}`)
       socket.to(socket.fileID).emit('joinFile', socket.id)
     })
     .on('changeName', async (id, name) => {
       await changeFileName(id, name)
       io.of(vaultID).emit('changeName', id, name, socket.id)
-      console.log('change name', id, name)
+      //console.log('change name', id, name)
     })
     .on('leaveRoom', (id) => {
       socket.leave(id)
       socket.to(socket.fileID).emit('leaveRoom', socket.id)
-      console.log(`user ${socket.userID} left room ${id}`)
+      //console.log(`user ${socket.userID} left room ${id}`)
     })
     .on('moveFile', async (dataArr, id, targetID, revisionID) => {
       if(revisionID < vaults[vaultID]){
@@ -75,7 +75,7 @@ io.of(/^\/[0-9]+$/)
         return
       }
       io.of(vaultID).emit('moveFile', id, targetID, socket.id, vaults[vaultID])
-      console.log('move file')
+      //console.log('move file')
     })
     .on('createFile', (id, prevID, type, revisionID) => {
       vaults[vaultID] = ++revisionID
@@ -98,13 +98,13 @@ io.of(/^\/[0-9]+$/)
     .on('disconnect', () => {
       io.of(vaultID).emit('leaveVault', socket.userID)
     })
-    .on('operation', (clientRevisionID, operation) => {
+    .on('operation', (clientRevisionID, operation, text) => {
       // console.log(clientRevisionID, operation)
       setTimeout(async () => {
         const userID = socket.userID
         //const vaultID = socket.nsp.name.replace('/', '')
         const fileID = socket.fileID
-        console.log('received', operation)
+        //console.log('received', operation)
         if(LogOp[fileID] == undefined){
           LogOp[fileID] = []
         }
@@ -125,9 +125,17 @@ io.of(/^\/[0-9]+$/)
         revisionID++
         doc = applyOperation(doc, operation)
         //console.log('pending...')
+        // if(text != doc ){
+        //   console.log('DIVERGE================')
+        //   console.log('client', clientRevisionID)
+        //   console.log('revisionID', revisionID)
+        //   console.log(doc)
+        //   console.log('------------')
+        //   console.log(text)
+        // }
         socket.emit('ack', revisionID)
-        console.log('Sync OP', revisionID, operation)
-        socket.to(socket.fileID).emit('syncOp', revisionID, operation, socket.id);
+        //console.log('Sync OP', revisionID, operation)
+        socket.to(socket.fileID).emit('syncOp', revisionID, operation, socket.id, doc);
         LogOp[fileID][revisionID] = operation
         //console.log(operation)
         // const backUpOp = operation.map((op) => {
@@ -163,7 +171,7 @@ io.of(/^\/[0-9]+$/)
         }
         fileArr[fileID].doc = doc
         fileArr[fileID].revisionID = revisionID
-      }, 0)
+      }, 3000)
     })
   })
 

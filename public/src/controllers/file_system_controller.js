@@ -300,7 +300,7 @@ class FileSystemController extends BaseController{
       const target = event.target
       if(target.matches('#remove-btn')){
         const id = target.parentNode.parentNode.dataset.id
-        console.log(id)
+        //console.log(id)
         this.removeFiles(id)
         return
       }
@@ -414,6 +414,11 @@ class FileSystemController extends BaseController{
     const p = getElement('p', dom)
     node.name = name
     p.innerText = name
+    const selectedID = window.sessionStorage.getItem('file_id')
+    if(selectedID == fileID){
+      this.operation.name = name
+      noteTitle.value = name
+    }
   }
   addNoteListDragListener() {
     noteList.addEventListener('dragend', (e) => {
@@ -528,7 +533,7 @@ class FileSystemController extends BaseController{
     //this.fileSystem.printTree()
   }
   openAncestors(node){
-    console.log('enter node', node.id, node.parent.id)
+    //console.log('enter node', node.id, node.parent.id)
     if(node.type == DATA_TYPE.FOLDER){
       this.showHiddenFiles(node.id, false, true)
     }
@@ -615,7 +620,6 @@ class FileSystemController extends BaseController{
     $('#vault').modal('toggle');
   }
   receiveLeaveVault(){
-    console.log('?')
     const storage = window.sessionStorage
     storage.removeItem('vault_id')
     storage.removeItem('file_id')
