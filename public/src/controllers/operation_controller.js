@@ -65,7 +65,7 @@ class OperationController extends BaseController{
     //console.log('outstanding', outstandingOp)
     //console.log('bufferOp', bufferOp)
     if (outstandingOp.length > 0){
-      this.operation.iterateOT([...outstandingOp], syncOp)
+      outstandingOp = this.operation.iterateOT(outstandingOp, syncOp)
     }
     if (bufferOp.length > 0){
       bufferOp = this.operation.iterateOT(bufferOp, syncOp)
@@ -95,11 +95,12 @@ class OperationController extends BaseController{
           doc = prevPart + op.key + doc.substring(op.position, doc.length)
           break;
         case OP_TYPE.DELETE :
-          if(op.position + op.count <= currentStart){
-            currentStart = op.position + op.count
+          console.log('delete')
+          if(op.position + op.count < currentStart){
+            currentStart = Math.max(op.position + op.count, currentStart + op.count)
           }
-          if(op.position + op.count <= currentEnd){
-            currentEnd = op.position + op.count
+          if(op.position + op.count < currentEnd){
+            currentEnd = Math.max(op.position + op.count, currentEnd + op.count)
           }
           doc = doc.substring(0, op.position + op.count) + doc.substring(op.position, doc.length)
           break;
@@ -136,7 +137,11 @@ class OperationController extends BaseController{
       //console.log('paste triggered')
       this.inputOn = false
       let paste = (event.clipboardData || window.clipboardData).getData('text')
-      //console.log(paste.length, textarea.selectionEnd)
+      if(paste.length > 20000){
+        alert('This content is too large')
+        event.preventDefault()
+        return
+      }
       if(indexEnd - indexStart > 0){
           opInfo.push({type: OP_TYPE.DELETE, position: indexEnd, count: indexStart - indexEnd})
       }

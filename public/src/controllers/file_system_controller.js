@@ -152,14 +152,18 @@ class FileSystemController extends BaseController{
         let [id, prevID, depth] = await this.createFileOrFolder(DATA_TYPE.FOLDER)
         element = createFolderOrFile(DATA_TYPE.FOLDER, id, prevID, depth)
         const p = getElement('p', element)
+        p.innerText = ''
         p.focus()
+        this.addBlurListener(p)
         domMap[id] = element
       }
       else if (target.matches('#file-option')){
         let [id, prevID, depth] = await this.createFileOrFolder(DATA_TYPE.FILE)
         element = createFolderOrFile(DATA_TYPE.FILE, id, prevID, depth)
         const p = getElement('p', element)
+        p.innerText = ''
         p.focus()
+        this.addBlurListener(p)
         this.changeSelectedFile(element)
         domMap[id] = element
       }
@@ -175,7 +179,9 @@ class FileSystemController extends BaseController{
         this.changeSelectedFile(element)
         domMap[id] = element
         const p = getElement('p', element)
+        p.innerText = ''
         p.focus()
+        this.addBlurListener(p)
         this.showHiddenFiles(targetID, false, true)
         event.stopPropagation()
         return
@@ -187,7 +193,9 @@ class FileSystemController extends BaseController{
         element = createFolderOrFile(DATA_TYPE.FOLDER, id, prevID, depth)
         domMap[id] = element
         const p = getElement('p', element)
+        p.innerText = ''
         p.focus()
+        this.addBlurListener(p)
         this.showHiddenFiles(targetID, false, true)
         event.stopPropagation()
         return
@@ -310,6 +318,9 @@ class FileSystemController extends BaseController{
         this.selectedName = p.innerText
         p.style['pointer-events'] = 'auto'
         p.setAttribute("contenteditable", true)
+        if(p.innerText == 'Untitled'){
+          p.innerText = ''
+        }
         p.focus()
         this.addBlurListener(p)
         return
@@ -359,7 +370,12 @@ class FileSystemController extends BaseController{
         p.innerText = node.name
         return
       }
-      if(node.type == DATA_TYPE.FILE){
+      if(p.innerText.length > 45){
+        p.innerText = node.name
+        alert('Name is too long')
+        return
+      }
+      if(node.type == DATA_TYPE.FILE && this.fileSystem.file.dataset.id == node.id){
         noteTitle.value = name
       }
       node.name = name
@@ -576,13 +592,17 @@ class FileSystemController extends BaseController{
     signUpForm.addEventListener('submit', async (event) => {
       event.preventDefault()
       const result = await submitFormData(event.target.action, event.target, FORM_TYPE.SIGN_UP)
-      this.socketIO.init(result[0], result[1])
+      if(result){
+        this.socketIO.init(result[0], result[1])
+      }
     })
 
     signInForm.addEventListener('submit', async (event) => {
       event.preventDefault()
       const result = await submitFormData(event.target.action, event.target, FORM_TYPE.SIGN_IN)
-      this.socketIO.init(result[0], result[1])
+      if(result){
+        this.socketIO.init(result[0], result[1])
+      }
     })
   }
   async selectVault(isForced){
@@ -654,6 +674,27 @@ class FileSystemController extends BaseController{
       this.socketIO.init(newVaultID, storage.getItem('access_token'))
       
     })
+    vaultInput.addEventListener('keydown', async (event) => {
+      if(event.key != 'Enter'){
+        return
+      } else{
+        event.preventDefault()
+      }
+      const vault = vaultInput.value.trim()
+      if ((/^\s*$/).test(vault)){
+        vaultInput.value = ''
+        return
+      }
+      const storage = window.sessionStorage
+      const result = await this.api.createVault(vault)
+      const newVaultID = result.data.id
+      $('#vault').modal('toggle');
+      vaultInput.value = ''
+      storage.setItem('vault_id', newVaultID)
+      storage.removeItem('file_id')
+      this.socketIO.init(newVaultID, storage.getItem('access_token'))
+      
+    })
     vaultList.addEventListener('click', (event) => {
       event.preventDefault()
       const target = event.target
@@ -705,6 +746,10 @@ class FileSystemController extends BaseController{
   addLeaveBtnClickListener(){
     LeaveBtn.addEventListener('click', async (event) => {
       event.preventDefault()
+      let confirmLeave = confirm('You will no longer have access to this vault. Do you want to proceed?')
+      if(!confirmLeave){
+        return
+      }
       const storage = window.sessionStorage
       const vaultID =  storage.getItem('vault_id')
       storage.removeItem('vault_id')
@@ -730,6 +775,22 @@ class FileSystemController extends BaseController{
       }
       addUserInput.value = ''
       //console.log(this.newVaultUserEmails)
+    })
+    addUserInput.addEventListener('keydown', (event) => {
+      if(event.key != 'Enter'){
+        return
+      }
+      event.preventDefault()
+      const email = addUserInput.value.trim()
+      if((/^\s*$/).test(email)){
+        return
+      } else if (!this.vaultUserEmails.has(email) && !this.newVaultUserEmails.has(email)){
+        this.newVaultUserEmails.add(email)
+        const li = createElement('li', ['user-email'])
+        li.innerText = email
+        $('#user-email-list').prepend(li)
+      }
+      addUserInput.value = ''
     })
   }
   addVaultNameInputBlurListener() {
@@ -778,15 +839,13 @@ class FileSystemController extends BaseController{
     })
   }
   addSearchBoxBlurListener(){
-    searchBox.addEventListener('input', (event) => {
+    searchBox.addEventListener('input', async (event) => {
       const keyword = searchBox.value.trim()
-      this.searchFiles(keyword)
+      await this.searchFiles(keyword)
     })
-    searchTool.addEventListener('click', () => {
+    searchTool.addEventListener('click', async () => {
       const keyword = searchBox.value.trim()
-      if(keyword.length > 0){
-        this.searchFiles(keyword)
-      }
+      await this.searchFiles(keyword)
     })
     navigationTool.addEventListener('click', () => {
       const storage = window.sessionStorage
@@ -797,15 +856,13 @@ class FileSystemController extends BaseController{
     })
   }
   async searchFiles(keyword){
+    searchList.innerHTML = ''
     if(keyword.length > 0){
-      searchList.innerHTML = ''
       const storage = window.sessionStorage
       const vaultID = storage.getItem('vault_id')
       const result = await this.api.searchFiles(vaultID, keyword)
       const ids = result.data
       this.buildSearchList(ids)
-    } else{
-      searchList.innerHTML = ''
     }
   }
   buildSearchList(ids){

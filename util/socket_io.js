@@ -1,5 +1,6 @@
  
 require('dotenv').config()
+const cloneDeep = require('lodash.clonedeep')
 const {
   getFile,
   getFileSystem,
@@ -118,7 +119,7 @@ io.of(/^\/[0-9]+$/)
           for (let i = clientRevisionID + 1; i < LogOp[fileID].length; i++){
             if (LogOp[fileID][i]){
               //change info.operation inplace
-              iterateOT(LogOp[fileID][i], operation)
+              iterateOT(cloneDeep(LogOp[fileID][i]), operation)
             } 
           }
         }
@@ -171,7 +172,7 @@ io.of(/^\/[0-9]+$/)
         }
         fileArr[fileID].doc = doc
         fileArr[fileID].revisionID = revisionID
-      }, 3000)
+      }, 0)
     })
   })
 

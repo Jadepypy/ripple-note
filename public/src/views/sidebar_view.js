@@ -42,10 +42,37 @@ arrow.addEventListener('click', () => {
     editorContainer.style.gridTemplateAreas = '"side main"';
   }
 })
-
+function lengthIsValid(value, type){
+  let isValid = true
+  let error
+  if(value.email.length > 45){
+    isValid = false
+    error = 'Email length exceeds'
+  } else if (value.password.length > 60){
+    isValid = false
+    error = 'Password length exceeds'
+  } else if (value.name){
+    if (value.name.length > 45){
+      isValid = false
+      error = 'Name length exceeds'
+    }
+  }
+  if(!isValid){
+    if(type === FORM_TYPE.SIGN_IN){
+      signInError.innerText = error
+    } else{
+      signUpError.innerText = error
+    }
+    return false
+  }
+  return true
+}
 async function submitFormData(url, data, type) {
   const form = new FormData(data)
   const value = Object.fromEntries(form.entries())
+  if(!lengthIsValid(value, type)){
+    return false
+  }
   const response = await fetch(url, {
     method: 'POST',
     headers: { 'Content-Type': 'application/json' },

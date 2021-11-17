@@ -49,7 +49,7 @@ const getFileSystem = async (vaultID) => {
                   type: file.type
                 })
   })
-  console.log('init files')
+  //console.log('init files')
   return [firstChild, files, revisionID]
 }
 
@@ -92,14 +92,10 @@ const searchFileSystem = async (req, res) => {
   }
   const idSet = new Set() 
   ids[0].forEach((id) => {
-    if(!idSet.has(id)){
-      idSet.add(id.id)
-    }
+    idSet.add(id.id)
   })
   ids[1].forEach((id) => {
-    if(!idSet.has(id)){
-      idSet.add(id.id)
-    }
+    idSet.add(id.id)
   })
   res.status(200).send({data: [...idSet]})
 }

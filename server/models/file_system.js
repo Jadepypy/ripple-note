@@ -161,8 +161,8 @@ const searchFileSystem = async (userID, vaultID, keyword) => {
     }
     const idSet = new Set()
     const [textResult] = await conn.query(`SELECT f.id as id FROM files f JOIN folder_file ff ON f.id = ff.id WHERE ff.vault_id = ? and lower(f.text) LIKE ?`,[vaultID, `%${keyword}%`])
-    // const [nameResult] = await conn.query(`SELECT id FROM folder_file WHERE vault_id = ? and lower(name) LIKE ?`,[vaultID, `%${keyword}%`])
-    return {ids: [textResult, []]}
+    const [nameResult] = await conn.query(`SELECT id FROM folder_file WHERE vault_id = ? and lower(name) LIKE ? and type = ?`,[vaultID, `%${keyword}%`, DATA_TYPE.FILE])
+    return {ids: [textResult, nameResult]}
   } catch(error) {
     await conn.query('ROLLBACK')
     conn.release()
