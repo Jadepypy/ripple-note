@@ -73,7 +73,7 @@ class OperationController extends BaseController{
     this.operation.outstandingOp = outstandingOp
     this.applyOperation(syncOp)
   }
-  applyOperation(operation){
+  applyOperation(operation, isLocal){
     //this.printOpInfo(operation)
     let doc = textarea.value
     let currentStart = textarea.selectionStart
@@ -81,11 +81,17 @@ class OperationController extends BaseController{
     for (const op of operation){
       switch (op.type) {
         case OP_TYPE.INSERT :
-          if(op.position < currentStart){
-            currentStart++
-          }
-          if(op.position < currentEnd){
-            currentEnd++
+          if(isLocal){
+            console.log(op.position)
+            currentStart = op.position + 1
+            currentEnd = op.position + 1
+          } else{
+            if(op.position < currentStart){
+              currentStart++
+            }
+            if(op.position < currentEnd){
+              currentEnd++
+            }
           }
           let prevPart = doc.substring(0, op.position)
           if(prevPart == ''){
@@ -140,8 +146,10 @@ class OperationController extends BaseController{
         event.preventDefault()
         return
       }
+      let doc = textarea.value
+      const selectedText = doc.substring(indexStart, indexEnd)
       if(indexEnd - indexStart > 0){
-          opInfo.push({type: OP_TYPE.DELETE, position: indexEnd, count: indexStart - indexEnd})
+          opInfo.push({type: OP_TYPE.DELETE, position: indexEnd, count: indexStart - indexEnd, key: selectedText})
       }
       let position = indexStart
       for (let i = 0; i < paste.length; i++){
@@ -155,8 +163,10 @@ class OperationController extends BaseController{
       let opInfo = []
       const indexStart = textarea.selectionStart
       const indexEnd = textarea.selectionEnd
+      let doc = textarea.value
+      const selectedText = doc.substring(indexStart, indexEnd)
       if(indexEnd - indexStart > 0){
-        opInfo.push({type: OP_TYPE.DELETE, position: indexEnd, count: indexStart - indexEnd})
+        opInfo.push({type: OP_TYPE.DELETE, position: indexEnd, count: indexStart - indexEnd, key: selectedText})
       }
       this.handleTextAreaOperation(opInfo)
     })
@@ -208,26 +218,39 @@ class OperationController extends BaseController{
         event.stopPropagation()
         return
       }
+
+      if(event.keyCode == 90 && event.ctrlKey || event.keyCode == 90 && event.metaKey){
+        event.preventDefault()
+        this.handleTextAreaOperation(null, -1)
+        return
+      }
+      if(event.keyCode == 89 && event.ctrlKey || event.keyCode == 89 && event.metaKey){
+        event.preventDefault()
+        this.handleTextAreaOperation(null, 1)
+        return
+      }
       const indexStart = textarea.selectionStart
       const indexEnd = textarea.selectionEnd
+      let doc = textarea.value
+      this.selectedText = indexStart != indexEnd? doc.substring(indexStart, indexEnd): doc.substring(indexEnd - 1, indexEnd)
       let opInfo = []
       if (event.key == 'Backspace'){
         if(indexEnd > 0){
-          opInfo.push({type: OP_TYPE.DELETE, position: indexEnd, count: Math.min(indexStart - indexEnd, -1)})
+          opInfo.push({type: OP_TYPE.DELETE, position: indexEnd, count: Math.min(indexStart - indexEnd, -1), key: this.selectedText})
         }
       }
       if (event.keyCode == 46){
         if(indexEnd > indexStart){
-          opInfo.push({type: OP_TYPE.DELETE, position: indexEnd, count: indexStart - indexEnd})
+          opInfo.push({type: OP_TYPE.DELETE, position: indexEnd, count: indexStart - indexEnd, key: this.selectedText})
         } else{
-          opInfo.push({type: OP_TYPE.DELETE, position: indexEnd + 1, count: -1})   
+          opInfo.push({type: OP_TYPE.DELETE, position: indexEnd + 1, count: -1, key: this.selectedText})   
         }
       }
       this.lastStart = indexStart
       this.lastEnd = indexEnd
       if( event.key == 'Enter'){
         if(indexEnd > indexStart){
-          opInfo.push({type: OP_TYPE.DELETE, position: indexEnd, count: indexStart - indexEnd})
+          opInfo.push({type: OP_TYPE.DELETE, position: indexEnd, count: indexStart - indexEnd, key: this.selectedText})
         }
         opInfo.push({type: OP_TYPE.INSERT, position: indexStart, key: '\n'})
       }
@@ -247,7 +270,7 @@ class OperationController extends BaseController{
         //const indexEnd = textarea.selectionEnd
         //console.log('input triggered')
         if(this.lastEnd - this.lastStart > 0){
-          opInfo.push({type: OP_TYPE.DELETE, position: this.lastEnd, count: this.lastStart - this.lastEnd})
+          opInfo.push({type: OP_TYPE.DELETE, position: this.lastEnd, count: this.lastStart - this.lastEnd, key: this.selectedText})
         }
         opInfo.push({type: OP_TYPE.INSERT, position: this.lastStart, key: event.data})
         // opInfo.push({type: OP_TYPE.RETAIN, position: textarea.selectionEnd, id: this.socketIO.socket.id})
@@ -287,11 +310,34 @@ class OperationController extends BaseController{
     caret.style.left = `${noteList.offsetWidth + sidebar.offsetWidth + coordinate.left}px`
     //console.log('selection', textarea.selectionEnd)
   }
-  handleTextAreaOperation(opInfo){
+  handleTextAreaOperation(opInfo, pointerChange){
     let state = this.operation.state
     const outstandingOp = this.operation.outstandingOp
     const bufferOp = this.operation.bufferOp
     const revisionID = this.operation.revisionID
+
+    if(pointerChange){
+      let stackLength = this.operation.opStack.length
+      if (pointerChange > 0  && this.operation.pointer < stackLength - 1){
+        opInfo = this.operation.opStack[++this.operation.pointer]
+        this.applyOperation(opInfo, true)
+      } else if (pointerChange < 0 && this.operation.pointer >= 0){
+        let opBefore = this.operation.opStack[this.operation.pointer]
+        console.log(opBefore)
+        opInfo = this.operation.reverseOperation(opBefore)
+        this.applyOperation(opInfo, true)
+        this.operation.pointer = this.operation.pointer-1
+      } else {
+        return
+      }
+    }else{
+      if(this.operation.pointer < this.operation.opStack.length - 1){
+        this.operation.opStack = this.operation.opStack.slice(0, this.operation.pointer + 1)
+      }
+      this.operation.opStack.push(opInfo)
+      this.operation.pointer++
+    }
+    //console.log('pointer', this.operation.pointer, 'opStack length', this.operation.opStack.length)
 
     if (state === STATE.CLEAR){
       outstandingOp.push(...opInfo)

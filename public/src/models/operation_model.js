@@ -8,6 +8,8 @@ class OperationModel {
     this.name = null
     this.revisionID = null
     this.doc = null
+    this.opStack = []
+    this.pointer = this.opStack.length - 1
     this.carets = {}
   }
   printOT(opInfo) {
@@ -150,6 +152,22 @@ class OperationModel {
     //console.log('delete delete----')
     //console.log(op1, op2)
     return [op1, op2]
+  }
+  reverseOperation(opInfo){
+    const reverseOp = []
+    for(let i = (opInfo.length - 1); i>=0; i--){
+      const op = opInfo[i]
+      if(op.type == OP_TYPE.INSERT){
+        reverseOp.push({type: OP_TYPE.DELETE, position: op.position + 1, count: -1, key: op.key})
+      } else if(op.type == OP_TYPE.DELETE){
+        const deletedText = op.key
+        let position = op.position + op.count
+        for (let i = 0; i < deletedText.length; i++){
+          reverseOp.push({type: OP_TYPE.INSERT, position: position++, key: deletedText[i]})
+        }
+      }
+    }
+    return reverseOp
   }
 }
 

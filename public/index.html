@@ -13,6 +13,27 @@
   <script src="https://kit.fontawesome.com/6c244c09d5.js" crossorigin="anonymous"></script>
 </head>
 <body>
+  <div class="offcanvas offcanvas-end" tabindex="-1" id="file-history" aria-labelledby="offcanvasRightLabel">
+  <div class="offcanvas-header">
+    <h5 id="offcanvasRightLabel">Version History</h5>
+    <button type="button" class="btn-close text-reset" data-bs-dismiss="offcanvas" aria-label="Close"></button>
+  </div>
+  <div class="offcanvas-body">
+    <div class="input-group mb-3">
+  <input type="text" class="form-control" placeholder="Name current version" aria-label="current version" aria-describedby="add-version-name-btn">
+  <button class="btn btn-outline-secondary" type="button" id="add-version-name-btn">Add</button>
+  <div class="list-group">
+  <a href="#" class="list-group-item list-group-item-action active" aria-current="true">
+    The current link item
+  </a>
+  <a href="#" class="list-group-item list-group-item-action">A second link item</a>
+  <a href="#" class="list-group-item list-group-item-action">A third link item</a>
+  <a href="#" class="list-group-item list-group-item-action">A fourth link item</a>
+</div>
+</div>
+  </div>
+</div>
+
 <div class="modal fade" id="vault" tabindex="-1" role="dialog" aria-labelledby="exampleModalCenterTitle" aria-hidden="true">
   <div class="modal-dialog modal-dialog-centered modal-lg" role="document">
     <div class="modal-content">
@@ -244,6 +265,7 @@
       <div class="editor hidden">
           <input id="note-title" placeholder="Untitled" maxlength="60" readonly>
           <span class="note-tools">
+            <i class="fas fa-history" id="history-icon" title="Version history" data-bs-toggle="offcanvas" data-bs-target="#file-history" aria-controls="offcanvasRight"></i>
             <i class="fas fa-align-right" id="preview-icon" title="Preview"></i>
             <i class="fas fa-times" id="trash-icon" title="Close"></i>
 

@@ -1,19 +1,23 @@
  #preview-icon,
-#trash-icon, #dot-icon{
+#trash-icon, #dot-icon,#history-icon{
   color: #a8a4a4;
   font-size: 22px;
   -webkit-text-stroke: 1.7px #f6f8f4;
+  display: block;
 }
 #trash-icon{
   color: #a8a4a4;
   font-size: 22px;
   -webkit-text-stroke: 2.5px #f6f8f4;
 }
-#preview-icon, #trash-icon, #dot-icon{
+/* #preview-icon, #trash-icon, #dot-icon,#history-icon{
+  margin-right: 10px;
+} */
+#dot-icon {
   margin-right: 10px;
 }
 #preview-icon:hover, #trash-icon:hover, 
-#dot-icon:hover{
+#dot-icon:hover, #history-icon:hover{
   color: rgb(106, 201, 218);
   cursor: pointer;
 }
@@ -22,8 +26,10 @@
   border-bottom: 1px solid #e1e1e1;
   text-align: right;
   margin: 0;
-  padding-right: 8px;
   line-height: 50px;
+  display: flex;
+  justify-content: space-around;
+  align-items: center;
 }
 .editor-container {
   display: grid;
@@ -45,6 +51,7 @@
   overflow-y: auto; 
   margin: 0;
   padding: 0;
+  overflow: hidden; 
 }
 textarea{
   width: 100%;
@@ -120,5 +127,17 @@ backlink {
   background-color: rgba(255, 0, 0, 0.274);
   font-size: 16px;
   position:absolute;
+}
+#file-history{
+  background-color: #eeeeee;
+  font-size: 25px;
+  font-family: Trebuchet MS;
+  color: #7e7b7b;
+  width: 300px;
+
+}
+#add-version-name-btn{
+  border: 1px solid #7e7b7b;
+  box-shadow: none;
 }
 

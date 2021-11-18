@@ -175,7 +175,7 @@ function printOpInfo(opInfo){
       console.log('INSERT', 'pos', op.position, 'key', op.key)
     } else{
       console.log('DELETE', 'pos', op.position, 'count', op
-      .count)
+      .count, 'key', op.key)
     }
   }
 }
