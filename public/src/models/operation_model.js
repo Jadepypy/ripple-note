@@ -10,33 +10,55 @@ class OperationModel {
     this.doc = null
     this.carets = {}
   }
-
-  iterateOT (opArr1, opArr2) {
-    // console.log("BEFORE:")
-    // for (const op of opArr2){
-    //   console.log(op)
-    // }
-    let opArr1Prime = []
-    //let opArr2Prime = [...opArr2]
-    for (let op1 of opArr1){
-      for (let i =0; i < opArr2.length; i++){
-        let op2
-        [op1, op2] = this.transformation(op1, opArr2[i])
-        if (Array.isArray(op2)){
-          opArr2[i++] = op2[0]
-          opArr2.splice(i, 0, op2[1])
-        } else{
-          opArr2[i] = op2    
-        }
-      }
-      if (Array.isArray(op1)){
-        opArr1Prime.push(op1[0])
-        opArr1Prime.push(op1[1]) 
+  printOT(opInfo) {
+    if (Array.isArray(opInfo)){
+      if(opInfo.type == OP_TYPE.INSERT){
+        console.log('INSERT', 'pos', opInfo[0].position, 'key', opInfo[0].key)
       } else{
-        opArr1Prime.push(op1)
+        console.log('DELETE', 'pos', opInfo[0].position, 'count', opInfo[0].count)
+      }
+      if(opInfo.type == OP_TYPE.INSERT){
+        console.log('INSERT', 'pos', opInfo[1].position, 'key', opInfo[1].key)
+      } else{
+        console.log('DELETE', 'pos', opInfo[1].position, 'count', opInfo[1].count)
+      }
+    } else{
+      if(opInfo.type == OP_TYPE.INSERT){
+        console.log('INSERT', 'pos', opInfo.position, 'key', opInfo.key)
+      } else{
+        console.log('DELETE', 'pos', opInfo.position, 'count', opInfo.count)
       }
     }
-    //console.log("TRANSFORM OP:", opArr2)
+  }
+  iterateOT (opArr1, opArr2) {
+    let opArr1Prime = []
+    for (let op1Oringial of opArr1){
+      let op1Current = [op1Oringial]
+      let op1Next = []
+      for (let i =0; i < opArr2.length; i++){
+        console.log('before', opArr2[i].position, 'count', opArr2[i].count, 'key', opArr2[i].key)
+        op1Next = []
+        for(let op1 of op1Current){
+          let op2
+          const result = this.transformation(op1, opArr2[i])
+          op1 = result[0]
+          op2 = result[1]
+          if (Array.isArray(op2)){
+            opArr2[i++] = op2[0]
+            opArr2.splice(i, 0, op2[1])
+          } else{
+            opArr2[i] = op2    
+          }
+          if (Array.isArray(op1)){
+            op1Next = [...op1Next, ...op1]
+          } else{
+            op1Next.push(op1)    
+          }
+        }
+        op1Current = [...op1Next]
+      }
+      opArr1Prime = [...opArr1Prime, ...op1Next]
+    }
     return opArr1Prime
   }
   //heart of OT

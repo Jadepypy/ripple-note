@@ -1,5 +1,4 @@
- 
-require('dotenv').config()
+ require('dotenv').config()
 const cloneDeep = require('lodash.clonedeep')
 const {
   getFile,
@@ -115,6 +114,8 @@ io.of(/^\/[0-9]+$/)
         //console.log('files', fileArr[fileID], fileArr[fileID].doc)
         //console.log('inittial doc', doc)
         // console.log("ID", clientRevisionID, "SERVER INFO:", operation)
+        console.log('Received!!!--------', 'clientID', clientRevisionID)
+        printOpInfo(operation)
         if (revisionID > clientRevisionID) {
           for (let i = clientRevisionID + 1; i < LogOp[fileID].length; i++){
             if (LogOp[fileID][i]){
@@ -138,6 +139,8 @@ io.of(/^\/[0-9]+$/)
         //console.log('Sync OP', revisionID, operation)
         socket.to(socket.fileID).emit('syncOp', revisionID, operation, socket.id, doc);
         LogOp[fileID][revisionID] = operation
+        console.log('SEND!!!--------', 'clientID', revisionID)
+        printOpInfo(operation)
         //console.log(operation)
         // const backUpOp = operation.map((op) => {
         //     return [  revisionID,  
@@ -172,10 +175,21 @@ io.of(/^\/[0-9]+$/)
         }
         fileArr[fileID].doc = doc
         fileArr[fileID].revisionID = revisionID
-      }, 0)
+      }, 3000)
     })
   })
 
+}
+
+function printOpInfo(opInfo){
+  for(const op of opInfo){
+    if(op.type == OP_TYPE.INSERT){
+      console.log('INSERT', 'pos', op.position, 'key', op.key)
+    } else{
+      console.log('DELETE', 'pos', op.position, 'count', op
+      .count)
+    }
+  }
 }
 
 module.exports = {start}
