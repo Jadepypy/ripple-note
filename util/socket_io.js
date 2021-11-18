@@ -111,11 +111,8 @@ io.of(/^\/[0-9]+$/)
         const time = new Date().toISOString().slice(0, 19).replace('T', ' ')
         let revisionID = fileArr[fileID].revisionID
         let doc = fileArr[fileID].doc
-        //console.log('files', fileArr[fileID], fileArr[fileID].doc)
-        //console.log('inittial doc', doc)
-        // console.log("ID", clientRevisionID, "SERVER INFO:", operation)
-        console.log('Received!!!--------', 'clientID', clientRevisionID)
-        printOpInfo(operation)
+        //console.log('Received!!!--------', 'clientID', clientRevisionID)
+        //printOpInfo(operation)
         if (revisionID > clientRevisionID) {
           for (let i = clientRevisionID + 1; i < LogOp[fileID].length; i++){
             if (LogOp[fileID][i]){
@@ -126,21 +123,12 @@ io.of(/^\/[0-9]+$/)
         }
         revisionID++
         doc = applyOperation(doc, operation)
-        //console.log('pending...')
-        // if(text != doc ){
-        //   console.log('DIVERGE================')
-        //   console.log('client', clientRevisionID)
-        //   console.log('revisionID', revisionID)
-        //   console.log(doc)
-        //   console.log('------------')
-        //   console.log(text)
-        // }
         socket.emit('ack', revisionID)
         //console.log('Sync OP', revisionID, operation)
         socket.to(socket.fileID).emit('syncOp', revisionID, operation, socket.id, doc);
         LogOp[fileID][revisionID] = operation
-        console.log('SEND!!!--------', 'clientID', revisionID)
-        printOpInfo(operation)
+        //console.log('SEND!!!--------', 'clientID', revisionID)
+        //printOpInfo(operation)
         //console.log(operation)
         // const backUpOp = operation.map((op) => {
         //     return [  revisionID,  

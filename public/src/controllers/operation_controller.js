@@ -50,13 +50,11 @@ class OperationController extends BaseController{
     let bufferOp = this.operation.bufferOp
     let outstandingOp = []
     if (bufferOp.length > 0){
-      console.log('SEND-------------------', revisionID)
-      this.printOpInfo(bufferOp)
+      //this.printOpInfo(bufferOp)
       this.socketIO.sendOperation(revisionID, bufferOp)
       outstandingOp = [...bufferOp]
       this.operation.state = STATE.WAITING
       bufferOp = []
-      console.log('SEND END-------------------', revisionID)
     }
     this.operation.bufferOp = bufferOp
     this.operation.outstandingOp = outstandingOp
@@ -65,14 +63,9 @@ class OperationController extends BaseController{
     this.operation.revisionID = revisionID
     let outstandingOp = this.operation.outstandingOp
     let bufferOp = this.operation.bufferOp
-    //console.log('outstanding', outstandingOp)
-    //console.log('bufferOp', bufferOp)
-    console.log('RECEIVE====================================', revisionID)
-    console.log('OUTSANDING----------------')
     if (outstandingOp.length > 0){
       outstandingOp = this.operation.iterateOT(outstandingOp, syncOp)
     }
-    console.log('BUFFER----------------')
     if (bufferOp.length > 0){
       bufferOp = this.operation.iterateOT(bufferOp, syncOp)
     }
@@ -81,8 +74,7 @@ class OperationController extends BaseController{
     this.applyOperation(syncOp)
   }
   applyOperation(operation){
-    console.log('APPLY OP---------')
-    this.printOpInfo(operation)
+    //this.printOpInfo(operation)
     let doc = textarea.value
     let currentStart = textarea.selectionStart
     let currentEnd = textarea.selectionEnd
@@ -303,11 +295,9 @@ class OperationController extends BaseController{
 
     if (state === STATE.CLEAR){
       outstandingOp.push(...opInfo)
-      console.log('SEND-------------------', revisionID)
-      this.printOpInfo(opInfo)
+      //this.printOpInfo(opInfo)
       this.socketIO.sendOperation(revisionID, outstandingOp)
       this.operation.state = STATE.WAITING
-      console.log('SEND END-------------------')
     } else {
       bufferOp.push(...opInfo)
     }

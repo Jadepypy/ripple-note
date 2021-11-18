@@ -36,7 +36,7 @@ class OperationModel {
       let op1Current = [op1Oringial]
       let op1Next = []
       for (let i =0; i < opArr2.length; i++){
-        console.log('before', opArr2[i].position, 'count', opArr2[i].count, 'key', opArr2[i].key)
+        //console.log('before', opArr2[i].position, 'count', opArr2[i].count, 'key', opArr2[i].key)
         op1Next = []
         for(let op1 of op1Current){
           let op2
