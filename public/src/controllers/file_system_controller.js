@@ -164,7 +164,7 @@ class FileSystemController extends BaseController{
         p.innerText = ''
         p.focus()
         this.addBlurListener(p)
-        this.changeSelectedFile(element)
+        this.changeSelectedFile(element, 'Untitled')
         domMap[id] = element
       }
     })
@@ -375,8 +375,10 @@ class FileSystemController extends BaseController{
         alert('Name is too long')
         return
       }
-      if(node.type == DATA_TYPE.FILE && this.fileSystem.file.dataset.id == node.id){
-        noteTitle.value = name
+      if(this.fileSystem.file != null && node.type == DATA_TYPE.FILE){
+        if(this.fileSystem.file.dataset.id == node.id){
+          noteTitle.value = name
+        }
       }
       node.name = name
       this.socketIO.changeName(node.id, name, node.type)
