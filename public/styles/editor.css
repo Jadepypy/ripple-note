@@ -136,8 +136,43 @@ backlink {
   width: 300px;
 
 }
+.offcanvas-body{
+
+}
 #add-version-name-btn{
-  border: 1px solid #7e7b7b;
+  /* border: 1px solid #7e7b7b; */
+    border: 1px solid #ced4da;
+
   box-shadow: none;
+  margin-bottom: 20px;
+}
+
+#version-input{
+  margin-bottom: 20px;
+}
+#no-existing-version{
+  width: 100%;
+  font-size: 1rem;
+  padding-left: 15px;
+  font-weight: 400;
+}
+#version-history-list{
+  width: 100%;
+  font-size: 24px;
+}
+.version-history-item{
+  background: transparent;
+  font-family: Trebuchet MS;
+  font-size: 1rem;
+  color: #7e7b7b;
+  display: flex;
+  flex-direction: column;
+  flex-wrap: wrap;
+}
+.version-history-item.active{
+  border: 1px solid #e1e1e1;
+
+  background-color: rgba(165, 231, 245, 0.322);
+  color: #7e7b7b;
 }
 

@@ -20,15 +20,25 @@
   </div>
   <div class="offcanvas-body">
     <div class="input-group mb-3">
-  <input type="text" class="form-control" placeholder="Name current version" aria-label="current version" aria-describedby="add-version-name-btn">
+  <input type="text" class="form-control" id="version-input" placeholder="Name current version" aria-label="current version" aria-describedby="add-version-name-btn">
   <button class="btn btn-outline-secondary" type="button" id="add-version-name-btn">Add</button>
-  <div class="list-group">
-  <a href="#" class="list-group-item list-group-item-action active" aria-current="true">
+  <div id="no-existing-version" class="hidden">
+    No existing version
+  </div>
+  <div class="list-group" id="version-history-list">
+  <a href="#" class="list-group-item list-group-item-action active version-history-item" aria-current="true">
     The current link item
+    <small class="vault-created-time">2021-11-14T17:26:55.000Z</small>
   </a>
-  <a href="#" class="list-group-item list-group-item-action">A second link item</a>
-  <a href="#" class="list-group-item list-group-item-action">A third link item</a>
-  <a href="#" class="list-group-item list-group-item-action">A fourth link item</a>
+  <a href="#" class="list-group-item list-group-item-action version-history-item">A second link item
+    <small class="vault-created-time">2021-11-14T17:26:55.000Z</small>
+  </a>
+  <a href="#" class="list-group-item list-group-item-action version-history-item">A third link item
+    <small class="vault-created-time">2021-11-14T17:26:55.000Z</small>
+  </a>
+  <a href="#" class="list-group-item list-group-item-action version-history-item">A fourth link item
+    <small class="vault-created-time">2021-11-14T17:26:55.000Z</small>
+  </a>
 </div>
 </div>
   </div>
