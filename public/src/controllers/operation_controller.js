@@ -11,7 +11,8 @@ class OperationController extends BaseController{
       ack: this.handleAcknowledgement.bind(this),
       syncOp: this.handleSyncOperation.bind(this),
       joinFile: this.handleJoinFile.bind(this),
-      leaveRoom: this.handleLeaveRoom.bind(this)
+      leaveRoom: this.handleLeaveRoom.bind(this),
+      syncDoc: this.handleSyncDoc.bind(this)
     }
     this.inputOn = true
     this.keydownOn = true
@@ -122,6 +123,7 @@ class OperationController extends BaseController{
     trash.addEventListener('click', (event) => {
       showEditor(false)
       this.changeSelectedFile(null)
+      this.socketIO.leaveRoom()
     })
   }
 
@@ -347,6 +349,18 @@ class OperationController extends BaseController{
     } else {
       bufferOp.push(...opInfo)
     }
+  }
+  handleSyncDoc(revisionID, doc){
+    console.timeEnd()
+    console.time()
+    console.log('sync')
+    this.operation.revisionID = revisionID
+    this.operation.bufferOp = []
+    this.operation.outstandingOp = []
+    this.operation.state = STATE.CLEAR
+    const currentStart = textarea.selectionStart
+    const currentEnd = textarea.selectionEnd
+    renderEditor(doc, undefined, currentStart, currentEnd)
   }
   printOpInfo(opInfo){
     for(const op of opInfo){

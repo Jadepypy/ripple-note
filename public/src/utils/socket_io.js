@@ -69,6 +69,10 @@ class SocketIO {
         this.trigger('leaveVault')
       }
     })
+    this.socket.on('syncDoc', (revisionID, doc, fileID) => {
+      console.log(fileID)
+      this.trigger('syncDoc', revisionID, doc)
+    })
   }
   joinFile(fileID) {
     if(this.fileID !== null){

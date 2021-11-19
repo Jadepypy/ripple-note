@@ -1,13 +1,13 @@
  #preview-icon,
 #trash-icon, #dot-icon,#history-icon{
   color: #a8a4a4;
-  font-size: 22px;
+  font-size: 25px;
   -webkit-text-stroke: 1.7px #f6f8f4;
   display: block;
 }
 #trash-icon{
   color: #a8a4a4;
-  font-size: 22px;
+  font-size: 25px;
   -webkit-text-stroke: 2.5px #f6f8f4;
 }
 /* #preview-icon, #trash-icon, #dot-icon,#history-icon{
@@ -129,16 +129,17 @@ backlink {
   position:absolute;
 }
 #file-history{
-  background-color: #eeeeee;
+  /* background-color: #eeeeee; */
+  background-color: #f6f8f4;
   font-size: 25px;
   font-family: Trebuchet MS;
   color: #7e7b7b;
-  width: 300px;
-
+  width: 370px;
+  box-shadow: -1px 0px 10px 1px #4b4a4a5e;
 }
-.offcanvas-body{
+/* .offcanvas-body{
 
-}
+} */
 #add-version-name-btn{
   /* border: 1px solid #7e7b7b; */
     border: 1px solid #ced4da;

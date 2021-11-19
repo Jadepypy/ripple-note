@@ -38,19 +38,18 @@ io.of(/^\/[0-9]+$/)
     socket.on('joinFile', async (id) => {
       socket.join(id)
       socket.fileID = id
-     const result = await getFile(id)
-     if(result.error){
-       socket.emit('error', result.error)
-     }
-     const {revisionID, doc} = result
+      const result = await getFile(id)
+      if(result.error){
+        socket.emit('error', result.error)
+      }
+      const {revisionID, doc} = result
       fileArr[id] = {
         revisionID,
         doc
       }
       socket.emit('init', revisionID, doc) 
-      //console.log(`user ${socket.userID} joined room ${id}`)
-      //console.log(`send revisionID  ${fileArr[id].revisionID} text ${fileArr[id].doc}`)
       socket.to(socket.fileID).emit('joinFile', socket.id)
+      resetTimeInterval(socket, true)
     })
     .on('changeName', async (id, name) => {
       await changeFileName(id, name)
@@ -60,7 +59,7 @@ io.of(/^\/[0-9]+$/)
     .on('leaveRoom', (id) => {
       socket.leave(id)
       socket.to(socket.fileID).emit('leaveRoom', socket.id)
-      //console.log(`user ${socket.userID} left room ${id}`)
+      resetTimeInterval(socket)
     })
     .on('moveFile', async (dataArr, id, targetID, revisionID) => {
       if(revisionID < vaults[vaultID]){
@@ -127,21 +126,6 @@ io.of(/^\/[0-9]+$/)
         //console.log('Sync OP', revisionID, operation)
         socket.to(socket.fileID).emit('syncOp', revisionID, operation, socket.id, doc);
         LogOp[fileID][revisionID] = operation
-        //console.log('SEND!!!--------', 'clientID', revisionID)
-        //printOpInfo(operation)
-        //console.log(operation)
-        // const backUpOp = operation.map((op) => {
-        //     return [  revisionID,  
-        //               userID,
-        //               fileID,
-        //               op.type,
-        //               op.position,
-        //               op.count != undefined? op.count: 0,
-        //               op.key != undefined? op.key: '',
-        //               time
-        //             ]
-          
-        // })
         const backUpOp = operation.reduce((result, op) => {
           if(op.type != OP_TYPE.RETAIN){
             result.push([  revisionID,  
@@ -154,19 +138,32 @@ io.of(/^\/[0-9]+$/)
                           time
                         ])
           }
-          //console.log(op.type)
           return result
         }, [])
-        //console.log('create Operation', fileID, revisionID, operatin, doc)
-        if(backUpOp.length > 0){
-          await createOperation(fileID, revisionID, doc, backUpOp)
-        }
         fileArr[fileID].doc = doc
         fileArr[fileID].revisionID = revisionID
-      }, 3000)
+        await createOperation(fileID, revisionID, doc, backUpOp)
+        // console.log('create Operation', fileID, revisionID, fileArr[fileID].doc)
+        // if(backUpOp.length > 0){
+        //   await createOperation(fileID, revisionID, doc, backUpOp)
+        // }
+      }, 0)
     })
   })
 
+}
+
+function resetTimeInterval(socket, hasNewRoom){
+  const fileID = socket.fileID
+  const intervalID = socket.intervalID
+  if(intervalID){
+    clearInterval(intervalID)
+  }
+  if(hasNewRoom){
+    socket.intervalID = setInterval(() => {
+      socket.emit('syncDoc', fileArr[fileID].revisionID, fileArr[fileID].doc, fileID)
+    }, 5000)
+  }
 }
 
 function printOpInfo(opInfo){
