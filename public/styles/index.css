@@ -14,12 +14,15 @@ a {
 .custom-container {
   display: grid;
   padding: 0;
-  grid-template-columns: 30px auto;
+  grid-template-columns: 37px auto;
   grid-template-areas: "side main";
   margin: 0;
 }
 .note-container {
   grid-area: main;
+}
+.modal, .modal-dialog, .modal-content, .modal-body{
+  border-radius: 1.5% !important; 
 }
 .modal-header {
   background-color: #f6f8f4;
@@ -64,6 +67,9 @@ button {
   font-family: Trebuchet MS;
 }
 #vault-name {
+  font-size: 16px;
+}
+#user-name, #user-email-data{
   font-size: 16px;
 }
 /* #add-input-label{
@@ -199,6 +205,7 @@ small {
 #vault-list-sidebar {
   grid-area: side;
   border-radius: 0px;
+  border-radius: 1.5% 0px 0px 1.5%; 
   border-top: 1px solid #e1e1e1;
   border-right: 1px solid #e1e1e1;
   background: transparent;

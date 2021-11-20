@@ -1,13 +1,13 @@
  #preview-icon,
 #trash-icon, #dot-icon,#history-icon{
   color: #a8a4a4;
-  font-size: 25px;
+  font-size: 28px;
   -webkit-text-stroke: 1.7px #f6f8f4;
   display: block;
 }
 #trash-icon{
   color: #a8a4a4;
-  font-size: 25px;
+  font-size: 28px;
   -webkit-text-stroke: 2.5px #f6f8f4;
 }
 /* #preview-icon, #trash-icon, #dot-icon,#history-icon{
@@ -43,7 +43,7 @@
   display: grid;
   height: 100vh;
   grid-template-rows: 50px auto;
-  grid-template-columns: auto 100px;
+  grid-template-columns: auto 110px;
   grid-template-areas: "title note-tools" "note note";
 }
 .textarea-container{
@@ -150,6 +150,8 @@ backlink {
 
 #version-input{
   margin-bottom: 20px;
+  outline: none;
+  box-shadow: none;
 }
 #no-existing-version{
   width: 100%;

@@ -351,9 +351,9 @@ class OperationController extends BaseController{
     }
   }
   handleSyncDoc(revisionID, doc){
-    console.timeEnd()
-    console.time()
-    console.log('sync')
+    // console.timeEnd()
+    // console.time()
+    // console.log('sync')
     this.operation.revisionID = revisionID
     this.operation.bufferOp = []
     this.operation.outstandingOp = []

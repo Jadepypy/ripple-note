@@ -715,6 +715,7 @@ class FileSystemController extends BaseController{
     settingIcon.addEventListener('click', async () => {
       const storage = window.sessionStorage
       if(storage.getItem('access_token') !== null){
+        settingError.innerText = ''
         if(storage.getItem('vault_id') != DEMO_VAULT_ID){
           await this.getSetting()
         } else{
@@ -767,33 +768,44 @@ class FileSystemController extends BaseController{
     addUserBtn.addEventListener('click', (event) => {
       event.preventDefault()
       const email = addUserInput.value.trim()
-      if((/^\s*$/).test(email)){
-        return
-      } else if (!this.vaultUserEmails.has(email) && !this.newVaultUserEmails.has(email)){
-        this.newVaultUserEmails.add(email)
-        const li = createElement('li', ['user-email'])
-        li.innerText = email
-        $('#user-email-list').prepend(li)
-      }
-      addUserInput.value = ''
-      //console.log(this.newVaultUserEmails)
+      this.addUserEmail(email)
     })
     addUserInput.addEventListener('keydown', (event) => {
+      settingError.innerText = ''
       if(event.key != 'Enter'){
         return
       }
       event.preventDefault()
       const email = addUserInput.value.trim()
-      if((/^\s*$/).test(email)){
-        return
-      } else if (!this.vaultUserEmails.has(email) && !this.newVaultUserEmails.has(email)){
-        this.newVaultUserEmails.add(email)
-        const li = createElement('li', ['user-email'])
-        li.innerText = email
-        $('#user-email-list').prepend(li)
-      }
-      addUserInput.value = ''
+      this.addUserEmail(email)
     })
+  }
+  async addUserEmail(email){
+    if((/^\s*$/).test(email)){
+      settingError.innerText = 'Email can not be empty'
+      return false
+    }
+    if(!this.validateEmail(email)){
+      settingError.innerText = 'Email format invalid'
+      return false
+    }
+    if (this.vaultUserEmails.has(email) || this.newVaultUserEmails.has(email)){
+      settingError.innerText = 'Email already exists'
+      return false
+    }
+    const storage = window.sessionStorage
+    const vaultID = storage.getItem('vault_id')
+    this.newVaultUserEmails.add(email)
+    const li = createElement('li', ['user-email'])
+    li.innerText = email
+    $('#user-email-list').prepend(li)
+    const data = {
+      vault_id: vaultID,
+      emails: [...this.newVaultUserEmails]
+    }
+    await this.api.addVaultUsers(data)
+    addUserInput.value = ''
+    return true
   }
   addVaultNameInputBlurListener() {
     vaultNameInput.addEventListener('blur', (event) => {
@@ -811,7 +823,7 @@ class FileSystemController extends BaseController{
       }
     })
   }
-  addSaveBtnClickListener() {
+  async addSaveBtnClickListener() {
     saveBtn.addEventListener('click', async (event) => {
       //console.log('click')
       event.preventDefault()
@@ -820,14 +832,13 @@ class FileSystemController extends BaseController{
       if(this.vaultNameChanged){
         await this.api.changeVaultName(vaultID, {name: this.vaultName})
       }
-      //console.log(this.newVaultUserEmails.size)
-      if(this.newVaultUserEmails.size > 0){
-        const data = {
-          vault_id: vaultID,
-          emails: [...this.newVaultUserEmails]
+      const email = addUserInput.value.trim()
+      if(email.length > 0){
+        const hasAdded = await this.addUserEmail(email)
+        if(!hasAdded){
+          console.log('?')
+          return
         }
-        //console.log(data)
-        await this.api.addVaultUsers(data)
       }
       $('#setting-modal').modal('toggle')
     })
@@ -882,6 +893,12 @@ class FileSystemController extends BaseController{
         this.changeSelectedFile(searchDomMap[fileID], name)
       } 
     })    
+  }
+  validateEmail(mail) {
+    if (/^\w+([\.-]?\w+)*@\w+([\.-]?\w+)*(\.\w{2,3})+$/.test(mail)){
+      return true
+    }
+    return false
   }
 }
 
