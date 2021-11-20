@@ -2,13 +2,13 @@
 #trash-icon, #dot-icon,#history-icon{
   color: #a8a4a4;
   font-size: 28px;
-  -webkit-text-stroke: 1.7px #f6f8f4;
+  -webkit-text-stroke: 1.9px #f6f8f4;
   display: block;
 }
 #trash-icon{
   color: #a8a4a4;
   font-size: 28px;
-  -webkit-text-stroke: 2.5px #f6f8f4;
+  -webkit-text-stroke: 2.8px #f6f8f4;
 }
 /* #preview-icon, #trash-icon, #dot-icon,#history-icon{
   margin-right: 10px;
@@ -135,7 +135,7 @@ backlink {
   font-family: Trebuchet MS;
   color: #7e7b7b;
   width: 370px;
-  box-shadow: -1px 0px 10px 1px #4b4a4a5e;
+  box-shadow: -1px 0px 10px -1px #4b4a4a5e;
 }
 /* .offcanvas-body{
 
@@ -171,6 +171,24 @@ backlink {
   display: flex;
   flex-direction: column;
   flex-wrap: wrap;
+  display: grid;
+  grid-template-columns: 70% auto;
+  grid-template-areas: "vault restore";
+}
+.vault-vc-container{
+  grid-area: vault;
+}
+.restore-btn{
+  display: block; 
+  background-color: #f6f8f4;
+  width: 78px; 
+  font-size: 1rem; 
+  color: #7e7b7b;
+  border: 1px solid #7e7b7b;
+  border-radius: 6%;
+  grid-area: restore;
+  z-index: 1;
+  padding: 1px 1px;
 }
 .version-history-item.active{
   border: 1px solid #e1e1e1;
@@ -178,4 +196,3 @@ backlink {
   background-color: rgba(165, 231, 245, 0.322);
   color: #7e7b7b;
 }
-

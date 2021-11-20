@@ -27,6 +27,8 @@
   grid-template-columns: 100%;
   grid-template-areas: "tools" "options" "note-list";
   max-height: 100vh;
+  z-index: 1;
+  box-shadow: 4px 0px 10px -8px #4b4a4a5e;
 }
 .tools {
   grid-area: tools;
@@ -98,12 +100,12 @@
   align-items: center;
   cursor: pointer;
 }
-.folder{
+.folder.opened{
   /* border-bottom: 1px solid #c7c6c6c4; */
   /* border-top: 1px solid #c7c6c6c4; */
   /* box-shadow: 0px -1px 5px#c7c6c6c4; */
   z-index: 1;
-  box-shadow: 0 4px 2px -3px #c7c6c671;
+  box-shadow: 0 4px 3px -2px #c7c6c649;
 
 }
 .folder.entered,

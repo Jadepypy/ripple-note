@@ -24,6 +24,7 @@ const {
 const fileArr = {}
 const vaults = {}
 const LogOp = {}
+const onlines = {}//fileID: {count, intervalID}
 // const dataArr = [[0, 1, null, -1, 'vault'], [1, 4, 2, 0, 'Folder1'], [2, 5, 3, 0, 'Folder2'], [3, 10, null, 0, 'Folder3'], [4, null, 8, 1, 'File4'],  [8, null, 9, 1, 'File8'], [9, null, null, 1, 'File9'], [5, null, 6, 1, 'File5'], [6, null, null, 1, 'File6'], [10, 11, null, 0, 'Folder10'], [11, null, null, 1, 'File11']]
 const start = (io) => {
 io.of(/^\/[0-9]+$/)
@@ -38,16 +39,18 @@ io.of(/^\/[0-9]+$/)
     socket.on('joinFile', async (id) => {
       socket.join(id)
       socket.fileID = id
-      const result = await getFile(id)
-      if(result.error){
-        socket.emit('error', result.error)
+      if(!fileArr[id]){
+        const result = await getFile(id)
+        if(result.error){
+          socket.emit('error', result.error)
+        }
+        const {revisionID, doc} = result
+        fileArr[id] = {
+          revisionID,
+          doc
+        }
       }
-      const {revisionID, doc} = result
-      fileArr[id] = {
-        revisionID,
-        doc
-      }
-      socket.emit('init', revisionID, doc) 
+      socket.emit('init', fileArr[id].revisionID, fileArr[id].doc) 
       socket.to(socket.fileID).emit('joinFile', socket.id)
       resetTimeInterval(socket, true)
     })
@@ -96,23 +99,18 @@ io.of(/^\/[0-9]+$/)
     })
     .on('disconnect', () => {
       io.of(vaultID).emit('leaveVault', socket.userID)
+      resetTimeInterval(socket, false)
     })
     .on('operation', (clientRevisionID, operation, text) => {
       // console.log(clientRevisionID, operation)
       setTimeout(async () => {
         const userID = socket.userID
-        //const vaultID = socket.nsp.name.replace('/', '')
         const fileID = socket.fileID
-        //console.log('received', operation)
         if(LogOp[fileID] == undefined){
           LogOp[fileID] = []
         }
         const time = new Date().toISOString().slice(0, 19).replace('T', ' ')
-        let revisionID = fileArr[fileID].revisionID
-        let doc = fileArr[fileID].doc
-        //console.log('Received!!!--------', 'clientID', clientRevisionID)
-        //printOpInfo(operation)
-        if (revisionID > clientRevisionID) {
+        if (fileArr[fileID].revisionID > clientRevisionID) {
           for (let i = clientRevisionID + 1; i < LogOp[fileID].length; i++){
             if (LogOp[fileID][i]){
               //change info.operation inplace
@@ -120,15 +118,17 @@ io.of(/^\/[0-9]+$/)
             } 
           }
         }
-        revisionID++
-        doc = applyOperation(doc, operation)
+        fileArr[fileID].revisionID++
+        fileArr[fileID].doc = applyOperation(fileArr[fileID].doc, operation)
+        let revisionID = fileArr[fileID].revisionID
+        let doc = fileArr[fileID].doc
         socket.emit('ack', revisionID)
         //console.log('Sync OP', revisionID, operation)
         socket.to(socket.fileID).emit('syncOp', revisionID, operation, socket.id, doc);
         LogOp[fileID][revisionID] = operation
         const backUpOp = operation.reduce((result, op) => {
           if(op.type != OP_TYPE.RETAIN){
-            result.push([  revisionID,  
+            result.push([ revisionID,  
                           userID,
                           fileID,
                           op.type,
@@ -140,19 +140,39 @@ io.of(/^\/[0-9]+$/)
           }
           return result
         }, [])
-        fileArr[fileID].doc = doc
-        fileArr[fileID].revisionID = revisionID
         await createOperation(fileID, revisionID, doc, backUpOp)
         // console.log('create Operation', fileID, revisionID, fileArr[fileID].doc)
         // if(backUpOp.length > 0){
         //   await createOperation(fileID, revisionID, doc, backUpOp)
         // }
-      }, 0)
+      }, 3000)
     })
   })
 
 }
 
+function trackDocVersion(fileID, isOnline){ 
+  if(isOnline){
+    if(onlines[fileID]){
+      onlines[fileID].count++
+    } else{
+      onlines[fileID] = {}
+      onlines[fileID].count = 1
+      onlines[fileID].intervalID = setInterval(() => {
+        
+      }, 10000)
+    }
+  } else{
+    if(onlines[fileID].count > 1){
+      
+    } else{
+      clearInterval(onlines[fileID].intervalID)
+      delete onlines[fileID]
+    }
+  }
+
+
+}
 function resetTimeInterval(socket, hasNewRoom){
   const fileID = socket.fileID
   const intervalID = socket.intervalID
@@ -161,6 +181,7 @@ function resetTimeInterval(socket, hasNewRoom){
   }
   if(hasNewRoom){
     socket.intervalID = setInterval(() => {
+      console.log('sync', fileArr[fileID].revisionID)
       socket.emit('syncDoc', fileArr[fileID].revisionID, fileArr[fileID].doc, fileID)
     }, 5000)
   }

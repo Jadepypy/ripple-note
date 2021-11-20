@@ -13,7 +13,7 @@
   <script src="https://kit.fontawesome.com/6c244c09d5.js" crossorigin="anonymous"></script>
 </head>
 <body>
-  <div class="offcanvas offcanvas-end" tabindex="-1" id="file-history" aria-labelledby="offcanvasRightLabel" data-bs-backdrop="false">
+  <div class="offcanvas offcanvas-end" tabindex="-1" id="file-history" aria-labelledby="offcanvasRightLabel" data-bs-backdrop="true">
   <div class="offcanvas-header">
     <h5 id="offcanvasRightLabel">Version History</h5>
     <button type="button" class="btn-close text-reset" data-bs-dismiss="offcanvas" aria-label="Close" style="border: none; box-shadow: none; outline: none;"></button>
@@ -26,18 +26,26 @@
     No existing version
   </div>
   <div class="list-group" id="version-history-list">
-  <a href="#" class="list-group-item list-group-item-action active version-history-item" aria-current="true">
-    The current link item
+  <a class="list-group-item list-group-item-action active version-history-item" aria-current="true">
+    <div class="vault-vc-container">
+    The current link item<br>
     <small class="vault-created-time">2021-11-14T17:26:55.000Z</small>
+    </div>
+    <button type="button" class="btn btn-block my-auto restore-btn" >Restore</button>
   </a>
-  <a href="#" class="list-group-item list-group-item-action version-history-item">A second link item
+    <a class="list-group-item list-group-item-action version-history-item" aria-current="true">
+    <div class="vault-vc-container">
+    The current link item<br>
     <small class="vault-created-time">2021-11-14T17:26:55.000Z</small>
+    </div>
+    <button type="button" class="btn btn-block my-auto restore-btn" >Restore</button>
   </a>
-  <a href="#" class="list-group-item list-group-item-action version-history-item">A third link item
+      <a class="list-group-item list-group-item-action version-history-item" aria-current="true">
+    <div class="vault-vc-container">
+    The current link item<br>
     <small class="vault-created-time">2021-11-14T17:26:55.000Z</small>
-  </a>
-  <a href="#" class="list-group-item list-group-item-action version-history-item">A fourth link item
-    <small class="vault-created-time">2021-11-14T17:26:55.000Z</small>
+    </div>
+    <button type="button" class="btn btn-block my-auto restore-btn" >Restore</button>
   </a>
 </div>
 </div>
@@ -63,12 +71,12 @@
 <div id="outer-input-vault-container">
         <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close" id="vault-close-btn"></button>
 <div id="new-vault-section">
-   <div class="input-group input-group-sm mb-3" id="vault-input-group">
-  <input type="text" list="vault-list" class="form-control" id="vault-input" placeholder="Create new vault">
-  <div class="input-group-append">
-    <button type="button" class="input-group-text" id="enter-btn">Enter</button></span>
-  </div>
+<h3 style="margin-bottom: 20px; text-align: left; font-size: 24px; color: #7e7b7b;
+">Create Vault</h3>
+  <div class="input-group input-group-sm mb-3" id="vault-input-group" style="width: 100%;">
+  <input type="text" list="vault-list" class="form-control" id="vault-input" placeholder="Enter vault name">
 </div>
+    <button type="button" class="input-group-text" id="enter-btn">Access Vault</button>
         </div>
       </div>
     </div>
@@ -163,7 +171,7 @@
 				</div>
           <label for="add-user-input" id="add-input-label">Add User</label>
 <div class="input-group mb-3" id="add-user-container">
-<input type="email" class="form-control" placeholder="Enter Email" aria-label="Username" aria-describedby="basic-addon1" id="add-user-input">
+<input type="email" class="form-control" placeholder="Enter email" aria-label="Username" aria-describedby="basic-addon1" id="add-user-input">
   <div class="input-group-append">
     <span class="input-group-text" id="add-user-btn" ><a>+</a></span>
   </div>  
