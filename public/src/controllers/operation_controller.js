@@ -353,14 +353,16 @@ class OperationController extends BaseController{
   handleSyncDoc(revisionID, doc){
     // console.timeEnd()
     // console.time()
-    // console.log('sync')
-    this.operation.revisionID = revisionID
-    this.operation.bufferOp = []
-    this.operation.outstandingOp = []
-    this.operation.state = STATE.CLEAR
-    const currentStart = textarea.selectionStart
-    const currentEnd = textarea.selectionEnd
-    renderEditor(doc, undefined, currentStart, currentEnd)
+    if(textarea.value != doc){
+      console.log('DIVERGE')
+      this.operation.revisionID = revisionID
+      this.operation.bufferOp = []
+      this.operation.outstandingOp = []
+      this.operation.state = STATE.CLEAR
+      const currentStart = textarea.selectionStart
+      const currentEnd = textarea.selectionEnd
+      renderEditor(doc, undefined, currentStart, currentEnd)
+    }
   }
   printOpInfo(opInfo){
     for(const op of opInfo){

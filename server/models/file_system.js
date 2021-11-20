@@ -21,7 +21,7 @@ const getFileSystem = async (vaultID) => {
 
 const getFile = async (fileID) => {
   try{
-    const [file] = await pool.query('SELECT text, revision_id FROM files WHERE id = ?', [fileID])
+    const [file] = await pool.query('SELECT id, text, revision_id FROM files WHERE file_id = ? ORDER BY revision_id DESC LIMIT 1', [fileID])
     if(file.length < 1){
       return {error: 'Database query error'}
     }
@@ -44,7 +44,7 @@ const insertFileAfter = async (newFile, prevID, type, vaultID, revisionID) => {
     }
     const [result] = await conn.query('INSERT INTO folder_file SET ?', newFile)
     if(type == DATA_TYPE.FILE){
-      await conn.query('INSERT INTO files (id, revision_id, text) VALUES (?, ?, ?)', [result.insertId, 0, ""])
+      await conn.query('INSERT INTO files (file_id, revision_id, text) VALUES (?, ?, ?)', [result.insertId, 0, ""])
     }
     await conn.query('UPDATE folder_file SET next_id = ? WHERE id = ?', [result.insertId, prevID])
     await conn.query('COMMIT')
@@ -71,7 +71,7 @@ const insertFileUnder = async (newFile, parentID, type, vaultID, revisionID) => 
     }
     const [result] = await conn.query('INSERT INTO folder_file SET ?', newFile)
     if(type == DATA_TYPE.FILE){
-      await conn.query('INSERT INTO files (id, revision_id, text) VALUES (?, ?, ?)', [result.insertId, 0, ""])
+      await conn.query('INSERT INTO files (file_id, revision_id, text) VALUES (?, ?, ?)', [result.insertId, 0, ""])
     }
     await conn.query('UPDATE folder_file SET first_child_id = ? WHERE id = ?', [result.insertId, parentID])
     await conn.query('COMMIT')
@@ -98,7 +98,7 @@ const insertFileUnderRoot = async (newFile, vaultID, type, revisionID) => {
     }
     const [result] = await conn.query('INSERT INTO folder_file SET ?', newFile)
     if(type == DATA_TYPE.FILE){
-      await conn.query('INSERT INTO files (id, revision_id, text) VALUES (?, ?, ?)', [result.insertId, 0, ""])
+      await conn.query('INSERT INTO files (file_id, revision_id, text) VALUES (?, ?, ?)', [result.insertId, 0, ""])
     }
     await conn.query('UPDATE vaults SET first_child_id = ? WHERE id = ?', [result.insertId, vaultID])
     await conn.query('COMMIT')
@@ -160,7 +160,7 @@ const searchFileSystem = async (userID, vaultID, keyword) => {
       return {error: 'Permission Denied'}
     }
     const idSet = new Set()
-    const [textResult] = await conn.query(`SELECT f.id as id FROM files f JOIN folder_file ff ON f.id = ff.id WHERE ff.vault_id = ? and lower(f.text) LIKE ?`,[vaultID, `%${keyword}%`])
+    const [textResult] = await conn.query(`SELECT f.file_id as id FROM files f JOIN folder_file ff ON f.file_id = ff.id WHERE ff.vault_id = ? and lower(f.text) LIKE ?`,[vaultID, `%${keyword}%`])
     const [nameResult] = await conn.query(`SELECT id FROM folder_file WHERE vault_id = ? and lower(name) LIKE ? and type = ?`,[vaultID, `%${keyword}%`, DATA_TYPE.FILE])
     return {ids: [textResult, nameResult]}
   } catch(error) {
@@ -188,7 +188,7 @@ const removeFiles = async (idArr, data, vaultID, revisionID) => {
     }
     await conn.query(sql, bind)
     await conn.query('DELETE FROM folder_file WHERE id IN (?)',[idArr])
-    await conn.query('DELETE FROM files WHERE id IN (?)',[idArr])
+    await conn.query('DELETE FROM files WHERE file_id IN (?)',[idArr])
     await conn.query(`UPDATE vaults SET revision_id = ? WHERE id = ?`, [revisionID, vaultID])
     await conn.query('COMMIT')
     return {}

@@ -70,7 +70,6 @@ class SocketIO {
       }
     })
     this.socket.on('syncDoc', (revisionID, doc, fileID) => {
-      console.log('sync', fileID)
       this.trigger('syncDoc', revisionID, doc)
     })
   }

@@ -62,7 +62,7 @@ const getFile = async (fileID) => {
   if(!file){
     return {error: 'Database query error'}
   } 
-  return {revisionID: file.revision_id, doc: file.text}
+  return {revisionID: file.revision_id, doc: file.text, recordID: file.id}
 }
 
 const removeFiles = async (idArr, nodeData, vaultID, revisionID) => {
