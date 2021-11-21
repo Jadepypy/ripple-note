@@ -382,6 +382,7 @@ class FileSystemController extends BaseController{
         }
       }
       node.name = name
+      this.operation.name = name
       this.socketIO.changeName(node.id, name, node.type)
     })
   }
@@ -897,6 +898,7 @@ class FileSystemController extends BaseController{
   }
   addHistoryIconClickListener(){
     historyIcon.addEventListener('click', async () => {
+      toggleEditorDisplay(false)
       if(!this.selectedVersion){
         this.currentRevisionID = this.operation.revisionID
         this.currentDoc = textarea.value

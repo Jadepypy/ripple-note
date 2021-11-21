@@ -27,7 +27,6 @@ class OperationController extends BaseController{
   initializeNote(revisionID, doc) {
     this.operation.revisionID = revisionID
     this.operation.doc = doc
-    //console.log(this.operation.name)
     renderEditor(doc, this.operation.name)
   }
   handleJoinFile(id){
@@ -261,7 +260,7 @@ class OperationController extends BaseController{
     })
     textarea.addEventListener('input', (event) => {
       let opInfo = []
-      if(!this.inputOn){
+      if(!this.inputOn && opInfo.length > 0){
         this.inputOn = true
         // opInfo.push({type: OP_TYPE.RETAIN, position: textarea.selectionEnd, id: this.socketIO.socket.id})
         this.handleTextAreaOperation(opInfo)
@@ -327,7 +326,7 @@ class OperationController extends BaseController{
         this.applyOperation(opInfo, true)
       } else if (pointerChange < 0 && this.operation.pointer >= 0){
         let opBefore = this.operation.opStack[this.operation.pointer]
-        console.log(opBefore)
+        //console.log(opBefore)
         opInfo = this.operation.reverseOperation(opBefore)
         this.applyOperation(opInfo, true)
         this.operation.pointer = this.operation.pointer-1
@@ -342,7 +341,6 @@ class OperationController extends BaseController{
       this.operation.pointer++
     }
     //console.log('pointer', this.operation.pointer, 'opStack length', this.operation.opStack.length)
-
     if (state === STATE.CLEAR){
       outstandingOp.push(...opInfo)
       //this.printOpInfo(opInfo)
