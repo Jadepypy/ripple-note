@@ -44,7 +44,7 @@ const insertFileAfter = async (newFile, prevID, type, vaultID, revisionID) => {
     }
     const [result] = await conn.query('INSERT INTO folder_file SET ?', newFile)
     if(type == DATA_TYPE.FILE){
-      await conn.query('INSERT INTO files (file_id, revision_id, text) VALUES (?, ?, ?)', [result.insertId, 0, ""])
+      await conn.query('INSERT INTO files (file_id, revision_id, text, updated_at) VALUES (?, ?, ?, ?)', [result.insertId, 0, "", newFile['created_at']])
     }
     await conn.query('UPDATE folder_file SET next_id = ? WHERE id = ?', [result.insertId, prevID])
     await conn.query('COMMIT')
@@ -71,7 +71,7 @@ const insertFileUnder = async (newFile, parentID, type, vaultID, revisionID) => 
     }
     const [result] = await conn.query('INSERT INTO folder_file SET ?', newFile)
     if(type == DATA_TYPE.FILE){
-      await conn.query('INSERT INTO files (file_id, revision_id, text) VALUES (?, ?, ?)', [result.insertId, 0, ""])
+      await conn.query('INSERT INTO files (file_id, revision_id, text, updated_at) VALUES (?, ?, ?, ?)', [result.insertId, 0, "", newFile['created_at']])
     }
     await conn.query('UPDATE folder_file SET first_child_id = ? WHERE id = ?', [result.insertId, parentID])
     await conn.query('COMMIT')
@@ -98,7 +98,7 @@ const insertFileUnderRoot = async (newFile, vaultID, type, revisionID) => {
     }
     const [result] = await conn.query('INSERT INTO folder_file SET ?', newFile)
     if(type == DATA_TYPE.FILE){
-      await conn.query('INSERT INTO files (file_id, revision_id, text) VALUES (?, ?, ?)', [result.insertId, 0, ""])
+      await conn.query('INSERT INTO files (file_id, revision_id, text, updated_at) VALUES (?, ?, ?, ?)', [result.insertId, 0, "", newFile['created_at']])
     }
     await conn.query('UPDATE vaults SET first_child_id = ? WHERE id = ?', [result.insertId, vaultID])
     await conn.query('COMMIT')
@@ -201,6 +201,57 @@ const removeFiles = async (idArr, data, vaultID, revisionID) => {
   }
 }
 
+const getFileVersionHistory = async (fileID) => {
+  try {
+    const [files] = await pool.query('SELECT revision_id, updated_at, name FROM files WHERE file_id = ? ORDER BY revision_id DESC', [fileID])
+    return {files}
+  } catch (error) {
+    console.log(error)
+    return {error}
+  }
+}
+
+const getFileVersion = async (fileID, revisionID) => {
+  try {
+    const [file] = await pool.query('SELECT text FROM files WHERE file_id = ? and revision_id = ?', [fileID, revisionID])
+    if(file.length == 0){
+      return {error: 'Database query error'}
+    }
+    return {file: file[0]}
+  } catch (error) {
+    console.log(error)
+    return {error}
+  }
+}
+
+const changeVersionName = async (fileID, revisionID, text, name) => {
+  try{
+    const updatedAt = new Date().toISOString().slice(0, 19).replace('T', ' ')
+    const result = await pool.query('INSERT INTO files (file_id, revision_id, text, name, updated_at) VALUES (?, ?, ?, ?, ?) ON DUPLICATE KEY UPDATE name = ?', [ fileID, revisionID, text, name, updatedAt, name])
+    return {}
+  } catch (error){
+    console.log(error)
+    return {error}
+  }
+}
+
+const restoreVersion = async (fileID, revisionID) => {
+  const conn = await pool.getConnection()
+  try{
+    const [file] = await conn.query('SELECT id, text FROM files WHERE file_id = ?  and revision_id = ?', [ fileID, revisionID])
+    await conn.query('DELETE FROM files WHERE file_id = ? and revision_id > ?', [fileID, revisionID])
+    if(file.length == 0){
+      return {error: 'Database query error'}
+    }
+    return { file: file[0]}
+  } catch(error) {
+    console.log(error)
+    return {error}
+  } finally{
+    await conn.release()
+  }
+}
+
 module.exports = {  DATA_TYPE,
                     getFileSystem,
                     searchFileSystem,
@@ -210,7 +261,11 @@ module.exports = {  DATA_TYPE,
                     insertFileAfter,
                     insertFileUnderRoot,
                     insertFileUnder,
-                    removeFiles
+                    removeFiles,
+                    getFileVersion,
+                    getFileVersionHistory,
+                    changeVersionName,
+                    restoreVersion
 }
 
 

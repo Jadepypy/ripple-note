@@ -5,6 +5,7 @@ class SocketIO {
     this.fileID = null
     this.vaultID = null
     this.socket = null
+    this.isFreezed = false
     this.callbacks = {}
   }
   init(vaultID, token) {
@@ -28,7 +29,7 @@ class SocketIO {
     })
     this.socket.on('syncOp', (revisionID, syncOp, socketID, doc) => {
       publicDoc = doc
-      if (this.socket.id != socketID){
+      if (!this.isFreezed && this.socket.id != socketID){
         this.trigger('syncOp', revisionID, syncOp)
       }
     })
@@ -69,8 +70,15 @@ class SocketIO {
         this.trigger('leaveVault')
       }
     })
-    this.socket.on('syncDoc', (revisionID, doc, fileID) => {
-      this.trigger('syncDoc', revisionID, doc)
+    this.socket.on('syncDoc', (revisionID, doc, syncFileID) => {
+      const storage = window.sessionStorage
+      const fileID = storage.getItem('file_id')
+      if(!this.isFreezed && fileID == syncFileID){
+        this.trigger('syncDoc', revisionID, doc)
+      }
+    })
+    this.socket.on('restore', () => {
+      location.reload()
     })
   }
   joinFile(fileID) {
@@ -102,6 +110,12 @@ class SocketIO {
   }
   removeFiles(id, idArr, nodeData){
     this.socket.emit('removeFiles', id, idArr, nodeData, this.fsRevisionID)
+  }
+  saveCurrent(){
+    this.socket.emit('currentSaved')
+  }
+  restoreVersion(revisionID){
+    this.socket.emit('restore', revisionID)
   }
   registerCallbacks(cb) {
     this.callbacks = {...this.callbacks, ...cb}

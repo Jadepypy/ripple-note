@@ -5,6 +5,9 @@
   -webkit-text-stroke: 1.9px #f6f8f4;
   display: block;
 }
+#history-icon.freezed {
+  color: rgb(106, 201, 218);
+}
 #trash-icon{
   color: #a8a4a4;
   font-size: 28px;
@@ -30,6 +33,7 @@
   display: flex;
   justify-content: space-around;
   align-items: center;
+  grid-area: note-tools;
 }
 .editor-container {
   display: grid;
@@ -43,8 +47,29 @@
   display: grid;
   height: 100vh;
   grid-template-rows: 50px auto;
-  grid-template-columns: auto 110px;
-  grid-template-areas: "title note-tools" "note note";
+  grid-template-columns: auto 280px 110px;
+  grid-template-areas: "title timestamp note-tools" "note note note";
+}
+.timestamp{
+  grid-area: timestamp;
+  background-color: #f6f8f4;
+  border-bottom: 1px solid #e1e1e1;
+  padding: 15px;
+  font-size: 16px;
+  outline: none;
+  border: none;
+  height: 100%;
+  font-family: Trebuchet MS;
+  color: #7e7b7b;
+  background: #f6f8f4;
+  border-bottom: 1px solid #e1e1e1;
+  text-align: right;
+  cursor: pointer;
+}
+#unfreezed-icon{
+  font-size: 14px;
+  -webkit-text-stroke: 1.5px #f6f8f4;
+  padding-right: 1px;
 }
 .textarea-container{
   grid-area: note;
@@ -172,8 +197,9 @@ backlink {
   flex-direction: column;
   flex-wrap: wrap;
   display: grid;
-  grid-template-columns: 70% auto;
+  grid-template-columns: 75% auto;
   grid-template-areas: "vault restore";
+  z-index: 100;
 }
 .vault-vc-container{
   grid-area: vault;
@@ -182,7 +208,7 @@ backlink {
   display: block; 
   background-color: #f6f8f4;
   width: 78px; 
-  font-size: 1rem; 
+  font-size: 18px; 
   color: #7e7b7b;
   border: 1px solid #7e7b7b;
   border-radius: 6%;
@@ -192,7 +218,21 @@ backlink {
 }
 .version-history-item.active{
   border: 1px solid #e1e1e1;
-
   background-color: rgba(165, 231, 245, 0.322);
+  color: #7e7b7b;
+}
+.version-created-time{
+  color: #7e7b7b;
+  font-size: 18px;
+}
+.version-name{
+  background-color: transparent;
+  border: none;
+  outline: none;
+  color: #7e7b7b;
+  font-size: 18px;
+  box-shadow: none;
+}
+.version-name::placeholder {
   color: #7e7b7b;
 }

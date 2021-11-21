@@ -5,7 +5,8 @@ const {
   getFileSystem,
   moveFile,
   changeFileName,
-  removeFiles
+  removeFiles,
+  restoreVersion
 } = require('../server/controllers/file_sytem_controller')
 const {
   createOperation,
@@ -22,9 +23,10 @@ const {
 const {
   wsAuthenticate
 } = require('./util')
+let isSaved = false
 const fileArr = {}
 const vaults = {}
-const LogOp = {}
+let LogOp = {}
 const onlines = {}//fileID: {count, intervalID}
 // const dataArr = [[0, 1, null, -1, 'vault'], [1, 4, 2, 0, 'Folder1'], [2, 5, 3, 0, 'Folder2'], [3, 10, null, 0, 'Folder3'], [4, null, 8, 1, 'File4'],  [8, null, 9, 1, 'File8'], [9, null, null, 1, 'File9'], [5, null, 6, 1, 'File5'], [6, null, null, 1, 'File6'], [10, 11, null, 0, 'Folder10'], [11, null, null, 1, 'File11']]
 const start = (io) => {
@@ -55,18 +57,18 @@ io.of(/^\/[0-9]+$/)
       socket.emit('init', fileArr[id].revisionID, fileArr[id].doc) 
       socket.to(socket.fileID).emit('joinFile', socket.id)
       resetTimeInterval(socket, true)
-      trackDocVersion(id, true)
+      await trackDocVersion(id, true)
     })
     .on('changeName', async (id, name) => {
       await changeFileName(id, name)
       io.of(vaultID).emit('changeName', id, name, socket.id)
       //console.log('change name', id, name)
     })
-    .on('leaveRoom', (id) => {
+    .on('leaveRoom', async (id) => {
       socket.leave(id)
       socket.to(socket.fileID).emit('leaveRoom', socket.id)
-      resetTimeInterval(socket)
-      trackDocVersion(socket.fileID, false)
+      resetTimeInterval(socket, false)
+      await trackDocVersion(socket.fileID, false)
     })
     .on('moveFile', async (dataArr, id, targetID, revisionID) => {
       if(revisionID < vaults[vaultID]){
@@ -101,10 +103,25 @@ io.of(/^\/[0-9]+$/)
       }
       io.of(vaultID).emit('removeFiles', id, socket.id, vaults[vaultID])
     })
-    .on('disconnect', () => {
+    .on('currentSaved', () => {
+      isSaved = true
+      //console.log('saved')
+    })
+    .on('disconnect', async () => {
       io.of(vaultID).emit('leaveVault', socket.userID)
       resetTimeInterval(socket, false)
-      trackDocVersion(socket.fileID, false)
+      await trackDocVersion(socket.fileID, false)
+    })
+    .on('restore', async (revisionID) => {
+      const fileID = socket.fileID
+      fileArr[fileID].revisionID = revisionID
+      const result = await restoreVersion(fileID, revisionID)
+      fileArr[fileID].doc = result.doc
+      fileArr[fileID].recordID = result.recordID
+      isSaved = true
+      LogOp[fileID] = []
+      socket.to(socket.fileID).emit('restore')
+      socket.emit('restore')
     })
     .on('operation', (clientRevisionID, operation, text) => {
       // console.log(clientRevisionID, operation)
@@ -130,7 +147,12 @@ io.of(/^\/[0-9]+$/)
         //console.log('Sync OP', revisionID, operation)
         socket.to(socket.fileID).emit('syncOp', revisionID, operation, socket.id, doc);
         LogOp[fileID][revisionID] = operation
-        await updateOperation(fileID, revisionID, doc, fileArr[fileID].recordID)
+        if(isSaved){
+          fileArr[fileID].recordID = await createOperation(fileID, revisionID, doc)
+          isSaved = false
+        } else{
+          await updateOperation(fileID, revisionID, doc, fileArr[fileID].recordID)
+        }
         // console.log('create Operation', fileID, revisionID, fileArr[fileID].doc)
         // if(backUpOp.length > 0){
         //   await createOperation(fileID, revisionID, doc, backUpOp)
@@ -141,7 +163,7 @@ io.of(/^\/[0-9]+$/)
 
 }
 
-function trackDocVersion(fileID, hasNewUser){ 
+async function trackDocVersion(fileID, hasNewUser){ 
   if(hasNewUser){
     if(onlines[fileID]){
       onlines[fileID].count++
@@ -159,7 +181,7 @@ function trackDocVersion(fileID, hasNewUser){
     if(onlines[fileID].count > 1){
       onlines[fileID].count--
     } else{
-      saveDoc(fileID)
+      await saveDoc(fileID)
       clearInterval(onlines[fileID].intervalID)
       delete onlines[fileID]
     }
@@ -168,11 +190,11 @@ function trackDocVersion(fileID, hasNewUser){
 async function saveDoc(fileID){
   let doc = fileArr[fileID].doc
   let revisionID = fileArr[fileID].revisionID
-  console.log('enter save doc')
   if(onlines[fileID].revisionID != revisionID){
-    console.log('save', fileID, 'revisionID', revisionID)
-    await createOperation(fileID, revisionID, doc)
+    //console.log('save', fileID, 'revisionID', onlines[fileID].revisionID, revisionID)
+    //await createOperation(fileID, revisionID, doc)
     onlines[fileID].revisionID = revisionID
+    isSaved = true
   }
 }
 function resetTimeInterval(socket, hasNewRoom){

@@ -7,8 +7,13 @@ const updateOperation = async (fileID, revisionID, doc, recordID) => {
 
 const createOperation = async (fileID, revisionID, doc) => {
   const updatedAt = new Date().toISOString().slice(0, 19).replace('T', ' ')
-  await Operation.createOperation(fileID, revisionID, doc, updatedAt)
+  const recordID = await Operation.createOperation(fileID, revisionID, doc, updatedAt)
+  return recordID
 }
+
+
+
+
 
 module.exports =  { 
                     updateOperation,

@@ -52,6 +52,7 @@ class FileSystemController extends BaseController{
     this.addSaveBtnClickListener()
     this.addUserIconClinkListener()
     this.addSearchBoxBlurListener()
+    this.addHistoryIconClickListener()
   }
   constructFileSystem(firstChild, fileArr) {
     showEditor(false)
@@ -894,6 +895,103 @@ class FileSystemController extends BaseController{
       } 
     })    
   }
+  addHistoryIconClickListener(){
+    historyIcon.addEventListener('click', async () => {
+      if(!this.selectedVersion){
+        this.currentRevisionID = this.operation.revisionID
+        this.currentDoc = textarea.value
+      }
+      const storage = window.sessionStorage
+      const fileID = storage.getItem('file_id')
+      if(!this.socketIO.isFreezed){
+        const result = await this.api.getFileVersion(fileID)
+        const files = result.data.files
+        historyList.innerHTML = ''
+        for(let i = 0; i < files.length; i++){
+          let file = files[i]
+          let updatedAt = i != 0? moment(file.updated_at).format("MMM Do, h:mm:ss a"): 'current'
+          const name = file.name == null? 'Untitled': file.name
+          const revisionID = file.revision_id
+          const a = createElement('a', ['list-group-item', 'list-group-item-action', 'version-history-item'])
+          a.setAttribute('aria-current', 'true')
+          a.dataset.revision = revisionID
+          a.dataset.name = name
+          a.dataset.time = updatedAt
+          if(this.selectedVersion == revisionID){
+            this.selectedVersionItem = a
+            this.selectedVersion = revisionID
+            a.classList.add('active')
+          }
+          a.innerHTML = `<div class="vault-vc-container" style="margin-top: 0px;">
+                <div class="version-created-time">${updatedAt}</div> 
+              <input type="text" class="version-name" placeholder="${name}">
+            </div>`
+          if(i > 0){
+            a.innerHTML += 
+          `<button type="button" class="btn btn-block my-auto restore-btn" >Restore</button>`
+          }
+          if(i == 0 && !this.selectedVersion){
+            this.selectedVersionItem = a
+            this.selectedVersion = revisionID
+            a.classList.add('active')
+            await this.handleClickHistoryItem(a, fileID)
+          }
+          historyList.append(a)
+          this.addHistoryListClickListener(a, fileID)
+        }
+      }
+    
+    })
+  }
+  addHistoryListClickListener(a, fileID){
+    a.addEventListener('click', async (event) => {
+      this.selectedVersionItem.classList.toggle('active', false)
+      a.classList.toggle('active', true)
+      if(event.target.matches('.restore-btn')){
+        let confirmRestore = confirm('Your current document will revert to the version. Do you want to proceed?') 
+        if(confirmRestore){
+          const revisionID = a.dataset.revision
+          this.socketIO.restoreVersion(revisionID)
+        }
+      }
+      await this.handleClickHistoryItem(a, fileID)
+    })
+  }
+  async handleClickHistoryItem(a, fileID){
+    this.selectedVersionItem = a
+    const revisionID = a.dataset.revision
+    this.selectedVersion = revisionID
+    let doc
+    if(a.dataset.time != 'current'){
+      const result = await this.api.getFileVersion(fileID, revisionID)
+      doc = result.data.doc
+    } else{
+      doc = this.currentDoc
+    }
+    timeStamp.innerHTML = `<i class="fas fa-times" id="unfreezed-icon" title="Close"></i> Freezed: ${a.dataset.time}`
+    timeStamp.addEventListener('click', () => {
+      this.freezeTextarea(false, fileID)
+    })
+    this.freezeTextarea(true)
+    renderEditor(doc, undefined, undefined, undefined, true)
+    const input = getElement('.version-name', a)
+    input.addEventListener('blur', async () => {
+      const name = input.value.trim()
+      if((/^\s*$/).test(name)){
+        input.value = a.dataset.name
+        return
+      } else if (input.value != a.dataset.name){
+        const storage = window.sessionStorage
+        const fileID = storage.getItem('file_id')
+        if(a.dataset.time == 'current'){
+          this.socketIO.saveCurrent()
+        }
+        await this.api.changeVersionName(fileID, {name, revision_id: a.dataset.revision, doc})
+        a.dataset.name = name
+      }
+    })
+  }
+
   validateEmail(mail) {
     if (/^\w+([\.-]?\w+)*@\w+([\.-]?\w+)*(\.\w{2,3})+$/.test(mail)){
       return true

@@ -36,7 +36,6 @@ const moveFile = async (dataArr, vaultID, revisionID) => {
 const getFileSystem = async (vaultID) => {
   const result = await FileSystem.getFileSystem(vaultID)
   // console.log(result)
-
   let firstChild = result[0][0].first_child_id
   const revisionID = result[0][0].revision_id
   const files = []
@@ -82,13 +81,13 @@ const searchFileSystem = async (req, res) => {
   const user = req.user
   const result = await FileSystem.searchFileSystem(user.id, vaultID, keyword.toLowerCase())
   if (result.error){
-    return {error: result.error}
+    res.status(500).send(result.error)
   }
   const ids = result.ids
   if(!ids){
-    return {error: 'Database query error'}
+    res.status(500).send('Database query error')
   } else if (ids.length == 0){
-    return {error: 'Database query error'}
+    res.status(500).send('Database query error')
   }
   const idSet = new Set() 
   ids[0].forEach((id) => {
@@ -100,9 +99,52 @@ const searchFileSystem = async (req, res) => {
   res.status(200).send({data: [...idSet]})
 }
 
-const saveFile = async (revisionID, ) => {
-
+const getFileVersion = async (req, res) => {
+  const fileID = req.params.id
+  const revisionID = req.query.revision_id
+  let result
+  if(revisionID){
+    result = await FileSystem.getFileVersion(fileID, revisionID)
+    const file = result.file
+    if(!file || result.error){
+      res.status(500).send('Database query error')
+      return
+    }
+    res.status(200).send({data: {doc: file.text}})
+    return
+  } else{
+    result = await FileSystem.getFileVersionHistory(fileID)
+    const files = result.files
+    if(!files || result.error){
+      res.status(500).send('Database query error')
+      return
+    }
+    res.status(200).send({data: {files}})
+  }
 }
+const changeVersionName = async (req ,res) => {
+  const fileID = req.params.id
+  const {name, revision_id, doc} = req.body
+  if (!name){
+    res.status(400).send({error:'Wrong Request'})
+    return  
+  }
+  const result = await FileSystem.changeVersionName(fileID, revision_id, doc, name)
+  if(result.error){
+    return res.status(403).send({error: result.error})
+  }
+  res.sendStatus(200)
+}
+
+const restoreVersion = async (fileID, revisionID) => {
+  const result = await FileSystem.restoreVersion(fileID, revisionID)
+  if(result.error){
+    return {error: result.error}
+  }
+  const file = result.file
+  return {doc: file.text, recordID: file.id}
+}
+
 module.exports =  { 
                     createFile,
                     getFileSystem,
@@ -110,5 +152,8 @@ module.exports =  {
                     moveFile,
                     changeFileName,
                     removeFiles,
-                    searchFileSystem
+                    searchFileSystem,
+                    getFileVersion,
+                    changeVersionName,
+                    restoreVersion
 }

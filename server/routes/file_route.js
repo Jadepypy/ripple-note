@@ -3,17 +3,21 @@ const {wrapAsync, httpAuthenticate} = require('../../util/util');
 
 const { 
   createFile,
-  getFileSystem,
-  searchFileSystem
+  getFileVersion,
+  searchFileSystem,
+  changeVersionName
 } = require('../controllers/file_sytem_controller')
 
 
 router.route('/file')
-    .post(createFile)
-router.route('/file')
-    .get(getFileSystem)
+    .post(wrapAsync(createFile))
+router.route('/file/:id')
+    .patch(httpAuthenticate, wrapAsync(changeVersionName))
+router.route('/file/:id')
+    .get(httpAuthenticate, wrapAsync(getFileVersion))
+router.route('/file/:id')
+    .patch(httpAuthenticate, wrapAsync(changeVersionName))
 router.route('/files')
     .get(httpAuthenticate, wrapAsync(searchFileSystem))
-
 
 module.exports = router

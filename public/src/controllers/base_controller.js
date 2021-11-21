@@ -14,6 +14,7 @@ class BaseController {
 
   changeSelectedFile(file, name) {
     //console.log('change', this.fileSystem.file)
+    this.freezeTextarea(false)
     if (this.fileSystem.file != null){
       toggleTag(this.fileSystem.file, 'selected', false)
     }
@@ -56,6 +57,23 @@ class BaseController {
       data['first_child'] = node.firstChild.id
     } 
     return data
+  }
+  freezeTextarea(isFreezed, fileID){
+    if(isFreezed){
+      textarea.readOnly = true
+      this.socketIO.isFreezed = true
+      historyIcon.classList.toggle('freezed', true)
+    } else{
+      timeStamp.innerHTML = ''
+      textarea.readOnly = false
+      this.socketIO.isFreezed = false
+      historyIcon.classList.toggle('freezed', false)
+      this.selectedVersionItem = undefined
+      this.selectedVersion = undefined
+      if(fileID != null || fileID != undefined){
+        this.socketIO.joinFile(fileID)
+      }
+    }
   }
 
 }

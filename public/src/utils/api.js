@@ -189,6 +189,52 @@ class API {
       return response.json();
     }) 
   }
+  getFileVersion(fileID, revisionID){
+    const storage = window.sessionStorage
+    const accessToken = storage.getItem
+    ('access_token')
+    let url
+    if(revisionID){
+      url = `${this.API_HOST}/file/${fileID}?revision_id=${revisionID}`
+    } else{
+      url = `${this.API_HOST}/file/${fileID}`
+    }
+    return fetch(url, {
+      headers: new Headers({
+        Authorization: `Bearer ${accessToken}`,
+      }),
+    }).then((response) => {
+      //console.log(response)
+      if (response.status === 401) {
+        throw new Error('請先登入');
+      }
+      if (response.status === 403) {
+        throw new Error('內容錯誤或權限不足');
+      }
+      return response.json();
+    }) 
+  }
+  changeVersionName(fileID, data){
+    const storage = window.sessionStorage
+    const accessToken = storage.getItem('access_token')
+    return fetch(`${this.API_HOST}/file/${fileID}`, {
+      body: JSON.stringify(data),
+      headers: new Headers({
+        Authorization: `Bearer ${accessToken}`,
+        'Content-Type': 'application/json',
+      }),
+      method: 'PATCH',
+    }).then((response) => {
+      //console.log(response)
+      if (response.status === 401) {
+        throw new Error('請先登入');
+      }
+      if (response.status === 403) {
+        throw new Error('內容錯誤或權限不足');
+      }
+      return
+    })
+  }
 
 }
 

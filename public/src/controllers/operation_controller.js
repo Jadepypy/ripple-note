@@ -83,7 +83,6 @@ class OperationController extends BaseController{
       switch (op.type) {
         case OP_TYPE.INSERT :
           if(isLocal){
-            console.log(op.position)
             currentStart = op.position + 1
             currentEnd = op.position + 1
           } else{

@@ -80,7 +80,6 @@ async function submitFormData(url, data, type) {
   })
   if (response.status !== 200) {
     const err = await response.json()
-    console.log(err)
     if(type === FORM_TYPE.SIGN_IN){
       signInError.innerText = err.error
     } else{
