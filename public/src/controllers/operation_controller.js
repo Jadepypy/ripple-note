@@ -312,6 +312,9 @@ class OperationController extends BaseController{
     //console.log('selection', textarea.selectionEnd)
   }
   handleTextAreaOperation(opInfo, pointerChange){
+    if(this.socketIO.isFreezed){
+      return
+    }
     let state = this.operation.state
     const outstandingOp = this.operation.outstandingOp
     const bufferOp = this.operation.bufferOp

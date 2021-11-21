@@ -205,7 +205,6 @@ function resetTimeInterval(socket, hasNewRoom){
   }
   if(hasNewRoom){
     socket.intervalID = setInterval(() => {
-      console.log('send', )
       socket.emit('syncDoc', fileArr[fileID].revisionID, fileArr[fileID].doc, fileID)
     }, 5000)
   }
