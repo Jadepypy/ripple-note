@@ -352,9 +352,8 @@ class OperationController extends BaseController{
   handleSyncDoc(revisionID, doc){
     // console.timeEnd()
     // console.time()
-    if(textarea.value != doc){
+    if(textarea.value != doc && this.operation.revisionID != revisionID){
       console.log('DIVERGE')
-      this.operation.revisionID = revisionID
       this.operation.bufferOp = []
       this.operation.outstandingOp = []
       this.operation.state = STATE.CLEAR

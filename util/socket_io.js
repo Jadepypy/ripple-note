@@ -205,6 +205,7 @@ function resetTimeInterval(socket, hasNewRoom){
   }
   if(hasNewRoom){
     socket.intervalID = setInterval(() => {
+      console.log('send', )
       socket.emit('syncDoc', fileArr[fileID].revisionID, fileArr[fileID].doc, fileID)
     }, 5000)
   }
@@ -222,37 +223,6 @@ function printOpInfo(opInfo){
 }
 
 module.exports = {start}
-// const OP_TYPE = {
-//   INSERT: 0,
-//   DELETE: 1,
-//   NOOP: -1
-// }
-
-// let doc = ''
-
-// io.on("connection", (socket) => {
-//   socket.emit('init', {id: revisionID, doc: doc})
-//   socket.on('operation', (info) => {
-//     setTimeout(() => {
-//       console.log("SERVER INFO:", info)
-//       if (revisionID > info.revisionID) {
-//         for (let i = info.revisionID + 1; i < LogOp.length; i++){
-//           if (LogOp[i]){
-//             //change info.operation inplace
-//             iterateOT(LogOp[i], info.operation)
-//           } 
-//         }
-//       }
-//       revisionID++
-//       doc = applyOperation(doc, info.operation)
-//       //console.log('pending...')
-//       socket.emit('ack', revisionID)
-//       socket.broadcast.emit('syncOperation', {id: revisionID, syncOp: info.operation});
-//       console.log('SEND SYNC:', info.operation)
-//       LogOp[revisionID] = info.operation
-//     }, 4000)
-//   })
-// });
 
 
 
