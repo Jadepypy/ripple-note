@@ -854,7 +854,7 @@ class FileSystemController extends BaseController{
     })
   }
   addSearchBoxBlurListener(){
-    searchBox.addEventListener('input', async (event) => {
+    searchBox.addEventListener('change', async (event) => {
       const keyword = searchBox.value.trim()
       await this.searchFiles(keyword)
     })
