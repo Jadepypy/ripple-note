@@ -56,7 +56,7 @@ io.of(/^\/[0-9]+$/)
       }
       socket.emit('init', fileArr[id].revisionID, fileArr[id].doc) 
       socket.to(socket.fileID).emit('joinFile', socket.id)
-      resetTimeInterval(socket, true)
+     // resetTimeInterval(socket, true)
       await trackDocVersion(id, true)
     })
     .on('changeName', async (id, name) => {
@@ -67,7 +67,7 @@ io.of(/^\/[0-9]+$/)
     .on('leaveRoom', async (id) => {
       socket.leave(id)
       socket.to(socket.fileID).emit('leaveRoom', socket.id)
-      resetTimeInterval(socket, false)
+      //resetTimeInterval(socket, false)
       await trackDocVersion(socket.fileID, false)
     })
     .on('moveFile', async (dataArr, id, targetID, revisionID) => {
@@ -109,7 +109,7 @@ io.of(/^\/[0-9]+$/)
     })
     .on('disconnect', async () => {
       io.of(vaultID).emit('leaveVault', socket.userID)
-      resetTimeInterval(socket, false)
+      //resetTimeInterval(socket, false)
       await trackDocVersion(socket.fileID, false)
     })
     .on('restore', async (revisionID) => {
@@ -122,6 +122,17 @@ io.of(/^\/[0-9]+$/)
       LogOp[fileID] = []
       socket.to(socket.fileID).emit('restore')
       socket.emit('restore')
+    })
+    .on('syncDoc', (fileID, doc, revisionID) => {
+      const currentDoc = fileArr[fileID].doc
+      //console.log('receive')
+      if(doc != currentDoc){
+        //console.log('Diverge!!!',fileArr[fileID].revisionID, revisionID)
+        //console.log(doc)
+        //console.log('---------')
+        //console.log(currentDoc)
+        socket.emit('syncDoc', fileID, fileArr[fileID].revisionID, fileArr[fileID].doc)
+      }
     })
     .on('operation', (clientRevisionID, operation, text) => {
       // console.log(clientRevisionID, operation)
@@ -146,6 +157,7 @@ io.of(/^\/[0-9]+$/)
         socket.emit('ack', revisionID)
         //console.log('Sync OP', revisionID, operation)
         socket.to(socket.fileID).emit('syncOp', revisionID, operation, socket.id, doc);
+
         LogOp[fileID][revisionID] = operation
         if(isSaved){
           fileArr[fileID].recordID = await createOperation(fileID, revisionID, doc)
@@ -153,10 +165,6 @@ io.of(/^\/[0-9]+$/)
         } else{
           await updateOperation(fileID, revisionID, doc, fileArr[fileID].recordID)
         }
-        // console.log('create Operation', fileID, revisionID, fileArr[fileID].doc)
-        // if(backUpOp.length > 0){
-        //   await createOperation(fileID, revisionID, doc, backUpOp)
-        // }
       }, 0)
     })
   })
@@ -188,11 +196,8 @@ async function trackDocVersion(fileID, hasNewUser){
   }
 }
 async function saveDoc(fileID){
-  let doc = fileArr[fileID].doc
   let revisionID = fileArr[fileID].revisionID
   if(onlines[fileID].revisionID != revisionID){
-    //console.log('save', fileID, 'revisionID', onlines[fileID].revisionID, revisionID)
-    //await createOperation(fileID, revisionID, doc)
     onlines[fileID].revisionID = revisionID
     isSaved = true
   }

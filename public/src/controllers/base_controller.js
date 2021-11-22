@@ -30,6 +30,7 @@ class BaseController {
     toggleTag(file, 'selected', true)
     file.scrollIntoView()
     this.socketIO.joinFile(file.dataset.id)
+    this.setSyncInteval(file.dataset.id)
     this.operation.id = file.dataset.id
     if(name){
       this.operation.name = name
@@ -73,6 +74,20 @@ class BaseController {
       if(fileID != null || fileID != undefined){
         this.socketIO.joinFile(fileID)
       }
+    }
+  }
+  setSyncInteval(fileID){
+    this.clearSyncInterval()
+    this.intervalID = setInterval(() => {
+      if(this.operation.state == STATE.CLEAR && !this.socketIO.isFreezed){
+        this.socketIO.syncDoc(fileID, textarea.value, this.operation.revisionID)
+      }
+    }, 5000)
+  }
+  clearSyncInterval(){
+    if(this.intervalID){
+       clearInterval(this.intervalID)
+       this.intervalID = null
     }
   }
 

@@ -70,9 +70,10 @@ class SocketIO {
         this.trigger('leaveVault')
       }
     })
-    this.socket.on('syncDoc', (revisionID, doc, syncFileID) => {
+    this.socket.on('syncDoc', (syncFileID, revisionID, doc) => {
       const storage = window.sessionStorage
       const fileID = storage.getItem('file_id')
+      console.log('receive sync', this.isFreezed, fileID == syncFileID)
       if(!this.isFreezed && fileID == syncFileID){
         this.trigger('syncDoc', revisionID, doc)
       }
@@ -116,6 +117,9 @@ class SocketIO {
   }
   restoreVersion(revisionID){
     this.socket.emit('restore', revisionID)
+  }
+  syncDoc(fileID, doc, revisionID){
+    this.socket.emit('syncDoc', fileID, doc, revisionID)
   }
   registerCallbacks(cb) {
     this.callbacks = {...this.callbacks, ...cb}

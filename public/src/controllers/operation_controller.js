@@ -126,14 +126,6 @@ class OperationController extends BaseController{
   }
 
   addTextAreaListener() {
-    // textarea.addEventListener('mouseup', () => {
-    //   this.handleTextAreaOperation([{type: OP_TYPE.RETAIN, position: textarea.selectionEnd, id: this.socketIO.socket.id}])
-    // })
-    // textarea.addEventListener('keyup', (event) => {
-    //   if(ARROW_KEYS.includes(event.key) || event.key == 'Backspace' || event.keyCode == 46 || event.key == 'Enter'){
-    //     this.handleTextAreaOperation([{type: OP_TYPE.RETAIN, position: textarea.selectionEnd, id: this.socketIO.socket.id}])      
-    //   }
-    // })
     textarea.addEventListener('paste', (event) => {
       const indexStart = textarea.selectionStart
       const indexEnd = textarea.selectionEnd
@@ -277,23 +269,6 @@ class OperationController extends BaseController{
         this.handleTextAreaOperation(opInfo)
       }
     })
-    // textarea.addEventListener('keydown',(event) => {
-    //   let key = event.key == 'Enter'? '\n' : event.key
-    //   const indexStart = textarea.selectionStart
-    //   const indexEnd = textarea.selectionEnd
-    //   if (SPECIAL_KEYS.includes(key)) return
-    //   let opInfo = []
-    //   if (key == 'Backspace'){
-    //     opInfo.push({type: OP_TYPE.DELETE, position: indexEnd, count: Math.min(indexStart - indexEnd, -1)})
-    //     console.log('opinfo:', opInfo)
-    //   } else {
-    //     if (indexEnd - indexStart > 0){
-    //       opInfo.push({type: OP_TYPE.DELETE, position: indexEnd, count: indexStart - indexEnd})
-    //     }
-    //     opInfo.push({type: OP_TYPE.INSERT, position: indexStart, key: key})
-    //   }
-    //   this.handleTextAreaOperation(opInfo)
-    // })
   }
   createCaret(id){
     const caret = createElement('span', ['custom-caret'])
@@ -353,15 +328,15 @@ class OperationController extends BaseController{
   handleSyncDoc(revisionID, doc){
     // console.timeEnd()
     // console.time()
-    if(textarea.value != doc && this.operation.revisionID != revisionID){
-      console.log('DIVERGE')
-      this.operation.bufferOp = []
-      this.operation.outstandingOp = []
-      this.operation.state = STATE.CLEAR
-      const currentStart = textarea.selectionStart
-      const currentEnd = textarea.selectionEnd
-      renderEditor(doc, undefined, currentStart, currentEnd)
-    }
+    console.log('DIVERGE')
+    this.operation.revisionID = revisionID
+    this.operation.bufferOp = []
+    this.operation.outstandingOp = []
+    this.operation.state = STATE.CLEAR
+    const currentStart = textarea.selectionStart
+    const currentEnd = textarea.selectionEnd
+    console.log('re', this.operation.revisionID)
+    renderEditor(doc, undefined, currentStart, currentEnd)
   }
   printOpInfo(opInfo){
     for(const op of opInfo){

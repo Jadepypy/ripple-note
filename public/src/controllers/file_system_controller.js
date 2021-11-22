@@ -379,10 +379,10 @@ class FileSystemController extends BaseController{
       if(this.fileSystem.file != null && node.type == DATA_TYPE.FILE){
         if(this.fileSystem.file.dataset.id == node.id){
           noteTitle.value = name
+          this.operation.name = name
         }
       }
       node.name = name
-      this.operation.name = name
       this.socketIO.changeName(node.id, name, node.type)
     })
   }
@@ -838,7 +838,6 @@ class FileSystemController extends BaseController{
       if(email.length > 0){
         const hasAdded = await this.addUserEmail(email)
         if(!hasAdded){
-          console.log('?')
           return
         }
       }
