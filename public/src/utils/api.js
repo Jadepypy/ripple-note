@@ -90,7 +90,7 @@ class API {
   createVault(name) {
     const storage = window.sessionStorage
     const accessToken = storage.getItem('access_token')
-    return fetch(`${this.API_HOST}/user/vault`, {
+    return fetch(`${this.API_HOST}/vault`, {
       body: JSON.stringify({name}),
       headers: new Headers({
         Authorization: `Bearer ${accessToken}`,

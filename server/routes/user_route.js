@@ -1,9 +1,8 @@
 const router = require('express').Router()
-const {wrapAsync, httpAuthenticate} = require('../../util/util');
+const {handleInternalError, httpAuthenticate} = require('../../util/util');
 
 const {
   getVaults,
-  createVault,
   deleteVault,
   signIn,
   signUp,
@@ -11,16 +10,14 @@ const {
 } = require('../controllers/user_controller')
 
 router.route('/user/vaults')
-    .get(httpAuthenticate, wrapAsync(getVaults))
-router.route('/user/vault')
-    .post(httpAuthenticate, wrapAsync(createVault))
+    .get(httpAuthenticate, handleInternalError(getVaults))
 router.route('/user/signin')
     .post(signIn)
 router.route('/user/signup')
     .post(signUp)
 router.route('/user/profile')
-    .get(httpAuthenticate, wrapAsync(getUserProfile))
+    .get(httpAuthenticate, handleInternalError(getUserProfile))
 router.route('/user/vault/:id')
-    .delete(httpAuthenticate, wrapAsync(deleteVault))
+    .delete(httpAuthenticate, handleInternalError(deleteVault))
 
 module.exports = router

@@ -1,5 +1,5 @@
 const router = require('express').Router()
-const {wrapAsync, httpAuthenticate} = require('../../util/util');
+const {handleInternalError, httpAuthenticate} = require('../../util/util');
 
 const { 
   createFile,
@@ -10,14 +10,12 @@ const {
 
 
 router.route('/file')
-    .post(wrapAsync(createFile))
+    .post(handleInternalError(createFile))
 router.route('/file/:id')
-    .patch(httpAuthenticate, wrapAsync(changeVersionName))
+    .get(httpAuthenticate, handleInternalError(getFileVersion))
 router.route('/file/:id')
-    .get(httpAuthenticate, wrapAsync(getFileVersion))
-router.route('/file/:id')
-    .patch(httpAuthenticate, wrapAsync(changeVersionName))
+    .patch(httpAuthenticate, handleInternalError(changeVersionName))
 router.route('/files')
-    .get(httpAuthenticate, wrapAsync(searchFileSystem))
+    .get(httpAuthenticate, handleInternalError(searchFileSystem))
 
 module.exports = router

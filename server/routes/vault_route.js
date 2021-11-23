@@ -1,18 +1,21 @@
 const router = require('express').Router()
-const {wrapAsync, httpAuthenticate} = require('../../util/util');
+const {handleInternalError, httpAuthenticate} = require('../../util/util');
 
 const {
   getVault,
+  createVault,
   addVaultUser,
   changeVaultName
 } = require('../controllers/user_controller')
 
 router.route('/vault/users')
-    .post(httpAuthenticate, wrapAsync(addVaultUser))
+    .post(httpAuthenticate, handleInternalError(addVaultUser))
 router.route('/vault/:id')
-    .get(httpAuthenticate, wrapAsync(getVault))
+    .get(httpAuthenticate, handleInternalError(getVault))
 router.route('/vault/:id')
-    .patch(httpAuthenticate, wrapAsync(changeVaultName))
+    .patch(httpAuthenticate, handleInternalError(changeVaultName))
+router.route('/vault')
+    .post(httpAuthenticate, handleInternalError(createVault))
 
 
 module.exports = router

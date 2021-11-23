@@ -126,6 +126,10 @@ const getVault = async (req, res) => {
     return res.status(403).send({error: result.error})
   }
   const users = result.users
+  if(!users){
+    res.status(500).send('Database query error')
+    return 
+  }
   res.status(200).send({
     data: {
       users
@@ -155,9 +159,13 @@ const createVault = async (req, res) => {
   }
   const result = await User.createVault(userID, createdAt, name)
   if(result.error){
-    return res.status(403).send({error: result.error})
+    return res.status(500).send({error: result.error})
   }
   const id = result.id
+  if(!id){
+    res.status(500).send('Database query error')
+    return 
+  }
   res.status(200).send({
     data: {
       id
@@ -171,7 +179,6 @@ const addVaultUser = async (req, res) => {
     return  
   }
   const {emails, vault_id} = req.body
-  //console.log(vault_id)
   const user = req.user
   for (const email of emails){
     if (!validator.isEmail(email)) {

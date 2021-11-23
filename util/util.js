@@ -2,7 +2,7 @@ const jwt = require('jsonwebtoken')
 const {CONNECTION_TYPE} = require('../server/models/user')
 require('dotenv').config();
 
-const wrapAsync = (fn) => {
+const handleInternalError = (fn) => {
   return function(req, res, next) {
     fn(req, res, next).catch(next)
   }
@@ -48,7 +48,7 @@ const wsAuthenticate = (socket, next) => {
   return
 }
 
-module.exports = {  wrapAsync,           
+module.exports = {  handleInternalError,           
                     httpAuthenticate, 
                     wsAuthenticate
                   }

@@ -136,9 +136,9 @@ const getVault = async (userID, vaultID) => {
     }
     [users] = await pool.query( 
     `SELECT vaults.name, users.email
-    FROM vault_user join vaults 
+    FROM vault_user JOIN vaults 
     on vault_user.vault_id = vaults.id
-    join users on users.id = vault_user.user_id
+    JOIN users on users.id = vault_user.user_id
     WHERE vault_user.vault_id = ?`, [vaultID])
     return {users}
   } catch (error){
@@ -164,7 +164,6 @@ const deleteVault = async (userID, vaultID) => {
     return {}
   } catch(error) {
     await conn.query('ROLLBACK')
-    conn.release()
     console.log(error)
     return {error}
   } finally{
@@ -181,7 +180,6 @@ const createVault = async (userID, createdAt, name) => {
     return {id: result.insertId}
   } catch(error) {
     await conn.query('ROLLBACK')
-    conn.release()
     console.log(error)
     return {error}
   } finally{
@@ -192,14 +190,10 @@ const createVault = async (userID, createdAt, name) => {
 const addVaultUser = async (userID, vaultID, emails) => {
   const conn = await pool.getConnection()
   try{
-    let [users] = await conn.query(
-      `SELECT user_id FROM vault_user
-      WHERE vault_id = ?`, [vaultID])
-    let vaultUserIds = new Set()
-    users.forEach(user => {
-      vaultUserIds.add(user.user_id)
-    })
-    if(!vaultUserIds.has(userID)){
+    let [user] = await conn.query(
+      `SELECT vault_id FROM vault_user
+      WHERE user_id = ? and vault_id = ?`, [userID, vaultID])
+    if(user.length < 1){
       return {error: 'Permission Denied'}
     }
     await conn.query('START TRANSACTION')
@@ -225,7 +219,6 @@ const addVaultUser = async (userID, vaultID, emails) => {
     return {}
   } catch(error) {
     await conn.query('ROLLBACK')
-    conn.release()
     console.log(error)
     return {error}
   } finally{
@@ -235,10 +228,10 @@ const addVaultUser = async (userID, vaultID, emails) => {
 const changeVaultName = async (userID, vaultID, name) => {
   const conn = await pool.getConnection()
   try{
-    let [users] = await conn.query(
+    let [user] = await conn.query(
       `SELECT vault_id FROM vault_user
       WHERE user_id = ? and vault_id = ?`, [userID, vaultID])
-    if(users.length < 1){
+    if(user.length < 1){
       return {error: 'Permission Denied'}
     }
     await conn.query(`UPDATE vaults SET name = ? WHERE id = ?`, [name, vaultID])
