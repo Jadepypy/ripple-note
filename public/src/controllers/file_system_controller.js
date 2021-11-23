@@ -253,7 +253,8 @@ class FileSystemController extends BaseController{
       let lastChildID
       if (head.lastChild !== null) {
         lastChildID = head.lastChild.id
-        prevID = this.fileSystem.getLastDescendant(head).id
+        // prevID = this.fileSystem.getLastDescendant(head).id
+        prevID = null
         data['prev'] = lastChildID
       } else{
         prevID = null
@@ -282,8 +283,9 @@ class FileSystemController extends BaseController{
   }
   receiveNewFile(id, prevID, type) {
     const node = new Node(id, null, null, type, 'Untitled')
+    let prevNode
     if (prevID != null){
-      const prevNode = this.fileSystem.nodeMap[prevID]
+      prevNode = this.fileSystem.nodeMap[prevID]
       if(prevNode.type == DATA_TYPE.FILE){
         this.fileSystem.insertAfter(node, prevNode)
       } else{
@@ -295,8 +297,15 @@ class FileSystemController extends BaseController{
         prevID = this.fileSystem.getLastDescendant(head).id
       }
     }
-    //this.fileSystem.printTree()
     const element = createFolderOrFile(type, id, prevID, node.depth)
+    let parentDom = domMap[node.parent.id]
+    console.log(parentDom)
+    if(parentDom){
+      if(parentDom.matches('.closed')){
+        element.classList.toggle('closed', true)
+        element.classList.toggle('hidden', true)
+      }
+    }
     // if(type == DATA_TYPE.FILE){
     //   this.changeSelectedFile(element)
     // }

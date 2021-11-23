@@ -1,5 +1,3 @@
-//let revisionID = 0
-//const LogOp = []
 const OP_TYPE = {
   INSERT: 0,
   DELETE: 1,
@@ -77,8 +75,6 @@ const applyOperation = (doc, operation) => {
   return doc
 }
 
-
-
 //heart of OT
 const transformation = (op1, op2) => {
   if (op1.type == OP_TYPE.INSERT && op2.type == OP_TYPE.INSERT){
@@ -93,7 +89,6 @@ const transformation = (op1, op2) => {
   }
   return [op1, op2]
 }
-
 //insert  insert transformation
 function Tii(op1, op2){
   if (op1.position >= op2.position) {
@@ -164,8 +159,6 @@ function Tdd(op1, op2){
   } else {
     op2.position = op2.position + op1.count
   }
-  //console.log('delete delete----')
-  //console.log(op1, op2)
   return [op1, op2]
 }
 

@@ -11,10 +11,6 @@ const createOperation = async (fileID, revisionID, doc) => {
   return recordID
 }
 
-
-
-
-
 module.exports =  { 
                     updateOperation,
                     createOperation
