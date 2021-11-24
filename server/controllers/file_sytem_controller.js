@@ -74,28 +74,21 @@ const removeFiles = async (idArr, nodeData, vaultID, revisionID) => {
   return {}
 }
 
-const searchFileSystem = async (req, res) => {
+const searchFiles = async (req, res) => {
   const keyword = req.query.keyword
   const vaultID = req.query.vault_id
   const user = req.user
-  const result = await FileSystem.searchFileSystem(user.id, vaultID, keyword.toLowerCase())
+  const result = await FileSystem.searchFiles(user.id, vaultID, keyword.toLowerCase())
   if (result.error){
     res.status(500).send(result.error)
+    return
   }
   const ids = result.ids
-  if(!ids){
+  if(ids === undefined){
     res.status(500).send('Database query error')
-  } else if (ids.length == 0){
-    res.status(500).send('Database query error')
+    return
   }
-  const idSet = new Set() 
-  ids[0].forEach((id) => {
-    idSet.add(id.id)
-  })
-  ids[1].forEach((id) => {
-    idSet.add(id.id)
-  })
-  res.status(200).send({data: [...idSet]})
+  res.status(200).send({data: {ids}})
 }
 
 const getFileVersion = async (req, res) => {
@@ -124,11 +117,11 @@ const getFileVersion = async (req, res) => {
 const changeFileVersionName = async (req ,res) => {
   const fileID = req.params.id
   const {name, revision_id, doc} = req.body
-  if (!name){
+  if (!name || !revision_id){
     res.status(400).send({error:'Wrong Request'})
     return  
   }
-  const result = await FileSystem.changeVersionName(fileID, revision_id, doc, name)
+  const result = await FileSystem.changeFileVersionName(fileID, revision_id, doc, name)
   if(result.error){
     return res.status(403).send({error: result.error})
   }
@@ -151,7 +144,7 @@ module.exports =  {
                     moveFile,
                     changeFileName,
                     removeFiles,
-                    searchFileSystem,
+                    searchFiles,
                     getFileVersion,
                     changeFileVersionName,
                     restoreFileVersion

@@ -883,7 +883,7 @@ class FileSystemController extends BaseController{
       const storage = window.sessionStorage
       const vaultID = storage.getItem('vault_id')
       const result = await this.api.searchFiles(vaultID, keyword)
-      const ids = result.data
+      const ids = result.data.ids
       this.buildSearchList(ids)
     }
   }

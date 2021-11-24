@@ -102,7 +102,7 @@ const moveFile = async(dataArr, vaultID, revisionID) => {
 
 }
 
-const searchFileSystem = async (userID, vaultID, keyword) => {
+const searchFiles = async (userID, vaultID, keyword) => {
   const conn = await pool.getConnection()
   try{
     let [users] = await conn.query(
@@ -112,12 +112,23 @@ const searchFileSystem = async (userID, vaultID, keyword) => {
       return {error: 'Permission Denied'}
     }
     const idSet = new Set()
-    const [textResult] = await conn.query(`SELECT f.file_id as id FROM files f JOIN folder_file ff ON f.file_id = ff.id WHERE ff.vault_id = ? and lower(f.text) LIKE ?`,[vaultID, `%${keyword}%`])
-    const [nameResult] = await conn.query(`SELECT id FROM folder_file WHERE vault_id = ? and lower(name) LIKE ? and type = ?`,[vaultID, `%${keyword}%`, DATA_TYPE.FILE])
-    return {ids: [textResult, nameResult]}
+    const [textResult] = await conn.query(`SELECT files.file_id as id FROM files
+      JOIN (SELECT max(revision_id) as revision_id, f.file_id
+      FROM files f JOIN folder_file ff ON f.file_id = ff.id 
+      WHERE ff.vault_id =  ?
+      GROUP BY file_id) t
+      on files.revision_id = t.revision_id and files.file_id = t.file_id
+      WHERE lower(files.text) LIKE ?`,[vaultID, `%${keyword}%`])
+      const [nameResult] = await conn.query(`SELECT id FROM folder_file WHERE vault_id = ? and lower(name) LIKE ? and type = ?`,[vaultID, `%${keyword}%`, DATA_TYPE.FILE])
+    textResult.forEach((file) => {
+      idSet.add(file.id)
+    })
+    nameResult.forEach((file) => {
+      idSet.add(file.id)
+    })
+    return {ids: [...idSet]}
   } catch(error) {
     await conn.query('ROLLBACK')
-    conn.release()
     console.log(error)
     return {error}
   } finally{
@@ -176,10 +187,10 @@ const getFileVersion = async (fileID, revisionID) => {
   }
 }
 
-const changeVersionName = async (fileID, revisionID, text, name) => {
+const changeFileVersionName = async (fileID, revisionID, text, name) => {
   try{
     const updatedAt = new Date().toISOString().slice(0, 19).replace('T', ' ')
-    const result = await pool.query('INSERT INTO files (file_id, revision_id, text, name, updated_at) VALUES (?, ?, ?, ?, ?) ON DUPLICATE KEY UPDATE name = ?', [ fileID, revisionID, text, name, updatedAt, name])
+    await pool.query('INSERT INTO files (file_id, revision_id, text, name, updated_at) VALUES (?, ?, ?, ?, ?) ON DUPLICATE KEY UPDATE name = ?', [ fileID, revisionID, text, name, updatedAt, name])
     return {}
   } catch (error){
     console.log(error)
@@ -206,7 +217,7 @@ const restoreFileVersion = async (fileID, revisionID) => {
 
 module.exports = {  DATA_TYPE,
                     getFileSystem,
-                    searchFileSystem,
+                    searchFiles,
                     getFile,
                     moveFile,
                     changeFileName,
@@ -214,7 +225,7 @@ module.exports = {  DATA_TYPE,
                     removeFiles,
                     getFileVersion,
                     getFileVersionHistory,
-                    changeVersionName,
+                    changeFileVersionName,
                     restoreFileVersion
 }
 

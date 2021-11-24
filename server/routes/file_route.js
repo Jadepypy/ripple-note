@@ -4,7 +4,7 @@ const {handleInternalError, httpAuthenticate} = require('../../util/util');
 const { 
   createFile,
   getFileVersion,
-  searchFileSystem,
+  searchFiles,
   changeFileVersionName
 } = require('../controllers/file_sytem_controller')
 
@@ -16,6 +16,6 @@ router.route('/file/:id')
 router.route('/file/:id')
     .patch(httpAuthenticate, handleInternalError(changeFileVersionName))
 router.route('/files')
-    .get(httpAuthenticate, handleInternalError(searchFileSystem))
+    .get(httpAuthenticate, handleInternalError(searchFiles))
 
 module.exports = router
