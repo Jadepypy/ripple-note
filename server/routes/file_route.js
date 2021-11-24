@@ -5,7 +5,7 @@ const {
   createFile,
   getFileVersion,
   searchFileSystem,
-  changeVersionName
+  changeFileVersionName
 } = require('../controllers/file_sytem_controller')
 
 
@@ -14,7 +14,7 @@ router.route('/file')
 router.route('/file/:id')
     .get(httpAuthenticate, handleInternalError(getFileVersion))
 router.route('/file/:id')
-    .patch(httpAuthenticate, handleInternalError(changeVersionName))
+    .patch(httpAuthenticate, handleInternalError(changeFileVersionName))
 router.route('/files')
     .get(httpAuthenticate, handleInternalError(searchFileSystem))
 

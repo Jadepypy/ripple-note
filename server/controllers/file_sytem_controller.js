@@ -8,17 +8,16 @@ const createFile = async(req, res) => {
   newFile['created_at'] = new Date().toISOString().slice(0, 19).replace('T', ' ')
   let result
   if(data.prev){
-    result = await FileSystem.insertFileAfter(newFile, data['prev'], data.new.type, vaultID, revisionID)
+    result = await FileSystem.createFile(newFile, data.new.type, vaultID, revisionID, data['prev'])
   } else if (data.parent) {
-    result = await FileSystem.insertFileUnder(newFile, data['parent'], data.new.type, vaultID, revisionID)
+    result = await FileSystem.createFile(newFile, data.new.type, vaultID, revisionID, null, data['parent'])
   } else{
-    result = await FileSystem.insertFileUnderRoot(newFile, newFile.vault_id, data.new.type,revisionID)
+    result = await FileSystem.createFile(newFile, data.new.type, vaultID, revisionID)
   }
   if(result.error){
     res.status(400).send(result.error)
     return
   }
-  // console.log('new file', id)
   res.send({id: result.id, revision_id: revisionID})
 }
 const changeFileName = async (id, name) => {
@@ -122,7 +121,7 @@ const getFileVersion = async (req, res) => {
     res.status(200).send({data: {files}})
   }
 }
-const changeVersionName = async (req ,res) => {
+const changeFileVersionName = async (req ,res) => {
   const fileID = req.params.id
   const {name, revision_id, doc} = req.body
   if (!name){
@@ -136,8 +135,8 @@ const changeVersionName = async (req ,res) => {
   res.sendStatus(200)
 }
 
-const restoreVersion = async (fileID, revisionID) => {
-  const result = await FileSystem.restoreVersion(fileID, revisionID)
+const restoreFileVersion = async (fileID, revisionID) => {
+  const result = await FileSystem.restoreFileVersion(fileID, revisionID)
   if(result.error){
     return {error: result.error}
   }
@@ -154,6 +153,6 @@ module.exports =  {
                     removeFiles,
                     searchFileSystem,
                     getFileVersion,
-                    changeVersionName,
-                    restoreVersion
+                    changeFileVersionName,
+                    restoreFileVersion
 }

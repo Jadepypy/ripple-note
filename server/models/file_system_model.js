@@ -31,7 +31,7 @@ const getFile = async (fileID) => {
   }
 }
 
-const insertFileAfter = async (newFile, prevID, type, vaultID, revisionID) => {
+const createFile = async (newFile, type, vaultID, revisionID, prevID, parentID) => {
   const conn = await pool.getConnection()
   try{
     conn.query('START TRANSACTION')
@@ -46,69 +46,21 @@ const insertFileAfter = async (newFile, prevID, type, vaultID, revisionID) => {
     if(type == DATA_TYPE.FILE){
       await conn.query('INSERT INTO files (file_id, revision_id, text, updated_at) VALUES (?, ?, ?, ?)', [result.insertId, 0, "", newFile['created_at']])
     }
-    await conn.query('UPDATE folder_file SET next_id = ? WHERE id = ?', [result.insertId, prevID])
+    if(prevID){
+      await conn.query('UPDATE folder_file SET next_id = ? WHERE id = ?', [result.insertId, prevID])
+    } else if (parentID){
+      await conn.query('UPDATE folder_file SET first_child_id = ? WHERE id = ?', [result.insertId, parentID])
+    } else {
+      await conn.query('UPDATE vaults SET first_child_id = ? WHERE id = ?', [result.insertId, vaultID])
+    }
     await conn.query('COMMIT')
-    return {id: result.insertId, revision_id: vault.revision_id}
+    return {id: result.insertId}
   } catch(error) {
     console.log(error)
     conn.query('ROLLBACK')
     return {error}
   } finally{
-    await conn.release()
-  }
-}
-
-const insertFileUnder = async (newFile, parentID, type, vaultID, revisionID) => {
-  const conn = await pool.getConnection()
-  try{
-    conn.query('START TRANSACTION')
-    const [vaults] = await conn.query(`SELECT revision_id FROM vaults WHERE id = ? FOR UPDATE`, [vaultID])
-    const vault = vaults[0]
-    if(revisionID < vault.revision_id){
-      return {error: 'Invalid action'}
-    } else{
-      await conn.query(`UPDATE vaults SET revision_id = ? WHERE id= ?`, [++vault.revision_id, vaultID])
-    }
-    const [result] = await conn.query('INSERT INTO folder_file SET ?', newFile)
-    if(type == DATA_TYPE.FILE){
-      await conn.query('INSERT INTO files (file_id, revision_id, text, updated_at) VALUES (?, ?, ?, ?)', [result.insertId, 0, "", newFile['created_at']])
-    }
-    await conn.query('UPDATE folder_file SET first_child_id = ? WHERE id = ?', [result.insertId, parentID])
-    await conn.query('COMMIT')
-    return {id: result.insertId, revision_id: vault.revision_id}
-  } catch(error) {
-    console.log(error)
-    conn.query('ROLLBACK')
-    return {error}
-  }finally{
-    await conn.release()
-  }
-}
-
-const insertFileUnderRoot = async (newFile, vaultID, type, revisionID) => {
-  const conn = await pool.getConnection()
-  try{
-    conn.query('START TRANSACTION')
-    const [vaults] = await conn.query(`SELECT revision_id FROM vaults WHERE id = ? FOR UPDATE`, [vaultID])
-    const vault = vaults[0]
-    if(revisionID < vault.revision_id){
-      return {error: 'Invalid action'}
-    } else{
-      await conn.query(`UPDATE vaults SET revision_id = ? WHERE id= ?`, [++vault.revision_id, vaultID])
-    }
-    const [result] = await conn.query('INSERT INTO folder_file SET ?', newFile)
-    if(type == DATA_TYPE.FILE){
-      await conn.query('INSERT INTO files (file_id, revision_id, text, updated_at) VALUES (?, ?, ?, ?)', [result.insertId, 0, "", newFile['created_at']])
-    }
-    await conn.query('UPDATE vaults SET first_child_id = ? WHERE id = ?', [result.insertId, vaultID])
-    await conn.query('COMMIT')
-    return {id: result.insertId, revision_id: vault.revision_id}
-  } catch(error) {
-    console.log(error)
-    conn.query('ROLLBACK')
-    return {error}
-  } finally{
-    await conn.release()
+    conn.release()
   }
 }
 
@@ -235,7 +187,7 @@ const changeVersionName = async (fileID, revisionID, text, name) => {
   }
 }
 
-const restoreVersion = async (fileID, revisionID) => {
+const restoreFileVersion = async (fileID, revisionID) => {
   const conn = await pool.getConnection()
   try{
     const [file] = await conn.query('SELECT id, text FROM files WHERE file_id = ?  and revision_id = ?', [ fileID, revisionID])
@@ -258,14 +210,12 @@ module.exports = {  DATA_TYPE,
                     getFile,
                     moveFile,
                     changeFileName,
-                    insertFileAfter,
-                    insertFileUnderRoot,
-                    insertFileUnder,
+                    createFile,
                     removeFiles,
                     getFileVersion,
                     getFileVersionHistory,
                     changeVersionName,
-                    restoreVersion
+                    restoreFileVersion
 }
 
 

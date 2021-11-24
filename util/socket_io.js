@@ -6,7 +6,7 @@ const {
   moveFile,
   changeFileName,
   removeFiles,
-  restoreVersion
+  restoreFileVersion
 } = require('../server/controllers/file_sytem_controller')
 const {
   createOperation,
@@ -110,7 +110,7 @@ io.of(/^\/[0-9]+$/)
     .on('restore', async (revisionID) => {
       const fileID = socket.fileID
       fileArr[fileID].revisionID = revisionID
-      const result = await restoreVersion(fileID, revisionID)
+      const result = await restoreFileVersion(fileID, revisionID)
       fileArr[fileID].doc = result.doc
       fileArr[fileID].recordID = result.recordID
       isSaved = true

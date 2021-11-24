@@ -299,7 +299,6 @@ class FileSystemController extends BaseController{
     }
     const element = createFolderOrFile(type, id, prevID, node.depth)
     let parentDom = domMap[node.parent.id]
-    console.log(parentDom)
     if(parentDom){
       if(parentDom.matches('.closed')){
         element.classList.toggle('closed', true)
