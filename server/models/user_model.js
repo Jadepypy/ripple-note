@@ -106,7 +106,7 @@ const signIn = async (email, password) => {
     conn.release()
   }
 }
-const getVaults = async (id) => {
+const getUserVaults = async (id) => {
   try{
     const [vaults] = await pool.query(  `SELECT vaults.id, name, created_at 
                                   FROM vault_user join vaults 
@@ -123,12 +123,11 @@ const deleteVault = async (userID, vaultID) => {
   try{
     await conn.query('START TRANSACTION')
     await conn.query('DELETE FROM vault_user WHERE vault_id = ? and user_id = ?', [vaultID, userID])
-    //delete files and folders
     await conn.query('UPDATE users SET last_entered_vault_id = NULL WHERE id = ?', [userID])
 
     const [users] = await conn.query('SELECT user_id FROM vault_user WHERE vault_id = ?', [vaultID])
     if(users.length < 1){
-      await conn.query('DELETE files FROM files INNER JOIN folder_file ON files.id = folder_file.id WHERE folder_file.vault_id = ?', [vaultID])
+      await conn.query('DELETE files FROM files INNER JOIN folder_file ON files.file_id = folder_file.id WHERE folder_file.vault_id = ?', [vaultID])
       await conn.query('DELETE FROM folder_file WHERE vault_id = ?', [vaultID])
       await conn.query('DELETE FROM vaults WHERE id = ?', [vaultID])
     }
@@ -147,6 +146,6 @@ const deleteVault = async (userID, vaultID) => {
 module.exports = {
                     signUp,
                     signIn,
-                    getVaults,
+                    getUserVaults,
                     deleteVault,
 }

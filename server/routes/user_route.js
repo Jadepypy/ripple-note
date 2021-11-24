@@ -2,7 +2,7 @@ const router = require('express').Router()
 const {handleInternalError, httpAuthenticate} = require('../../util/util');
 
 const {
-  getVaults,
+  getUserVaults,
   deleteVault,
   signIn,
   signUp,
@@ -10,7 +10,7 @@ const {
 } = require('../controllers/user_controller')
 
 router.route('/user/vaults')
-    .get(httpAuthenticate, handleInternalError(getVaults))
+    .get(httpAuthenticate, handleInternalError(getUserVaults))
 router.route('/user/signin')
     .post(signIn)
 router.route('/user/signup')

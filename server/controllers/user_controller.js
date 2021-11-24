@@ -77,13 +77,13 @@ const getUserProfile = async (req, res) => {
     }
   })
 }
-const getVaults = async (req, res) => {
+const getUserVaults = async (req, res) => {
   if (!req.user){
     res.status(400).send({error:'Wrong Request'})
     return  
   }
   const user = req.user
-  const result = await User.getVaults(user.id)
+  const result = await User.getUserVaults(user.id)
   if(result.error){
     return res.status(403).send({error: result.error})
   }
@@ -108,13 +108,13 @@ const deleteVault = async (req, res) => {
   const vaultID = req.params.id
   const result = await User.deleteVault(user.id, vaultID)
   if(result.error){
-    return res.status(403).send({error: result.error})
+    return res.status(500).send({error: result.error})
   }
   res.sendStatus(200) 
 }
 
 module.exports =  { 
-                    getVaults,
+                    getUserVaults,
                     deleteVault,
                     getUserProfile,
                     signIn,
