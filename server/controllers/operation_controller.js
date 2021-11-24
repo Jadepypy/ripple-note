@@ -1,4 +1,4 @@
-const Operation = require('../models/operation')
+const Operation = require('../models/operation_model')
 
 const updateOperation = async (fileID, revisionID, doc, recordID) => {
   const updatedAt = new Date().toISOString().slice(0, 19).replace('T', ' ')

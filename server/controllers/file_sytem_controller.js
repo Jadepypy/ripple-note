@@ -1,4 +1,4 @@
-const FileSystem = require('../models/file_system')
+const FileSystem = require('../models/file_system_model')
 
 const createFile = async(req, res) => {
   const data = req.body.data

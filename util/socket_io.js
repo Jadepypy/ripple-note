@@ -19,7 +19,7 @@ const {
 } = require('./operation_transformation')
 const {
   DATA_TYPE
-} = require('../server/models/file_system')
+} = require('../server/models/file_system_model')
 const {
   wsAuthenticate
 } = require('./util')

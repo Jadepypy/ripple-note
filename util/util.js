@@ -1,5 +1,4 @@
 const jwt = require('jsonwebtoken')
-const {CONNECTION_TYPE} = require('../server/models/user')
 require('dotenv').config();
 
 const handleInternalError = (fn) => {

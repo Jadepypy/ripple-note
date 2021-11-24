@@ -6,7 +6,7 @@ const {
   createVault,
   addVaultUser,
   changeVaultName
-} = require('../controllers/user_controller')
+} = require('../controllers/vault_controller')
 
 router.route('/vault/users')
     .post(httpAuthenticate, handleInternalError(addVaultUser))
