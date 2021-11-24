@@ -34,21 +34,17 @@ const moveFile = async (dataArr, vaultID, revisionID) => {
 
 const getFileSystem = async (vaultID) => {
   const result = await FileSystem.getFileSystem(vaultID)
-  // console.log(result)
-  let firstChild = result[0][0].first_child_id
-  const revisionID = result[0][0].revision_id
-  const files = []
+  if(result.error){
+    return {error: result.error}
+  }
+  const {vault, files} = result
+  if(!vault || !files){
+    return {error: 'Database query error'}
+  }
+  let firstChild = vault.first_child_id
+  const revisionID = vault.revision_id
   firstChild = firstChild != undefined? firstChild: null
-  result[1].forEach((file) => {
-    files.push({  id: file.id, 
-                  name: file.name, 
-                  firstChild: file.first_child_id != undefined? file.first_child_id: null,
-                  next: file.next_id != undefined? file.next_id: null,
-                  type: file.type
-                })
-  })
-  //console.log('init files')
-  return [firstChild, files, revisionID]
+  return {firstChild, files, revisionID}
 }
 
 const getFile = async (fileID) => {

@@ -35,10 +35,9 @@ io.of(/^\/[0-9]+$/)
   .use(wsAuthenticate)
   .on('connection', async (socket) => {
     const vaultID = socket.nsp.name.replace('/', '')
-    //console.log(`user connected on ${vaultID}`)
-    const result = await getFileSystem(vaultID)
-    socket.emit('fileSystem', result[0], result[1], result[2], socket.userID)
-    vaults[vaultID] = result[2]
+    const {firstChild, files, revisionID} = await getFileSystem(vaultID)
+    socket.emit('fileSystem', firstChild, files, revisionID, socket.userID)
+    vaults[vaultID] = revisionID
 
     socket.on('joinFile', async (id) => {
       socket.join(id)

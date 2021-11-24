@@ -10,8 +10,8 @@ const getFileSystem = async (vaultID) => {
   const conn = await pool.getConnection()
   try{
     const [vault] = await conn.query('SELECT first_child_id, revision_id from vaults where id = ?', [vaultID])
-    const [files] = await conn.query('SELECT id, name, type, first_child_id, next_id from folder_file where vault_id = ?', [vaultID])
-    return [vault, files]
+    const [files] = await conn.query('SELECT id, name, type, first_child_id as firstChild, next_id as next from folder_file where vault_id = ?', [vaultID])
+    return {vault: vault[0], files}
   } catch(e) {
     console.log(e)
   } finally{
