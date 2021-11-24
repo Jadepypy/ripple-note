@@ -65,7 +65,7 @@ const addVaultUser = async (userID, vaultID, emails) => {
     // if(addedUserIds.length > 0){
     //   await conn.query('INSERT INTO vault_user (vault_id, user_id) VALUES ?', [addedUserIds.map((id) => [vaultID, id])])
     // }
-    await conn.query('INSERT IGNORE INTO users (email) VALUES ?', [emails.map(email => ([email]))])
+    await conn.query('INSERT IGNORE INTO users (email, last_entered_vault_id) VALUES ?', [emails.map(email => ([email, vaultID]))])
     let [users] = await conn.query('SELECT id FROM users WHERE email in (?)', [emails])
     await conn.query('INSERT IGNORE INTO vault_user (vault_id, user_id) VALUES ?', [users.map(user => ([vaultID, user.id]))])
     await conn.query('COMMIT')

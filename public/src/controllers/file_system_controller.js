@@ -604,7 +604,7 @@ class FileSystemController extends BaseController{
   addLogInFormListener(){
     signUpForm.addEventListener('submit', async (event) => {
       event.preventDefault()
-      const result = await submitFormData(event.target.action, event.target, FORM_TYPE.SIGN_UP)
+      const result = await submitLoginForm(event.target.action, event.target, FORM_TYPE.SIGN_UP)
       if(result){
         this.socketIO.init(result[0], result[1])
       }
@@ -612,7 +612,7 @@ class FileSystemController extends BaseController{
 
     signInForm.addEventListener('submit', async (event) => {
       event.preventDefault()
-      const result = await submitFormData(event.target.action, event.target, FORM_TYPE.SIGN_IN)
+      const result = await submitLoginForm(event.target.action, event.target, FORM_TYPE.SIGN_IN)
       if(result){
         this.socketIO.init(result[0], result[1])
       }

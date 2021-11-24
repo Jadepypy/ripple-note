@@ -4,15 +4,11 @@ const User = require('../models/user_model')
 
 
 const signIn = async(req, res) => {
-  const {provider, email, password} = req.body
-  let result
-  switch(provider) {
-    case 'native':
-      result = await nativeSignIn(email, password)
-      break
-    default:
-      result = {error: 'Wrong request'}
+  const {email, password} = req.body
+  if(!email || !password){
+    return res.status(403).send({error:'Email, and password are required'})
   }
+  const result = await User.signIn(email, password)
   if(result.error){
     return res.status(403).send({error: result.error})
   }
@@ -32,17 +28,6 @@ const signIn = async(req, res) => {
         }
     }
   })
-}
-
-const nativeSignIn = async (email, password) => {
-  if(!email || !password){
-    return {error:'Email, and password are required'} 
-  }
-  try{
-    return await User.nativeSignIn(email, password)
-  } catch(error) {
-    return {error}
-  }
 }
 
 const signUp = async (req, res) => {

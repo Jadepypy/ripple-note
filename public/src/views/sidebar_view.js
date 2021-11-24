@@ -67,7 +67,7 @@ function lengthIsValid(value, type){
   }
   return true
 }
-async function submitFormData(url, data, type) {
+async function submitLoginForm(url, data, type) {
   const form = new FormData(data)
   const value = Object.fromEntries(form.entries())
   if(!lengthIsValid(value, type)){

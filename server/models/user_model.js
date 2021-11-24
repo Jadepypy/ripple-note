@@ -29,7 +29,7 @@ const signUp = async (name, email, password) => {
   try {
     const hash = await hashPassword(password)
     await conn.query('START TRANSACTION')
-    const users = await conn.query('SELECT id, email, is_registered FROM users WHERE email = ? FOR UPDATE', [email])
+    const users = await conn.query('SELECT id, email, is_registered, last_entered_vault_id FROM users WHERE email = ? FOR UPDATE', [email])
     const createdAt = new Date().toISOString().slice(0, 19).replace('T', ' ')
     let user, id, vaultID
     if(users[0].length > 0){
@@ -39,13 +39,12 @@ const signUp = async (name, email, password) => {
         return {error: 'Email already exists'}
       }
       id = user.id
-      const [vault] = await conn.query('SELECT vault_id from vault_user WHERE user_id = ? LIMIT 1', [id])
-      vaultID = vault[0].vault_id
-      await conn.query('UPDATE users SET name = ?, provider = "native", last_entered_vault_id = ?, password = ?,is_registered = 1 WHERE id = ?', [name, vaultID, hash, id])
+      vaultID = user.last_entered_vault_id
+      await conn.query('UPDATE users SET name = ?, password = ?,is_registered = 1 WHERE id = ?', [name, hash, id])
     } else{
       const [vault] = await conn.query('INSERT INTO vaults (name, created_at) VALUES (?, ?)', ['Default', createdAt])
       vaultID = vault.insertId
-      const [result] = await conn.query('INSERT INTO users (name, email, password, provider, last_entered_vault_id, is_registered) VALUES (?, ?, ?, ?, ?, 1)', [name, email , hash, 'native', vaultID])
+      const [result] = await conn.query('INSERT INTO users (name, email, password, last_entered_vault_id, is_registered) VALUES (?, ?, ?, ?, ?, 1)', [name, email , hash, vaultID])
       id = result.insertId
       await conn.query('INSERT INTO vault_user (vault_id, user_id) VALUES (?, ?)', [vaultID, id])
     }
@@ -66,7 +65,7 @@ const signUp = async (name, email, password) => {
     conn.release()
   }
 }
-const nativeSignIn = async (email, password) => {
+const signIn = async (email, password) => {
   const conn = await pool.getConnection()
   try {
     var vault
@@ -81,28 +80,27 @@ const nativeSignIn = async (email, password) => {
       await conn.query('COMMIT')
       return {error: 'Email not registered'}
     }
-    [vault] = await conn.query('SELECT vault_id from vault_user WHERE user_id = ? LIMIT 1', [user.id])
-    if(vault.length > 0){
+    const isSame = await comparePassword(password, user.password)
+    if(!isSame){
+      await conn.query('COMMIT')
+      return {error: 'Wrong Password'}
+    }
+    [vault] = await conn.query('SELECT vault_id FROM vault_user WHERE user_id = ? LIMIT 1', [user.id])
+    if(!user.last_entered_vault_id && vault.length > 0){
       await conn.query('UPDATE users SET last_entered_vault_id = ? WHERE id = ?', [vault[0].vault_id, user.id])
       user.last_entered_vault_id = vault[0].vault_id
     } else if(!user.last_entered_vault_id){
-      const createdAt = new Date().toISOString().slice(0, 19).replace('T', ' ')
+      const createdAt = new Date().toISOString().slice(0, 19).replace('T', ' ');
       var [vault] = await conn.query('INSERT INTO vaults (name, created_at) VALUES (?, ?)', ['Default', createdAt])
       await conn.query('INSERT INTO vault_user (vault_id, user_id) VALUES (?, ?)', [vault.insertId, user.id])
       await conn.query('UPDATE users SET last_entered_vault_id = ? WHERE id = ?', [vault.insertId, user.id])
       user.last_entered_vault_id = vault.insertId
-    }
-    const isSame = await comparePassword(password,user.password)
-    if(!isSame){
-      await conn.query('COMMIT')
-      return {error: 'Wrong Password'}
     }
     user.access_token = jwt.sign(user, JWT_KEY)
     await conn.query('COMMIT')
     return {user}
   } catch (error) {
     console.log(error)
-    conn.release()
     return {error}
   } finally{
     conn.release()
@@ -148,7 +146,7 @@ const deleteVault = async (userID, vaultID) => {
 
 module.exports = {
                     signUp,
-                    nativeSignIn,
+                    signIn,
                     getVaults,
                     deleteVault,
 }
