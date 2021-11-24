@@ -59,12 +59,14 @@ class BaseController {
     } 
     return data
   }
-  freezeTextarea(isFreezed, fileID){
-    if(isFreezed){
+  freezeTextarea(isFreezed){
+    if(isFreezed && !this.socketIO.isFreezed){
       textarea.readOnly = true
       this.socketIO.isFreezed = true
       historyIcon.classList.toggle('freezed', true)
-    } else{
+    } else if(this.socketIO.isFreezed){
+      const storage = window.sessionStorage
+      const fileID = storage.getItem('file_id')
       timeStamp.innerHTML = ''
       textarea.readOnly = false
       this.socketIO.isFreezed = false

@@ -26,7 +26,7 @@ const {
 
 let isSaved = false
 const fileArr = {}
-const vaults = {}
+const vaultRevision = {}
 let LogOp = {}
 const onlines = {}
 
@@ -37,7 +37,7 @@ io.of(/^\/[0-9]+$/)
     const vaultID = socket.nsp.name.replace('/', '')
     const {firstChild, files, revisionID} = await getFileSystem(vaultID)
     socket.emit('fileSystem', firstChild, files, revisionID, socket.userID)
-    vaults[vaultID] = revisionID
+    vaultRevision[vaultID] = revisionID
 
     socket.on('joinFile', async (id) => {
       socket.join(id)
@@ -68,36 +68,36 @@ io.of(/^\/[0-9]+$/)
       await trackDocVersion(socket.fileID, false)
     })
     .on('moveFile', async (dataArr, id, targetID, revisionID) => {
-      if(revisionID < vaults[vaultID]){
+      if(revisionID < vaultRevision[vaultID]){
         socket.emit('invalid', id, socket.id)
         return
       }
-      vaults[vaultID]++
-      const result = await moveFile(dataArr, vaultID, vaults[vaultID])
+      vaultRevision[vaultID]++
+      const result = await moveFile(dataArr, vaultID, vaultRevision[vaultID])
       if(result.error){
         socket.emit('invalid', id, socket.id)
-        vaults[vaultID]--
+        vaultRevision[vaultID]--
         return
       }
-      io.of(vaultID).emit('moveFile', id, targetID, socket.id, vaults[vaultID])
+      io.of(vaultID).emit('moveFile', id, targetID, socket.id, vaultRevision[vaultID])
     })
     .on('createFile', (id, prevID, type, revisionID) => {
-      vaults[vaultID] = ++revisionID
-      io.of(vaultID).emit('createFile', id, prevID, type, socket.id, vaults[vaultID])
+      vaultRevision[vaultID] = ++revisionID
+      io.of(vaultID).emit('createFile', id, prevID, type, socket.id, vaultRevision[vaultID])
     })
     .on('removeFiles', async (id, idArr, data, revisionID) => {
-      if(revisionID < vaults[vaultID]){
+      if(revisionID < vaultRevision[vaultID]){
         socket.emit('invalid', id, socket.id)
         return
       }
-      vaults[vaultID]++
-      const result = await removeFiles(idArr, data, vaultID, vaults[vaultID])
+      vaultRevision[vaultID]++
+      const result = await removeFiles(idArr, data, vaultID, vaultRevision[vaultID])
       if(result.error){
         socket.emit('invalid', id, socket.id)
-        vaults[vaultID]--
+        vaultRevision[vaultID]--
         return
       }
-      io.of(vaultID).emit('removeFiles', id, socket.id, vaults[vaultID])
+      io.of(vaultID).emit('removeFiles', id, socket.id, vaultRevision[vaultID])
     })
     .on('currentSaved', () => {
       isSaved = true

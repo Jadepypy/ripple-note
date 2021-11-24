@@ -53,6 +53,7 @@ class FileSystemController extends BaseController{
     this.addUserIconClinkListener()
     this.addSearchBoxBlurListener()
     this.addHistoryIconClickListener()
+    this.addTimeStampClickListener()
   }
   constructFileSystem(firstChild, fileArr) {
     showEditor(false)
@@ -913,6 +914,7 @@ class FileSystemController extends BaseController{
       const storage = window.sessionStorage
       const fileID = storage.getItem('file_id')
       if(!this.socketIO.isFreezed){
+        this.freezeTextarea(true)
         const result = await this.api.getFileVersion(fileID)
         const files = result.data.files
         historyList.innerHTML = ''
@@ -948,8 +950,7 @@ class FileSystemController extends BaseController{
           historyList.append(a)
           this.addHistoryListClickListener(a, fileID)
         }
-      }
-    
+      }  
     })
   }
   addHistoryListClickListener(a, fileID){
@@ -978,10 +979,6 @@ class FileSystemController extends BaseController{
       doc = this.currentDoc
     }
     timeStamp.innerHTML = `<i class="fas fa-times" id="unfreezed-icon" title="Close"></i> Freezed: ${a.dataset.time}`
-    timeStamp.addEventListener('click', () => {
-      this.freezeTextarea(false, fileID)
-    })
-    this.freezeTextarea(true)
     renderEditor(doc, undefined, undefined, undefined, true)
     const input = getElement('.version-name', a)
     input.addEventListener('blur', async () => {
@@ -1000,7 +997,11 @@ class FileSystemController extends BaseController{
       }
     })
   }
-
+  addTimeStampClickListener(){
+    timeStamp.addEventListener('click', () => {
+      this.freezeTextarea(false)
+    })
+  }
   validateEmail(mail) {
     if (/^\w+([\.-]?\w+)*@\w+([\.-]?\w+)*(\.\w{2,3})+$/.test(mail)){
       return true
