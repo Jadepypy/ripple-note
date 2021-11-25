@@ -6,11 +6,12 @@ const DATA_TYPE = {
                     FILE: '1'
                   }
 
-const getFileSystem = async (vaultID) => {
+const getFileSystem = async (vaultID, userID) => {
   const conn = await pool.getConnection()
   try{
     const [vault] = await conn.query('SELECT first_child_id, revision_id from vaults where id = ?', [vaultID])
     const [files] = await conn.query('SELECT id, name, type, first_child_id as firstChild, next_id as next from folder_file where vault_id = ?', [vaultID])
+    await conn.query('UPDATE users SET last_entered_vault_id = ? WHERE id = ?', [vaultID, userID])
     return {vault: vault[0], files}
   } catch(e) {
     console.log(e)

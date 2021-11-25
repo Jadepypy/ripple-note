@@ -31,7 +31,7 @@ io.of(/^\/[0-9]+$/)
   .use(wsAuthenticate)
   .on('connection', async (socket) => {
     const vaultID = socket.nsp.name.replace('/', '')
-    const {firstChild, files, revisionID} = await getFileSystem(vaultID)
+    const {firstChild, files, revisionID} = await getFileSystem(vaultID, socket.userID)
     socket.emit('fileSystem', firstChild, files, revisionID, socket.userID)
     vaultRevision[vaultID] = revisionID
 

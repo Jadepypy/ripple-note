@@ -32,8 +32,8 @@ const moveFile = async (dataArr, vaultID, revisionID) => {
   return {}
 }
 
-const getFileSystem = async (vaultID) => {
-  const result = await FileSystem.getFileSystem(vaultID)
+const getFileSystem = async (vaultID, userID) => {
+  const result = await FileSystem.getFileSystem(vaultID, userID)
   if(result.error){
     return {error: result.error}
   }
