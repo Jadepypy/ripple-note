@@ -1,5 +1,3 @@
-//import {STATE, OP_TYPE} from '../utils/enum.js'
-
 class SocketIO {
   constructor() {
     this.fileID = null

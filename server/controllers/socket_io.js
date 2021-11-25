@@ -7,22 +7,19 @@ const {
   changeFileName,
   removeFiles,
   restoreFileVersion
-} = require('../server/controllers/file_sytem_controller')
+} = require('./file_sytem_controller')
 const {
   createOperation,
   updateOperation
-} = require('../server/controllers/operation_controller')
+} = require('./operation_controller')
 const {
   iterateOT,
   applyOperation,
   OP_TYPE
-} = require('./operation_transformation')
-const {
-  DATA_TYPE
-} = require('../server/models/file_system_model')
+} = require('../../util/operation_transformation')
 const {
   wsAuthenticate
-} = require('./util')
+} = require('../../util/util')
 
 let isSaved = false
 const fileArr = {}

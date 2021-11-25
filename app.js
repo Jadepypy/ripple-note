@@ -25,7 +25,7 @@ app.use(function(err, req, res, next) {
     res.status(500).send('Internal Server Error');
 })
 
-const {start} = require('./util/socket_io')
+const {start} = require('./server/controllers/socket_io')
 const { createServer } = require("http");
 const server = createServer(app);
 const io = require("socket.io")(server)

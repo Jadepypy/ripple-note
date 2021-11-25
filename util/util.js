@@ -6,24 +6,6 @@ const handleInternalError = (fn) => {
     fn(req, res, next).catch(next)
   }
 }
-const httpAuthenticate = (req, res, next) => {
-  let bearerHeader = req.get('Authorization')
-  if(!bearerHeader) {
-    res.status(401).send({ error: 'Unauthorized'})
-  }
-  const result = bearerHeader.split('Bearer ')
-  if (result.length < 2){
-    res.status(401).send({ error: 'Unauthorized'})
-  } 
-  const token = result[1]   
-  try {
-    const user = jwt.verify(token, process.env.JWT_KEY)
-    req.user = user
-  } catch (error) {
-    return res.status(403).json({ error: 'Wrong token' })
-  }
-  return next()
-}
 const wsAuthenticate = (socket, next) => {
   const vaultID = socket.nsp.name.replace('/', '')
   if(vaultID == process.env.DEMO_VAULT_ID){
@@ -42,10 +24,29 @@ const wsAuthenticate = (socket, next) => {
     }
     return next()
   } else{
-    socket.emit('error', {error: 'Wrong token'})
+    socket.emit('error', {error: 'Unauthorized'})
   }
   return
 }
+const httpAuthenticate = (req, res, next) => {
+  let bearerHeader = req.get('Authorization')
+  if(!bearerHeader) {
+    res.status(401).send({ error: 'Unauthorized'})
+  }
+  const result = bearerHeader.split('Bearer ')
+  if (result.length < 2){
+    res.status(401).send({ error: 'Unauthorized'})
+  } 
+  const token = result[1]   
+  try {
+    const user = jwt.verify(token, process.env.JWT_KEY)
+    req.user = user
+  } catch (error) {
+    return res.status(403).json({ error: 'Wrong token' })
+  }
+  return next()
+}
+
 
 module.exports = {  handleInternalError,           
                     httpAuthenticate, 

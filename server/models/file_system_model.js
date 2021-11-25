@@ -15,7 +15,7 @@ const getFileSystem = async (vaultID) => {
   } catch(e) {
     console.log(e)
   } finally{
-    await conn.release()
+    conn.release()
   }
 }
 
