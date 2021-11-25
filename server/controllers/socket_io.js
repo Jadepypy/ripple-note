@@ -21,7 +21,6 @@ const {
   wsAuthenticate
 } = require('../../util/util')
 
-let isSaved = false
 const fileArr = {}
 const vaultRevision = {}
 let LogOp = {}
@@ -39,21 +38,23 @@ io.of(/^\/[0-9]+$/)
     socket.on('joinFile', async (id) => {
       socket.join(id)
       socket.fileID = id
+      let lastSaved = false
       if(!fileArr[id]){
         const result = await getFile(id)
         if(result.error){
           socket.emit('error', result.error)
         }
-        const {revisionID, doc, recordID} = result
+        const {revisionID, doc, recordID, revisionName} = result
         fileArr[id] = {
           revisionID,
           doc,
           recordID
         }
+        lastSaved = !(revisionName == null)
       }
       socket.emit('init', fileArr[id].revisionID, fileArr[id].doc) 
       socket.to(socket.fileID).emit('joinFile', socket.id)
-      await trackDocVersion(id, true)
+      await trackDocVersion(id, true, lastSaved)
     })
     .on('changeName', async (id, name) => {
       await changeFileName(id, name)
@@ -97,7 +98,7 @@ io.of(/^\/[0-9]+$/)
       io.of(vaultID).emit('removeFiles', id, socket.id, vaultRevision[vaultID])
     })
     .on('currentSaved', () => {
-      isSaved = true
+      onlines[socket.fileID].isSaved = true
     })
     .on('disconnect', async () => {
       io.of(vaultID).emit('leaveVault', socket.userID)
@@ -109,7 +110,7 @@ io.of(/^\/[0-9]+$/)
       const result = await restoreFileVersion(fileID, revisionID)
       fileArr[fileID].doc = result.doc
       fileArr[fileID].recordID = result.recordID
-      isSaved = true
+      onlines[fileID].isSaved = true
       LogOp[fileID] = []
       socket.to(socket.fileID).emit('restore')
       socket.emit('restore')
@@ -153,9 +154,9 @@ io.of(/^\/[0-9]+$/)
         socket.to(socket.fileID).emit('syncOp', revisionID, operation, socket.id, doc);
 
         LogOp[fileID][revisionID] = operation
-        if(isSaved){
+        if(onlines[fileID].isSaved && onlines[fileID].revisionID != revisionID){
           fileArr[fileID].recordID = await createOperation(fileID, revisionID, doc)
-          isSaved = false
+          onlines[fileID].isSaved = false
         } else{
           await updateOperation(fileID, revisionID, doc, fileArr[fileID].recordID)
         }
@@ -165,7 +166,7 @@ io.of(/^\/[0-9]+$/)
 
 }
 
-async function trackDocVersion(fileID, hasNewUser){ 
+async function trackDocVersion(fileID, hasNewUser, lastSaved){ 
   if(hasNewUser){
     if(onlines[fileID]){
       onlines[fileID].count++
@@ -173,6 +174,7 @@ async function trackDocVersion(fileID, hasNewUser){
       onlines[fileID] = {
         revisionID: fileArr[fileID].revisionID,
         count: 1,
+        isSaved: lastSaved,
         intervalID: setInterval(() => {
           saveDoc(fileID)
         }, 30000)
@@ -184,9 +186,10 @@ async function trackDocVersion(fileID, hasNewUser){
     if(onlines[fileID].count > 1){
       onlines[fileID].count--
     } else{
-      await saveDoc(fileID)
+      //await saveDoc(fileID)
       clearInterval(onlines[fileID].intervalID)
       delete onlines[fileID]
+      delete fileArr[fileID]
     }
   }
 }
@@ -194,7 +197,7 @@ async function saveDoc(fileID){
   let revisionID = fileArr[fileID].revisionID
   if(onlines[fileID].revisionID != revisionID){
     onlines[fileID].revisionID = revisionID
-    isSaved = true
+    onlines[fileID].isSaved = true
   }
 }
 
