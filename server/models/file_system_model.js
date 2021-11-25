@@ -110,14 +110,18 @@ const searchFiles = async (userID, vaultID, keyword) => {
       return {error: 'Permission Denied'}
     }
     const idSet = new Set()
-    const [textResult] = await conn.query(`SELECT files.file_id as id FROM files
-      JOIN (SELECT max(revision_id) as revision_id, f.file_id
-      FROM files f JOIN folder_file ff ON f.file_id = ff.id 
-      WHERE ff.vault_id =  ?
-      GROUP BY file_id) t
-      on files.revision_id = t.revision_id and files.file_id = t.file_id
-      WHERE lower(files.text) LIKE ?`,[vaultID, `%${keyword}%`])
-      const [nameResult] = await conn.query(`SELECT id FROM folder_file WHERE vault_id = ? and lower(name) LIKE ? and type = ?`,[vaultID, `%${keyword}%`, DATA_TYPE.FILE])
+    const [textResult] = await conn.query(`WITH t AS
+      (
+        SELECT f.file_id as id, f.text as text, RANK() OVER (PARTITION BY f.file_id ORDER BY f.revision_id DESC) as rank_no
+        FROM files f
+        JOIN folder_file ff ON f.file_id = ff.id 
+        WHERE ff.vault_id =  ?
+      )
+      SELECT id
+      FROM t
+      WHERE rank_no = 1 AND lower(text) LIKE ?`, [vaultID, `%${keyword}%`])
+    const [nameResult] = await conn.query(`SELECT id FROM folder_file WHERE vault_id = ? and lower(name) LIKE ? and type = ?`, [vaultID, `%${keyword}%`, DATA_TYPE.FILE])
+
     textResult.forEach((file) => {
       idSet.add(file.id)
     })
