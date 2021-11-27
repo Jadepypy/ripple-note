@@ -164,6 +164,9 @@ function Tdd(op1, op2){
 
 module.exports = {
   iterateOT,
+  Tii,
+  Tid,
+  Tdd,
   applyOperation,
   OP_TYPE
 }

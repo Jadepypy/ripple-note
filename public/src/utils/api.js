@@ -1,4 +1,3 @@
-
 class API {
   constructor(){
     this.tempCount = 99
