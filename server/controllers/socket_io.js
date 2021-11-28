@@ -6,12 +6,10 @@ const {
   moveFile,
   changeFileName,
   removeFiles,
-  restoreFileVersion
+  restoreFileVersion,
+  updateFileVersion,
+  createFileVersion
 } = require('./file_sytem_controller')
-const {
-  createOperation,
-  updateOperation
-} = require('./operation_controller')
 const {
   iterateOT,
   applyOperation,
@@ -155,10 +153,10 @@ io.of(/^\/[0-9]+$/)
 
         LogOp[fileID][revisionID] = operation
         if(onlines[fileID].isSaved && onlines[fileID].revisionID != revisionID){
-          fileArr[fileID].recordID = await createOperation(fileID, revisionID, doc)
+          fileArr[fileID].recordID = await createFileVersion(fileID, revisionID, doc)
           onlines[fileID].isSaved = false
         } else{
-          await updateOperation(fileID, revisionID, doc, fileArr[fileID].recordID)
+          await updateFileVersion(fileID, revisionID, doc, fileArr[fileID].recordID)
         }
       }, 0)
     })

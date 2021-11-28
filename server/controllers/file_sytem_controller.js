@@ -133,6 +133,17 @@ const restoreFileVersion = async (fileID, revisionID) => {
   return {doc: file.text, recordID: file.id}
 }
 
+const updateFileVersion = async (fileID, revisionID, doc, recordID) => {
+  const updatedAt = new Date().toISOString().slice(0, 19).replace('T', ' ')
+  await FileSystem.updateFileVersion(fileID, revisionID, doc, updatedAt, recordID)
+}
+
+const createFileVersion = async (fileID, revisionID, doc) => {
+  const updatedAt = new Date().toISOString().slice(0, 19).replace('T', ' ')
+  const recordID = await FileSystem.createFileVersion(fileID, revisionID, doc, updatedAt)
+  return recordID
+}
+
 module.exports =  { 
                     createFile,
                     getFileSystem,
@@ -143,5 +154,7 @@ module.exports =  {
                     searchFiles,
                     getFileVersion,
                     changeFileVersionName,
-                    restoreFileVersion
+                    restoreFileVersion,
+                    updateFileVersion,
+                    createFileVersion
 }
