@@ -19,13 +19,13 @@ const signIn = async(req, res) => {
   }
   res.status(200).send({
     data: {
-        access_token: user.access_token,
-        user: {
-          id: user.id,
-          name: user.name,
-          email: user.email,
-          last_entered_vault_id: user.last_entered_vault_id
-        }
+      access_token: user.access_token,
+      user: {
+        id: user.id,
+        name: user.name,
+        email: user.email,
+        last_entered_vault_id: user.last_entered_vault_id
+      }
     }
   })
 }

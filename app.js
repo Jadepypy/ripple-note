@@ -2,6 +2,12 @@ require('dotenv').config();
 const express = require('express')
 const app = express()
 
+const {start} = require('./server/controllers/socket_io')
+const { createServer } = require("http");
+const server = createServer(app);
+const io = require("socket.io")(server)
+start(io)
+
 app.use('/node_modules', express.static('node_modules'))
 app.use(express.static('public'))
 app.use(express.json())
@@ -15,7 +21,6 @@ app.use('/api',
         ]
 )
 
-// Page not found
 app.use(function(req, res, next) {
     res.status(404).sendFile(__dirname + '/public/404.html');
 });
@@ -24,12 +29,6 @@ app.use(function(err, req, res, next) {
     console.log(err);
     res.status(500).send('Internal Server Error');
 })
-
-const {start} = require('./server/controllers/socket_io')
-const { createServer } = require("http");
-const server = createServer(app);
-const io = require("socket.io")(server)
-start(io)
 
 server.listen(3000, function(){
   console.log('listening on *:3000');

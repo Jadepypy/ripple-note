@@ -160,7 +160,7 @@ io.of(/^\/[0-9]+$/)
         } else{
           await updateOperation(fileID, revisionID, doc, fileArr[fileID].recordID)
         }
-      }, 3000)
+      }, 0)
     })
   })
 

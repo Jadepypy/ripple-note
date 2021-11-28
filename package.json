@@ -4,7 +4,7 @@
   "description": "",
   "main": "index.js",
   "scripts": {
-    "test": "mocha"
+    "test": "NODE_ENV=test mocha --exit"
   },
   "keywords": [],
   "author": "",
@@ -12,6 +12,7 @@
   "dependencies": {
     "bcrypt": "^5.0.1",
     "chai": "^4.3.4",
+    "chai-http": "^4.3.0",
     "dompurify": "^2.3.3",
     "dotenv": "^10.0.0",
     "express": "^4.17.1",
