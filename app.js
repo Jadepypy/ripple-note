@@ -32,4 +32,11 @@ app.use(function(err, req, res, next) {
 
 server.listen(3000, function(){
   console.log('listening on *:3000');
-});
+})
+// if (require.main === module) {
+//   server.listen(3000, function(){
+//     console.log('listening on *:3000');
+//   })
+// }
+
+module.exports = app

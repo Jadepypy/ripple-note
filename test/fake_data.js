@@ -1,5 +1,5 @@
 const vault = {
-  name: 'test_vault',
+  //name: 'test_vault',
 }
 const users = [
   {

@@ -95,7 +95,7 @@ class SocketIO {
     this.socket.disconnect()
   }
   sendOperation(revisionID, opInfo) {
-    this.socket.emit('operation', revisionID, opInfo, textarea.value) 
+    this.socket.emit('operation', revisionID, opInfo) 
   }
   changeName(id, name, type) {
     this.socket.emit('changeName', id, name)

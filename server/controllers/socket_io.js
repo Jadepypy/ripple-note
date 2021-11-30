@@ -127,8 +127,8 @@ io.of(/^\/[0-9]+$/)
         socket.emit('syncDoc', fileID, fileArr[fileID].revisionID, fileArr[fileID].doc)
       }
     })
-    .on('operation', (clientRevisionID, operation, text) => {
-      // console.log(clientRevisionID, operation)
+    .on('operation', (clientRevisionID, operation) => {
+      console.log(clientRevisionID, operation)
       setTimeout(async () => {
         const userID = socket.userID
         const fileID = socket.fileID
