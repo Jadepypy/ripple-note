@@ -17,24 +17,11 @@ function tidyUserData(user){
     })
   })
 }
-
-// async function _createFakeVault(conn){
-//   const [result] = await conn.query('INSERT INTO vaults SET ?', [vault]);
-//   vault.id = result.insertId
-// }
 async function _getFakeVault(conn){
   const [vaults] = await conn.query('SELECT vault_id FROM vault_user WHERE user_id = ?', [users[0].id]);
   vault.id = vaults[0].vault_id
 }
 
-async function _createFakeVaultUser(conn){
-  // const vaultUsers = []
-  // for (const user of users){
-  //   vaultUsers.push([vault.id, user.id])
-  // }
-  // return await conn.query('INSERT INTO vault_user (vault_id, user_id) VALUES ?', [vaultUsers])
-  return await conn.query('INSERT INTO vault_user (vault_id, user_id) VALUES (?, ?)', [vault.id, users[0].id])
-} 
 async function _createFakeFile(conn){
   file.vault_id = vault.id
   const [result] = await conn.query('INSERT INTO folder_file SET ?', [file])
@@ -47,9 +34,7 @@ async function createFakeData() {
     const conn = await pool.getConnection();
     await conn.query('START TRANSACTION');
     await conn.query('SET FOREIGN_KEY_CHECKS = ?', 0);
-    //await _createFakeVault(conn);
     await _getFakeVault(conn)
-    //await _createFakeVaultUser(conn);
     await _createFakeFile(conn)
     await conn.query('SET FOREIGN_KEY_CHECKS = ?', 1);
     await conn.query('COMMIT');

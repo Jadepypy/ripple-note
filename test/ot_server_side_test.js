@@ -2,53 +2,150 @@ const app = require('../app');
 const chai = require('chai')
 const chaiHttp = require('chai-http')
 const io = require('socket.io-client')
+const { OP_TYPE } = require('../util/operation_transformation')
 const {createFakeData, deleteFakeData} = require('./test_data_generator')
-const { users } = require('./fake_data')
 const NODE_ENV = process.env.NODE_ENV
-const {vault, file} = require('./fake_data');
+const {users, vault, file} = require('./fake_data');
 
 chai.use(chaiHttp);
 const requester = chai.request(app).keepOpen()
 const socketURL = `http://localhost:3000`
+let joinFileCount = 0
 
-let accessToken1, accessToken2, accessToken3
-let client1, client2, client3
-let client1RevisionID, client2RevisionID, client3RevisionID
-describe('send operation to server via socket io', () => {
-  before(async () => {
-    if (NODE_ENV !== 'test') {
-      console.log('Not in test env')
-      return
-    }
-    await deleteFakeData()
-    accessToken1 = await signUp(users[0])
-    await createFakeData()
-    await addVaultUser(accessToken1, [users[1].email, users[2].email])
-    accessToken2 = await signUp(users[1])
-    accessToken3 = await signUp(users[2])
-    client1 = io(`${socketURL}/${vault.id}`, {auth: {token: accessToken1}})
-    client2 = io(`${socketURL}/${vault.id}`, {auth: {token: accessToken2}})
-    client3 = io(`${socketURL}/${vault.id}`, {auth: {token: accessToken3}})
+describe('send operation to server via socket io', function (){
+  this.timeout(5000)
+  const clients = {1: {}, 2: {}, 3: {}}
+  let op1, op2, op3
+  before(() => {
+    return new Promise(async (resolve) => {
+      if (NODE_ENV !== 'test') {
+        console.log('Not in test env')
+        return
+      }
+      await deleteFakeData()
+      clients[1].accessToken = await signUp(users[0])
+      await createFakeData()
+      await addVaultUser(clients[1].accessToken, [users[1].email, users[2].email])
+      clients[2].accessToken = await signUp(users[1])
+      clients[3].accessToken = await signUp(users[2])
+      clients[1].socket = establishConnection(clients[1].accessToken)
+      clients[2].socket = establishConnection(clients[2].accessToken)
+      clients[3].socket = establishConnection(clients[3].accessToken)
+      op1 = [{
+                      type: OP_TYPE.INSERT,
+                      position: 4,
+                      key: 'a'
+                    }, 
+                    {
+                      type: OP_TYPE.DELETE,
+                      position: 6,
+                      count: -1
+                    }]
+      op2 = [{
+                      type: OP_TYPE.INSERT,
+                      position: 4,
+                      key: 'a'
+                    }, 
+                    {
+                      type: OP_TYPE.DELETE,
+                      position: 6,
+                      count: -1
+                    }]
+      op3 = [{
+                      type: OP_TYPE.INSERT,
+                      position: 4,
+                      key: 'a'
+                    }, 
+                    {
+                      type: OP_TYPE.DELETE,
+                      position: 6,
+                      count: -1
+                    }]
+      setTimeout(() => {
+        if(joinFileCount === 3){
+          resolve()
+        }
+      }, 3000)
+    })
   })
   beforeEach(() => {
-    client1RevisionID = 0
-    client2RevisionID = 0
-    client3RevisionID = 0
+    for (const id in clients){
+      clients[id].revisionID = 0
+      clients[id].callCount = 0
+    }
   })
-  it('one client sends operation',  (done) => {
-    client1.on('ack', (revisionID) => {
-      client1RevisionID = revisionID
-      expect(client1RevisionID).equal(1);
-      done()
-    })
-    client1.emit('operation', client1RevisionID, [])
+  it('one client sends operation at once',  (done) => {
+    //key: callCount value: expected outout
+    const expected1 = {
+      1: {
+        revisionID: 1
+      }
+    }
+    const expected2 = {
+      1: {
+        revisionID: 1,
+        operation: [
+          {
+            type: OP_TYPE.INSERT,
+            position: 4,
+            key: 'a'
+          }, 
+          {
+            type: OP_TYPE.DELETE,
+            position: 6,
+            count: -1
+          }
+        ]
+      }
+    }
+    const expected3 = {
+      1: {
+        revisionID: 1,
+        operation: [
+          {
+            type: OP_TYPE.INSERT,
+            position: 4,
+            key: 'a'
+          }, 
+          {
+            type: OP_TYPE.DELETE,
+            position: 6,
+            count: -1
+          }
+        ]
+      }
+    }
+    console.log('send')
+    registerAckCallback (clients[1], expected1)
+    registerSyncOpCallback(clients[2], expected2, 1, done)
+    registerSyncOpCallback(clients[3], expected3, 1, done)
+    clients[1].socket.emit('operation', clients[1].revisionID, op1)
   })
   after(async () => {
     requester.close();
   })
 })
+async function registerAckCallback (client, expect, maxCallCount, done){
+  client.socket.on('ack', (revisionID) => {
+    chai.expect(revisionID).equal(expect[++client.callCount].revisionID)
+    client.revisionID = revisionID
+    if(done && client.callCount === maxCallCount){
+      done()
+    }
+  })
+}
+async function registerSyncOpCallback(client, expect, maxCallCount, done){
+  client.socket.on('syncOp', (revisionID, operation) => {
+    chai.expect(revisionID).equal(expect[++client.callCount].revisionID)
+    chai.expect(operation).to.deep.equal(expect[client.callCount].operation)
+    client.revisionID = revisionID
+    if(done && client.callCount === maxCallCount){
+      done()
+    }
+  })
+}
 async function addVaultUser(accessToken, emails){
-  const res =  await requester
+  return await requester
               .post('/api/vault/users')
               .set('Authorization', `Bearer ${accessToken}`)
               .send({emails, vault_id: vault.id});
@@ -61,33 +158,13 @@ async function signUp(user){
   user.id = data.user.id
   return data.access_token
 }
-
-function generateOperation(type, opNum){
-  const operations = []
-  let docLength = doc.length
-  for(let i = 0; i < opNum; i++){
-    type = Math.floor(Math.random()*2)
-    let position
-    if(type == OP_TYPE.DELETE){
-      if(doc.length <= 0){
-        continue
-      }
-      position = Math.floor(Math.random()*docLength + 1)
-      const count = (-1)*Math.min(Math.floor(Math.random()*(position+1)), 10)
-      operations.push({ type: OP_TYPE.DELETE,
-                        position,
-                        count
-                      })
-      docLength += count 
-    } else{
-      const key = characters[Math.floor(Math.random() * characters.length)]
-      position = Math.floor(Math.random()*(docLength+1))
-      operations.push({ type: OP_TYPE.INSERT,
-                        position,
-                        key
-                      })
-      docLength++
-    }
-  }
-  return operations
+function establishConnection(accessToken){
+  const socket = io(`${socketURL}/${vault.id}`, {auth: {token: accessToken}})
+  socket.on('fileSystem', () => {
+    socket.emit('joinFile', file.id)
+  })
+  socket.on('init', () => {
+    joinFileCount++
+  })
+  return socket
 }

@@ -118,47 +118,36 @@ io.of(/^\/[0-9]+$/)
         return
       }
       const currentDoc = fileArr[fileID].doc
-      //console.log('receive')
       if(doc != currentDoc){
-        //console.log('Diverge!!!',fileArr[fileID].revisionID, revisionID)
-        //console.log(doc)
-        //console.log('---------')
-        //console.log(currentDoc)
         socket.emit('syncDoc', fileID, fileArr[fileID].revisionID, fileArr[fileID].doc)
       }
     })
-    .on('operation', (clientRevisionID, operation) => {
-      console.log(clientRevisionID, operation)
-      setTimeout(async () => {
-        const userID = socket.userID
-        const fileID = socket.fileID
-        if(LogOp[fileID] == undefined){
-          LogOp[fileID] = []
+    .on('operation', async (clientRevisionID, operation) => {
+      const fileID = socket.fileID
+      if(LogOp[fileID] == undefined){
+        LogOp[fileID] = []
+      }
+      if (fileArr[fileID].revisionID > clientRevisionID) {
+        for (let i = clientRevisionID + 1; i < LogOp[fileID].length; i++){
+          if (LogOp[fileID][i]){
+            //change info.operation inplace
+            iterateOT(cloneDeep(LogOp[fileID][i]), operation)
+          } 
         }
-        if (fileArr[fileID].revisionID > clientRevisionID) {
-          for (let i = clientRevisionID + 1; i < LogOp[fileID].length; i++){
-            if (LogOp[fileID][i]){
-              //change info.operation inplace
-              iterateOT(cloneDeep(LogOp[fileID][i]), operation)
-            } 
-          }
-        }
-        fileArr[fileID].revisionID++
-        fileArr[fileID].doc = applyOperation(fileArr[fileID].doc, operation)
-        let revisionID = fileArr[fileID].revisionID
-        let doc = fileArr[fileID].doc
-        socket.emit('ack', revisionID)
-        //console.log('Sync OP', revisionID, operation)
-        socket.to(socket.fileID).emit('syncOp', revisionID, operation, socket.id, doc);
-
-        LogOp[fileID][revisionID] = operation
-        if(onlines[fileID].isSaved && onlines[fileID].revisionID != revisionID){
-          fileArr[fileID].recordID = await createFileVersion(fileID, revisionID, doc)
-          onlines[fileID].isSaved = false
-        } else{
-          await updateFileVersion(fileID, revisionID, doc, fileArr[fileID].recordID)
-        }
-      }, 0)
+      }
+      fileArr[fileID].revisionID++
+      fileArr[fileID].doc = applyOperation(fileArr[fileID].doc, operation)
+      let revisionID = fileArr[fileID].revisionID
+      let doc = fileArr[fileID].doc
+      socket.emit('ack', revisionID)
+      socket.to(socket.fileID).emit('syncOp', revisionID, operation, socket.id);
+      LogOp[fileID][revisionID] = operation
+      if(onlines[fileID].isSaved && onlines[fileID].revisionID != revisionID){
+        fileArr[fileID].recordID = await createFileVersion(fileID, revisionID, doc)
+        onlines[fileID].isSaved = false
+      } else{
+        await updateFileVersion(fileID, revisionID, doc, fileArr[fileID].recordID)
+      }
     })
   })
 

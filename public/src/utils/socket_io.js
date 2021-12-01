@@ -25,8 +25,7 @@ class SocketIO {
     this.socket.on('ack', (revisionID) => {
       this.trigger('ack', revisionID)
     })
-    this.socket.on('syncOp', (revisionID, syncOp, socketID, doc) => {
-      publicDoc = doc
+    this.socket.on('syncOp', (revisionID, syncOp, socketID) => {
       if (!this.isFreezed && this.socket.id != socketID){
         this.trigger('syncOp', revisionID, syncOp)
       }

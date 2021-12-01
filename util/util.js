@@ -7,11 +7,6 @@ const handleInternalError = (fn) => {
   }
 }
 const wsAuthenticate = (socket, next) => {
-  const vaultID = socket.nsp.name.replace('/', '')
-  if(vaultID == process.env.DEMO_VAULT_ID){
-    socket.userID = process.env.VISITOR_USER_ID
-    return next()
-  }
   if(socket.handshake.auth) {
     try{
       const user = jwt.verify(socket.handshake.auth.token, process.env.JWT_KEY)
@@ -19,10 +14,10 @@ const wsAuthenticate = (socket, next) => {
         socket.emit('error', {error: 'Wrong token'})
       }
       socket.userID = user.id
+      return next()
     } catch (error) {
       socket.emit('error', {error: 'Wrong token'})
     }
-    return next()
   } else{
     socket.emit('error', {error: 'Unauthorized'})
   }
