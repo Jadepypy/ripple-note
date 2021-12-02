@@ -11,7 +11,7 @@ chai.use(chaiHttp);
 const requester = chai.request(app).keepOpen()
 const socketURL = `http://localhost:3000`
 let joinFileCount = 0
-
+let successCallCount = 0
 describe('send operation to server via socket io', function (){
   this.timeout(5000)
   const clients = {1: {}, 2: {}, 3: {}}
@@ -73,6 +73,7 @@ describe('send operation to server via socket io', function (){
       clients[id].revisionID = 0
       clients[id].callCount = 0
     }
+    successCallCount = 0
   })
   it('one client sends operation at once',  (done) => {
     //key: callCount value: expected outout
@@ -98,7 +99,22 @@ describe('send operation to server via socket io', function (){
         ]
       }
     }
-    const expected3 = {
+    registerAckCallback (clients[1], expected1, 3, done)
+    registerSyncOpCallback(clients[2], expected2, 3, done)
+    registerSyncOpCallback(clients[3], expected2, 3, done)
+    clients[1].socket.emit('operation', clients[1].revisionID, op1)
+  })
+  it('one client sends operation separately',  (done) => {
+    //key: callCount value: expected outout
+    const expected1 = {
+      1: {
+        revisionID: 1
+      },
+      2: {
+        revisionID: 2
+      }
+    }
+    const expected2 = {
       1: {
         revisionID: 1,
         operation: [
@@ -106,7 +122,12 @@ describe('send operation to server via socket io', function (){
             type: OP_TYPE.INSERT,
             position: 4,
             key: 'a'
-          }, 
+          }
+        ]
+      },
+      2: {
+        revisionID: 2,
+        operation: [
           {
             type: OP_TYPE.DELETE,
             position: 6,
@@ -115,31 +136,39 @@ describe('send operation to server via socket io', function (){
         ]
       }
     }
-    console.log('send')
-    registerAckCallback (clients[1], expected1)
-    registerSyncOpCallback(clients[2], expected2, 1, done)
-    registerSyncOpCallback(clients[3], expected3, 1, done)
-    clients[1].socket.emit('operation', clients[1].revisionID, op1)
+    const cb = () => {
+      clients[1].socket.emit('operation', clients[1].revisionID, [op1[1]])
+    }
+    registerAckCallback (clients[1], expected1, 6, done, cb)
+    registerSyncOpCallback(clients[2], expected2, 6, done)
+    registerSyncOpCallback(clients[3], expected2, 6, done)
+    clients[1].socket.emit('operation', clients[1].revisionID, [op1[0]])
   })
   after(async () => {
     requester.close();
   })
 })
-async function registerAckCallback (client, expect, maxCallCount, done){
+async function registerAckCallback (client, expect, targetCallCount, done, cb){
   client.socket.on('ack', (revisionID) => {
+        console.log('callcount', client.callCount + 1, revisionID, 'expect', expect[client.callCount + 1].revisionID)
     chai.expect(revisionID).equal(expect[++client.callCount].revisionID)
     client.revisionID = revisionID
-    if(done && client.callCount === maxCallCount){
+    successCallCount++
+
+    if(done && successCallCount === targetCallCount){
       done()
+    } else if(client.callCount < 2 && cb) {
+      cb()
     }
   })
 }
-async function registerSyncOpCallback(client, expect, maxCallCount, done){
+async function registerSyncOpCallback(client, expect, targetCallCount, done){
   client.socket.on('syncOp', (revisionID, operation) => {
     chai.expect(revisionID).equal(expect[++client.callCount].revisionID)
     chai.expect(operation).to.deep.equal(expect[client.callCount].operation)
     client.revisionID = revisionID
-    if(done && client.callCount === maxCallCount){
+    successCallCount++
+    if(done && successCallCount === targetCallCount){
       done()
     }
   })
