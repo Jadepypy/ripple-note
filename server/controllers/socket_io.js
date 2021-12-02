@@ -52,7 +52,7 @@ io.of(/^\/[0-9]+$/)
       }
       socket.emit('init', fileArr[id].revisionID, fileArr[id].doc) 
       socket.to(socket.fileID).emit('joinFile', socket.id)
-      await trackDocVersion(id, true, lastSaved)
+      trackDocVersion(id, true, lastSaved)
     })
     .on('changeName', async (id, name) => {
       await changeFileName(id, name)
@@ -61,7 +61,7 @@ io.of(/^\/[0-9]+$/)
     .on('leaveRoom', async (id) => {
       socket.leave(id)
       socket.to(socket.fileID).emit('leaveRoom', socket.id)
-      await trackDocVersion(socket.fileID, false)
+      trackDocVersion(socket.fileID, false)
     })
     .on('moveFile', async (dataArr, id, targetID, revisionID) => {
       if(revisionID < vaultRevision[vaultID]){
@@ -100,7 +100,7 @@ io.of(/^\/[0-9]+$/)
     })
     .on('disconnect', async () => {
       io.of(vaultID).emit('leaveVault', socket.userID)
-      await trackDocVersion(socket.fileID, false)
+      trackDocVersion(socket.fileID, false)
     })
     .on('restore', async (revisionID) => {
       const fileID = socket.fileID
@@ -153,7 +153,7 @@ io.of(/^\/[0-9]+$/)
 
 }
 
-async function trackDocVersion(fileID, hasNewUser, lastSaved){ 
+function trackDocVersion(fileID, hasNewUser, lastSaved){ 
   if(hasNewUser){
     if(onlines[fileID]){
       onlines[fileID].count++
@@ -180,7 +180,7 @@ async function trackDocVersion(fileID, hasNewUser, lastSaved){
     }
   }
 }
-async function saveDoc(fileID){
+function saveDoc(fileID){
   let revisionID = fileArr[fileID].revisionID
   if(onlines[fileID].revisionID != revisionID){
     onlines[fileID].revisionID = revisionID
