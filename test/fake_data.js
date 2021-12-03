@@ -1,6 +1,6 @@
 const vault = {
   //name: 'test_vault',
-}
+};
 const users = [
   {
     name: 'test1',
@@ -20,14 +20,14 @@ const users = [
     password: 'password3',
     is_registered: 1
   }
-]
+];
 const file = {
   name: 'test_file',
   type: 1
-}
+};
 
 module.exports = {
-  vault, 
+  vault,
   users,
   file
-}
+};
