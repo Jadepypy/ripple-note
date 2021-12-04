@@ -202,7 +202,6 @@ const removeFiles = async (idArr, data, vaultID, revisionID) => {
     }
     await conn.query(sql, bind);
     await conn.query('DELETE FROM folder_file WHERE id IN (?)', [idArr]);
-    await conn.query('DELETE FROM files WHERE file_id IN (?)', [idArr]);
     await conn.query(`UPDATE vaults SET revision_id = ? WHERE id = ?`, [
       revisionID,
       vaultID

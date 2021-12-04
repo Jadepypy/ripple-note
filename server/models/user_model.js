@@ -176,7 +176,6 @@ const deleteVault = async (userID, vaultID) => {
         'DELETE files FROM files INNER JOIN folder_file ON files.file_id = folder_file.id WHERE folder_file.vault_id = ?',
         [vaultID]
       );
-      await conn.query('DELETE FROM folder_file WHERE vault_id = ?', [vaultID]);
       await conn.query('DELETE FROM vaults WHERE id = ?', [vaultID]);
     }
     await conn.query('COMMIT');

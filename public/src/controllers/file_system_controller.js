@@ -275,7 +275,7 @@ class FileSystemController extends BaseController{
     return [id, prevID, node.depth]
   }
   handleInvalidAction(){
-    console.log('invalid action!')
+    //console.log('invalid action!')
     const storage = window.sessionStorage
     alert('Invalid Action')
     const vaultID =  storage.getItem('vault_id')
@@ -487,17 +487,17 @@ class FileSystemController extends BaseController{
   checkValidity(node, targetNode){
     if (targetNode.id != this.fileSystem.head.id){
       if(this.fileSystem.checkIsAncestor(node, targetNode)){
-        console.log('ineffective1')
+        //console.log('ineffective1')
         return false
       }
       if (targetNode.next !== null && targetNode.type == DATA_TYPE.FILE){
         if(targetNode.next.id == node.id){
-          console.log('ineffective2')
+          //console.log('ineffective2')
           return false
         }
       } else if(targetNode.firstChild !== null && targetNode.type == DATA_TYPE.FOLDER) {
         if(targetNode.firstChild.id == node.id){
-          console.log('ineffective3')
+          //console.log('ineffective3')
           return false
         }
       }

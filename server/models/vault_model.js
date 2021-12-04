@@ -59,24 +59,6 @@ const addVaultUser = async (userID, vaultID, emails) => {
       return { error: 'Permission Denied' };
     }
     await conn.query('START TRANSACTION');
-    // let [result] = await conn.query('SELECT id, email FROM users WHERE email in (?) FOR UPDATE', [emails])
-    // let existingUsers = {}
-    // result.map(user => {
-    //   existingUsers[user.email] = user.id
-    // })
-    // let registeredEmails = new Set(Object.keys(existingUsers))
-    // const addedUserIds = []
-    // for (const email of emails){
-    //   if(!registeredEmails.has(email)){
-    //     [result] = await conn.query('INSERT INTO users (email) VALUES (?)', [email])
-    //      addedUserIds.push(result.insertId)
-    //   } else if (!vaultUserIds.has(existingUsers[email])){
-    //     addedUserIds.push(existingUsers[email])
-    //   }
-    // }
-    // if(addedUserIds.length > 0){
-    //   await conn.query('INSERT INTO vault_user (vault_id, user_id) VALUES ?', [addedUserIds.map((id) => [vaultID, id])])
-    // }
     await conn.query(
       'INSERT IGNORE INTO users (email, last_entered_vault_id) VALUES ?',
       [emails.map((email) => [email, vaultID])]

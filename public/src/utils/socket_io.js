@@ -18,8 +18,6 @@ class SocketIO {
       this.trigger('fileSystem',  rootID, dataArr)
     })
     this.socket.on('init', (revisionID, doc) => {
-      //console.log('get data!')
-      //console.log(revisionID, doc)
       this.trigger('init', revisionID, doc)
     })
     this.socket.on('ack', (revisionID) => {
@@ -70,7 +68,6 @@ class SocketIO {
     this.socket.on('syncDoc', (syncFileID, revisionID, doc) => {
       const storage = window.sessionStorage
       const fileID = storage.getItem('file_id')
-      console.log('receive sync', this.isFreezed, fileID == syncFileID)
       if(!this.isFreezed && fileID == syncFileID){
         this.trigger('syncDoc', revisionID, doc)
       }
