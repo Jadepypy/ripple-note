@@ -13,8 +13,8 @@ Test Account2:
 * Password: password
 
 ## Table of Contents
-* [Feature](##Feature)
-* [Technologies](##Technologies)
+* [Feature](#Feature)
+* [Technologies](#Technologies)
 
 ## Feature
 ### Collaborative Note Editing
