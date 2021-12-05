@@ -14,7 +14,7 @@ Test Account2:
 
 ## Table of Contents
 * [Feature](##Feature)
-* [Technology](##Implementation)
+* [Technologies](##Technologies)
 
 ## Feature
 ### Collaborative Note Editing
@@ -22,6 +22,11 @@ Test Account2:
 * Supports copy (Command-C/ Ctl-C)/ paste (Command-V/ Ctl-V)/ cut (Command-X/ Ctl-X)
 * Supports redo (Command-Z/ Ctl-Z)/ undo (Command-Y/ Ctl-Y)
 * TODO: collaboration on Mandarin, realtime users' cursor display
+### Vault -- An open sharing workspace
+* Add user to vault
+![add user](https://d16llsq1urfp7y.cloudfront.net/ripple-note/add_user.gif)
+* Switch between vault
+![switch vault](https://d16llsq1urfp7y.cloudfront.net/ripple-note/switch_vault.gif)
 ### File System
 * Supports multilevel structure
 ![multilevel file systme](https://d16llsq1urfp7y.cloudfront.net/ripple-note/multilevel_file_system.gif)
@@ -40,7 +45,7 @@ Test Account2:
 
 ## Technologies
 ### Architecture
-![]()
+![architure](https://d16llsq1urfp7y.cloudfront.net/ripple-note/architecture.png)
 
 ### Backend
 * Environment: Linux + **Node.js**
@@ -71,4 +76,5 @@ Test Account2:
 * Code Formatter: **Prettier**
 
 ### AWS Cloud Services
-* **EC2** + **ELB**
+* **EC2**
+* **RDS**
