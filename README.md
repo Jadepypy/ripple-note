@@ -46,7 +46,7 @@ Test Account2:
 
 ## Technologies
 ### Architecture
-![architure](https://d16llsq1urfp7y.cloudfront.net/ripple-note/architecture.png)
+![architure](https://d16llsq1urfp7y.cloudfront.net/ripple-note/architecture_altered.png)
 
 ### Backend
 * Environment: Linux + **Node.js**
