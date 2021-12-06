@@ -22,6 +22,7 @@ Test Account2:
 * Supports copy (Command-C/ Ctl-C)/ paste (Command-V/ Ctl-V)/ cut (Command-X/ Ctl-X)
 * Supports redo (Command-Z/ Ctl-Z)/ undo (Command-Y/ Ctl-Y)
 * TODO: collaboration on Mandarin, realtime users' cursor display
+![collaboration](https://d16llsq1urfp7y.cloudfront.net/ripple-note/collaboration.gif)
 ### Vault -- An open sharing workspace
 * Add user to vault
 ![add user](https://d16llsq1urfp7y.cloudfront.net/ripple-note/add_user.gif)
@@ -50,19 +51,29 @@ Test Account2:
 ### Backend
 * Environment: Linux + **Node.js**
 * Framework: **Express.js**
-* Real-time Data Transport: **Socket.io**
+* Real-time Data Transport: **Socket.IO**
 
 ### Front-End 
 * HTML
 * CSS
 * JavaScript
+* Markdown Converter: [marked.js](https://marked.js.org)
 
-### Operational transformation
+### Operational transformation 
+* Breaks down text editing behavior into two kinds of operation, insertion and deletion.
+* Operational transformation is, in its simplest form, a transformation function that takes a pair of operations A and B and produces a new pair A' and B' such that applying A then B' or B then A' would both lead to the same document.
 
+![ot funciton](https://d16llsq1urfp7y.cloudfront.net/ripple-note/ot_function.png)
+* Requires a centralized server to globally order operations so that operational transformation would only take place between two parties, client and server.
+
+![ot funciton](https://d16llsq1urfp7y.cloudfront.net/ripple-note/two_clients_ot.png)
+
+![one client](https://d16llsq1urfp7y.cloudfront.net/ripple-note/one_client_ot.png)
 
 ### Database
 * **RDS** + **MySQL**
 * Schema: 
+
 ![database schema](https://d16llsq1urfp7y.cloudfront.net/ripple-note/database_schema.png)
 
 
@@ -78,3 +89,5 @@ Test Account2:
 ### AWS Cloud Services
 * **EC2**
 * **RDS**
+
+
