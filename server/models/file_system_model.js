@@ -213,7 +213,7 @@ const removeFiles = async (idArr, data, vaultID, revisionID) => {
     conn.query('ROLLBACK');
     return { error };
   } finally {
-    await conn.release();
+    conn.release();
   }
 };
 

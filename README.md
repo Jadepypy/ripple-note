@@ -26,7 +26,7 @@ Test Account2:
 ### Vault -- An open sharing workspace
 * Add user to vault
 ![add user](https://d16llsq1urfp7y.cloudfront.net/ripple-note/add_user.gif)
-* Switch between vault
+* Switch between vaults
 ![switch vault](https://d16llsq1urfp7y.cloudfront.net/ripple-note/switch_vault.gif)
 ### File System
 * Supports multilevel structure
