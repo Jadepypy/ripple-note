@@ -18,10 +18,11 @@ Test Account2:
 
 ## Feature
 ### Collaborative Note Editing
+* 目前不支援中文
 * Supports collaboration on deletion/insertion/bulk deletion
 * Supports copy (Command-C/ Ctl-C)/ paste (Command-V/ Ctl-V)/ cut (Command-X/ Ctl-X)
 * Supports redo (Command-Z/ Ctl-Z)/ undo (Command-Y/ Ctl-Y)
-* TODO: collaboration on Mandarin, realtime users' cursor display
+* TODO: collaboration on Chinese characters, realtime users' cursor display
 ![collaboration](https://d16llsq1urfp7y.cloudfront.net/ripple-note/collaboration.gif)
 ### Vault -- An open sharing workspace
 * Add user to vault
