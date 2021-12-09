@@ -192,14 +192,6 @@ class OperationController extends BaseController{
       if(!this.keydownOn){
         return
       }
-      // if(event.metaKey && event.keyCode == 69 || event.ctlKey && event.keyCode == 69){
-      //   if(previewWindow.matches('.hidden')){
-      //     toggleEditorDisplay(true)
-      //   } else{
-      //     toggleEditorDisplay(false)
-      //   }
-      //   return
-      // }
       if(event.key == 'Backspace' && event.ctrlKey || event.key == 'Backspace' && event.metaKey){
         event.preventDefault()
         event.stopPropagation()
@@ -265,7 +257,6 @@ class OperationController extends BaseController{
           opInfo.push({type: OP_TYPE.DELETE, position: this.lastEnd, count: this.lastStart - this.lastEnd, key: this.selectedText})
         }
         opInfo.push({type: OP_TYPE.INSERT, position: this.lastStart, key: event.data})
-        // opInfo.push({type: OP_TYPE.RETAIN, position: textarea.selectionEnd, id: this.socketIO.socket.id})
         this.handleTextAreaOperation(opInfo)
       }
     })
@@ -275,8 +266,6 @@ class OperationController extends BaseController{
     caret.innerText = 'l'
     this.operation.carets[id] = caret
     this.setCaretLocation(id, 0)
-    //console.log(caret)
-    //textAreaContainer.appendChild(caret)
   }
   setCaretLocation(id, position){
     const caret = this.operation.carets[id]
@@ -301,7 +290,6 @@ class OperationController extends BaseController{
         this.applyOperation(opInfo, true)
       } else if (pointerChange < 0 && this.operation.pointer >= 0){
         let opBefore = this.operation.opStack[this.operation.pointer]
-        //console.log(opBefore)
         opInfo = this.operation.reverseOperation(opBefore)
         this.applyOperation(opInfo, true)
         this.operation.pointer = this.operation.pointer-1
@@ -315,10 +303,8 @@ class OperationController extends BaseController{
       this.operation.opStack.push(opInfo)
       this.operation.pointer++
     }
-    //console.log('pointer', this.operation.pointer, 'opStack length', this.operation.opStack.length)
     if (state === STATE.CLEAR){
       outstandingOp.push(...opInfo)
-      //this.printOpInfo(opInfo)
       this.socketIO.sendOperation(revisionID, outstandingOp)
       this.operation.state = STATE.WAITING
     } else {
@@ -328,13 +314,13 @@ class OperationController extends BaseController{
   handleSyncDoc(revisionID, doc){
     // console.timeEnd()
     // console.time()
-    //console.log('DIVERGE')
     this.operation.revisionID = revisionID
     this.operation.bufferOp = []
     this.operation.outstandingOp = []
     this.operation.state = STATE.CLEAR
     const currentStart = textarea.selectionStart
     const currentEnd = textarea.selectionEnd
+    renderEditor(doc, undefined, currentStart, currentEnd)
   }
   printOpInfo(opInfo){
     for(const op of opInfo){
