@@ -4,6 +4,7 @@
   "description": "",
   "main": "index.js",
   "scripts": {
+    "start": "node app.js",
     "test": "NODE_ENV=test mocha --exit"
   },
   "keywords": [],
